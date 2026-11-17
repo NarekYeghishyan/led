@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+*.log
+
+# private: contracts, design sources, store data
+Contracts/
+Design/
+*.mdb
+*.accdb
+*.ldb
+*.laccdb
+*.csv
+
+# agent secrets and state
+agent/config.ini
+agent/state.sqlite
+agent/logs/
+__pycache__/

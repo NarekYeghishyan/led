@@ -1,0 +1,118 @@
+import { BadRequestException, Body, Controller, Get, Injectable, Post, UseGuards } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, In } from 'typeorm';
+import { ApiKeyGuard } from './auth';
+import { Category, Currency, Product, SyncLog } from './entities';
+
+interface Batch<T> {
+  batchId?: string;
+  agentVersion?: string;
+  upserts?: T[];
+  deletes?: (number | string)[];
+}
+
+const MAX_BATCH = 2000;
+
+// Columns the agent may update. Web fields (slug, images, SEO, is_visible...) are never touched here.
+const PRODUCT_COLUMNS = [
+  'barcode', 'category_external_id', 'name', 'brand', 'unit', 'price', 'currency_external_id',
+  'quantity', 'in_price_list', 'discontinued', 'note', 'weight', 'volume', 'raw', 'deleted_at', 'synced_at',
+];
+
+const toInt = (v: unknown) => (v === null || v === undefined || v === '' ? null : Number.parseInt(String(v), 10));
+const toNum = (v: unknown) => (v === null || v === undefined || v === '' ? null : Number(v));
+const toStr = (v: unknown) => (v === null || v === undefined ? null : String(v));
+const toBool = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true' || v === -1;
+
+@Injectable()
+export class SyncService {
+  constructor(@InjectDataSource() private ds: DataSource) {}
+
+  private check(batch: Batch<unknown>) {
+    const n = (batch?.upserts?.length || 0) + (batch?.deletes?.length || 0);
+    if (!batch || n > MAX_BATCH) throw new BadRequestException(`Batch must have 0..${MAX_BATCH} rows`);
+  }
+
+  async products(batch: Batch<Record<string, unknown>>) {
+    this.check(batch);
+    const now = new Date();
+    const rows = (batch.upserts || []).map((r) => {
+      const externalId = toInt(r.externalId);
+      if (externalId === null || Number.isNaN(externalId)) throw new BadRequestException('externalId required');
+      const p: Partial<Product> = {
+        externalId,
+        barcode: toStr(r.barcode),
+        categoryExternalId: toInt(r.categoryExternalId),
+        name: toStr(r.name) ?? '',
+        brand: toStr(r.brand),
+        unit: toStr(r.unit),
+        price: toNum(r.price),
+        currencyExternalId: toInt(r.currencyExternalId),
+        quantity: toNum(r.quantity) ?? 0,
+        inPriceList: toBool(r.inPriceList),
+        discontinued: toBool(r.discontinued),
+        note: toStr(r.note),
+        weight: toNum(r.weight),
+        volume: toNum(r.volume),
+        raw: (r.raw as Record<string, unknown>) ?? {},
+        deletedAt: null,
+        syncedAt: now,
+      };
+      return p;
+    });
+    return this.apply(Product, 'products', batch, rows, PRODUCT_COLUMNS, now);
+  }
+
+  async lookup(entity: typeof Category | typeof Currency, name: string, batch: Batch<Record<string, unknown>>) {
+    this.check(batch);
+    const now = new Date();
+    const rows = (batch.upserts || []).map((r) => {
+      const externalId = toInt(r.externalId);
+      if (externalId === null || Number.isNaN(externalId)) throw new BadRequestException('externalId required');
+      return { externalId, name: toStr(r.name) ?? '', raw: (r.raw as object) ?? {}, deletedAt: null, syncedAt: now };
+    });
+    return this.apply(entity, name, batch, rows, ['name', 'raw', 'deleted_at', 'synced_at'], now);
+  }
+
+  private async apply(entity: any, name: string, batch: Batch<unknown>, rows: object[], cols: string[], now: Date) {
+    const deletes = (batch.deletes || []).map(toInt).filter((x): x is number => x !== null && !Number.isNaN(x));
+    await this.ds.transaction(async (m) => {
+      if (rows.length) {
+        await m.createQueryBuilder().insert().into(entity).values(rows).orUpdate(cols, ['external_id']).execute();
+      }
+      if (deletes.length) {
+        await m.getRepository(entity).update({ externalId: In(deletes) }, { deletedAt: now });
+      }
+      await m.getRepository(SyncLog).insert({
+        entity: name,
+        batchId: toStr(batch.batchId),
+        agentVersion: toStr(batch.agentVersion),
+        upserts: rows.length,
+        deletes: deletes.length,
+      });
+    });
+    return { ok: true, upserted: rows.length, deleted: deletes.length };
+  }
+
+  async status() {
+    const last = await this.ds.getRepository(SyncLog).find({ order: { id: 'DESC' }, take: 1 });
+    const count = (e: any) => this.ds.getRepository(e).createQueryBuilder('x').where('x.deleted_at IS NULL').getCount();
+    return {
+      lastSyncAt: last[0]?.receivedAt ?? null,
+      products: await count(Product),
+      categories: await count(Category),
+      currencies: await count(Currency),
+    };
+  }
+}
+
+@Controller('sync')
+@UseGuards(ApiKeyGuard)
+export class SyncController {
+  constructor(private sync: SyncService) {}
+
+  @Post('products') products(@Body() b: Batch<Record<string, unknown>>) { return this.sync.products(b); }
+  @Post('categories') categories(@Body() b: Batch<Record<string, unknown>>) { return this.sync.lookup(Category, 'categories', b); }
+  @Post('currencies') currencies(@Body() b: Batch<Record<string, unknown>>) { return this.sync.lookup(Currency, 'currencies', b); }
+  @Get('status') status() { return this.sync.status(); }
+}
