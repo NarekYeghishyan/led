@@ -36,8 +36,13 @@ cd admin && npm install && npm run dev     # http://localhost:5173/admin/
 2. Copy the `agent/` folder to e.g. `D:\led-agent\`.
 3. Run `pip install -r requirements.txt`.
 4. Copy `config.example.ini` to `config.ini`, then fill in the Access password and the API key (`SYNC_API_KEY` from the server).
-5. Test with `python agent.py --check`. It connects to Access and the API and prints what it would send.
-6. Do the first load with `python agent.py --once`.
+5. **First load from CSV:**
+   ```
+   python export_access_to_csv.py --site    # D:\python-script\products.csv, Типы.csv, Валюты.csv
+   python import_csv.py D:\python-script     # uploads them to the website (safe to repeat)
+   ```
+   Check the result in the admin panel.
+6. Test the live sync with `python agent.py --check`. It prints what it would send.
 7. Install it as a Windows service with [NSSM](https://nssm.cc):
    ```
    nssm install LedSyncAgent "C:\Python312\python.exe" "D:\led-agent\agent.py"

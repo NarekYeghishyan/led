@@ -30,8 +30,6 @@ import urllib.error
 import urllib.request
 import uuid
 
-import pyodbc
-
 VERSION = "0.1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
@@ -65,6 +63,7 @@ def setup_logging(cfg):
 # --------------------------------------------------------------------------- Access
 
 def connect_access(cfg):
+    import pyodbc  # imported here so import_csv.py works without the Access driver
     conn_str = (
         r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
         f"DBQ={cfg.get('access', 'db_path')};"

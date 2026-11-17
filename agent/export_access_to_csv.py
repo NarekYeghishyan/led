@@ -5,6 +5,7 @@ for importing into a website admin panel.
 Usage:
     python export_access_to_csv.py                # export TABLE (default: Товары) -> one CSV
     python export_access_to_csv.py Клиенты        # export another table instead
+    python export_access_to_csv.py --site         # products.csv + Типы.csv + Валюты.csv for the website import
     python export_access_to_csv.py --list         # list all tables
     python export_access_to_csv.py --columns      # show columns of TABLE (to map them for the site)
     python export_access_to_csv.py --columns Типы # show columns of another table
@@ -102,10 +103,14 @@ def format_value(v):
     return v
 
 
+def safe_filename(name):
+    return "".join("_" if c in '<>:"/\\|?*' else c for c in name).strip() or "table"
+
+
 def build_query(table):
     if CUSTOM_SQL:
         return CUSTOM_SQL
-    if COLUMNS:
+    if COLUMNS and table == TABLE:
         cols = ", ".join(f"[{src}] AS [{dst}]" for src, dst in COLUMNS.items())
         return f"SELECT {cols} FROM [{table}]"
     return f"SELECT * FROM [{table}]"
@@ -117,7 +122,7 @@ def export(conn, table):
     columns = [d[0] for d in cur.description]
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    path = os.path.join(OUTPUT_DIR, OUTPUT_FILE)
+    path = os.path.join(OUTPUT_DIR, OUTPUT_FILE if table == TABLE else safe_filename(table) + ".csv")
     count = 0
     with open(path, "w", newline="", encoding=CSV_ENCODING) as f:
         writer = csv.writer(f, delimiter=CSV_DELIMITER, quoting=csv.QUOTE_MINIMAL)
@@ -148,6 +153,13 @@ def main():
             for c in cur.columns(table=table):
                 print(f"{c.column_name:30} {c.type_name}")
             cur.close()
+            return
+
+        if "--site" in args:
+            # first load for the website: products + categories + currencies
+            for t in (TABLE, "Типы", "Валюты"):
+                path, n = export(conn, t)
+                print(f"OK: {t}: {n} rows -> {path}")
             return
 
         if not CUSTOM_SQL and table not in list_tables(conn):
