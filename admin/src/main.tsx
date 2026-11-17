@@ -2,7 +2,7 @@ import { StrictMode, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { api, auth } from './api';
-import { CategoriesPage, DashboardPage, ProductPage, ProductsPage, SyncPage } from './pages';
+import { CategoriesPage, DashboardPage, ImportPage, ProductPage, ProductsPage, SyncPage } from './pages';
 import './styles.css';
 
 function Login() {
@@ -53,6 +53,7 @@ function Layout() {
           <NavLink to="/products">Products</NavLink>
           <NavLink to="/categories">Categories</NavLink>
           <NavLink to="/sync">Sync</NavLink>
+          <NavLink to="/import">Import CSV</NavLink>
         </nav>
         <button className="link" onClick={() => { auth.set(null); nav('/login'); }}>Sign out</button>
       </aside>
@@ -72,6 +73,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="products/:id" element={<ProductPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="sync" element={<SyncPage />} />
+          <Route path="import" element={<ImportPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

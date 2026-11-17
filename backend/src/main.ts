@@ -9,6 +9,7 @@ import { ApiKeyGuard, AuthController, AuthService, JwtGuard } from './auth';
 import { AdminUser, ENTITIES } from './entities';
 import { Init1763380000000 } from './migrations/1763380000000-init';
 import { SyncController, SyncService } from './sync';
+import { ImportController } from './import';
 
 for (const name of ['DATABASE_URL', 'JWT_SECRET', 'SYNC_API_KEY']) {
   if (!process.env[name]) throw new Error(`Missing env ${name}`);
@@ -32,7 +33,7 @@ class HealthController {
     TypeOrmModule.forFeature([AdminUser]),
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '12h' } }),
   ],
-  controllers: [HealthController, AuthController, SyncController, AdminController],
+  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController],
   providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard],
 })
 class AppModule {}

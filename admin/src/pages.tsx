@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
-  ago, api, fmtDate, fmtNum, type Category, type Paged, type ProductRow, type Stats, type SyncLogRow,
+  ago, api, auth, fmtDate, fmtNum, type Category, type Paged, type ProductRow, type Stats, type SyncLogRow,
 } from './api';
 
 /** Loads data and reloads it every `refreshMs` (live view of the store). */
@@ -236,6 +236,73 @@ export function CategoriesPage() {
             ))}
           </tbody>
         </table>
+      </div>
+    </>
+  );
+}
+
+// ------------------------------------------------------------------ Import
+
+const IMPORTS = [
+  { kind: 'categories', file: 'Типы.csv', label: 'Categories' },
+  { kind: 'currencies', file: 'Валюты.csv', label: 'Currencies' },
+  { kind: 'products', file: 'products.csv', label: 'Products' },
+];
+
+function ImportRow({ kind, file, label }: { kind: string; file: string; label: string }) {
+  const [f, setF] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState('');
+
+  async function upload() {
+    if (!f) return;
+    setBusy(true); setError(''); setResult(null);
+    try {
+      const body = new FormData();
+      body.append('file', f);
+      const res = await fetch(`/api/admin/import/${kind}`, { method: 'POST', body, headers: { Authorization: `Bearer ${auth.token}` } });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(json?.message || res.statusText);
+      setResult(json);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="card import-row">
+      <div>
+        <h2>{label}</h2>
+        <p className="muted small">File: <b>{file}</b></p>
+      </div>
+      <input type="file" accept=".csv,text/csv" onChange={(e) => { setF(e.target.files?.[0] || null); setResult(null); setError(''); }} />
+      <button disabled={!f || busy} onClick={upload}>{busy ? 'Importing…' : 'Import'}</button>
+      {error && <div className="error">{error}</div>}
+      {result && (
+        <div className="success">
+          Imported {String(result.imported)} of {String(result.rows)} rows.
+          {'nameColumn' in result && <> Name column: <b>{String(result.nameColumn ?? '—')}</b>, code column: <b>{String(result.idColumn)}</b>.</>}
+          {Array.isArray(result.ignored) && result.ignored.length > 0 && <> Ignored columns: {(result.ignored as string[]).join(', ')}.</>}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function ImportPage() {
+  return (
+    <>
+      <header className="page-head"><h1>Import from CSV</h1></header>
+      <p className="muted">
+        First load of the Access data. On the store server run <code>python export_access_to_csv.py --site</code>,
+        then upload the three files below in this order. Importing again updates rows by their code and never creates duplicates.
+        After this, the sync agent keeps everything up to date automatically.
+      </p>
+      <div className="import-list">
+        {IMPORTS.map((i) => <ImportRow key={i.kind} {...i} />)}
       </div>
     </>
   );
