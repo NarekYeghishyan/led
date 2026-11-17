@@ -26,10 +26,15 @@ import pyodbc
 # ---------------- Settings ----------------
 # DB path and password are read from config.ini (the same file the sync agent uses)
 import configparser
+_CFG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini")
+if not os.path.exists(_CFG_PATH):
+    sys.exit(f"config.ini not found: {_CFG_PATH}. Put config.ini in the same folder as this script.")
 _cfg = configparser.ConfigParser(interpolation=None)
-_cfg.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.ini"), encoding="utf-8")
+_cfg.read(_CFG_PATH, encoding="utf-8-sig")
 DB_PATH = _cfg.get("access", "db_path", fallback=r"D:\LED\Data.mdb")
 DB_PASSWORD = _cfg.get("access", "password", fallback="")
+if "\\u" in DB_PASSWORD:  # password written as \u0162\u0163\u0164 (ASCII-safe)
+    DB_PASSWORD = DB_PASSWORD.encode("ascii").decode("unicode_escape")
 OUTPUT_DIR = r"D:\python-script"
 OUTPUT_FILE = "products.csv"
 
@@ -73,7 +78,13 @@ def connect():
         rf"DBQ={DB_PATH};"
         rf"PWD={DB_PASSWORD};"
     )
-    return pyodbc.connect(conn_str)
+    try:
+        return pyodbc.connect(conn_str)
+    except pyodbc.Error:
+        codes = " ".join(f"U+{ord(c):04X}" for c in DB_PASSWORD) or "(empty)"
+        print(f"Connection failed. config: {_CFG_PATH}\n  db_path: {DB_PATH}\n  password read as: {codes}"
+              "\n  expected for 'ŢţŤ': U+0162 U+0163 U+0164")
+        raise
 
 
 def list_tables(conn):

@@ -42,7 +42,7 @@ def load_config():
     if not os.path.exists(path):
         sys.exit(f"Missing {path}. Copy config.example.ini to config.ini and fill it in.")
     cfg = configparser.ConfigParser(interpolation=None)
-    cfg.read(path, encoding="utf-8")
+    cfg.read(path, encoding="utf-8-sig")
     return cfg
 
 
@@ -62,12 +62,19 @@ def setup_logging(cfg):
 
 # --------------------------------------------------------------------------- Access
 
+def access_password(cfg):
+    pw = cfg.get("access", "password", fallback="")
+    if "\\u" in pw:  # written as ŢţŤ (ASCII-safe)
+        pw = pw.encode("ascii").decode("unicode_escape")
+    return pw
+
+
 def connect_access(cfg):
     import pyodbc  # imported here so import_csv.py works without the Access driver
     conn_str = (
         r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
         f"DBQ={cfg.get('access', 'db_path')};"
-        f"PWD={cfg.get('access', 'password')};"
+        f"PWD={access_password(cfg)};"
         "ReadOnly=1;"
     )
     return pyodbc.connect(conn_str, readonly=True, autocommit=True)
