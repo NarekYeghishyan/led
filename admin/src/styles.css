@@ -96,3 +96,11 @@ dd { margin: 0; white-space: pre-wrap; word-break: break-word; }
 .success { background: #e3f6ea; color: #14633a; padding: 10px 12px; border-radius: 6px; }
 code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 @media (max-width: 800px) { .import-row { grid-template-columns: 1fr; } }
+
+.lang { display: inline-flex; border: 1px solid #ffffff2e; border-radius: 6px; overflow: hidden; align-self: flex-start; }
+.lang button { background: transparent; color: var(--side-text); padding: 4px 10px; border-radius: 0; font-size: 12px; }
+.lang button.on { background: var(--accent); color: var(--accent-ink); }
+.login .lang { border-color: var(--line); }
+.login .lang button { color: var(--muted); }
+.login .lang button.on { color: var(--accent-ink); }
+.login-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }

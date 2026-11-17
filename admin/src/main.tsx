@@ -1,11 +1,13 @@
 import { StrictMode, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
-import { api, auth } from './api';
+import { api, ApiError, auth } from './api';
+import { I18nProvider, LangSwitch, useI18n } from './i18n';
 import { CategoriesPage, DashboardPage, ImportPage, ProductPage, ProductsPage, SyncPage } from './pages';
 import './styles.css';
 
 function Login() {
+  const { t } = useI18n();
   const nav = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,7 @@ function Login() {
       auth.set(r.token);
       nav('/', { replace: true });
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof ApiError && err.status === 401 ? t('login.wrong') : (err as Error).message);
     } finally {
       setBusy(false);
     }
@@ -30,32 +32,34 @@ function Login() {
   return (
     <div className="login">
       <form onSubmit={submit} className="card">
-        <h1>LED Computers</h1>
-        <p className="muted">Admin panel</p>
-        <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
-        <label>Password<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
+        <div className="login-head"><h1>LED Computers</h1><LangSwitch /></div>
+        <p className="muted">{t('login.title')}</p>
+        <label>{t('login.email')}<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
+        <label>{t('login.password')}<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
         {error && <div className="error">{error}</div>}
-        <button disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
+        <button disabled={busy}>{busy ? t('login.busy') : t('login.submit')}</button>
       </form>
     </div>
   );
 }
 
 function Layout() {
+  const { t } = useI18n();
   const nav = useNavigate();
   if (!auth.token) return <Navigate to="/login" replace />;
   return (
     <div className="layout">
       <aside>
-        <div className="brand">LED<span>Computers</span></div>
+        <div className="brand">LED<span>{t('brand.sub')}</span></div>
         <nav>
-          <NavLink to="/" end>Dashboard</NavLink>
-          <NavLink to="/products">Products</NavLink>
-          <NavLink to="/categories">Categories</NavLink>
-          <NavLink to="/sync">Sync</NavLink>
-          <NavLink to="/import">Import CSV</NavLink>
+          <NavLink to="/" end>{t('nav.dashboard')}</NavLink>
+          <NavLink to="/products">{t('nav.products')}</NavLink>
+          <NavLink to="/categories">{t('nav.categories')}</NavLink>
+          <NavLink to="/sync">{t('nav.sync')}</NavLink>
+          <NavLink to="/import">{t('nav.import')}</NavLink>
         </nav>
-        <button className="link" onClick={() => { auth.set(null); nav('/login'); }}>Sign out</button>
+        <LangSwitch />
+        <button className="link" onClick={() => { auth.set(null); nav('/login'); }}>{t('nav.signout')}</button>
       </aside>
       <main><Outlet /></main>
     </div>
@@ -64,19 +68,21 @@ function Layout() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route element={<Layout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="products/:id" element={<ProductPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="sync" element={<SyncPage />} />
-          <Route path="import" element={<ImportPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <I18nProvider>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route element={<Layout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="products/:id" element={<ProductPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="sync" element={<SyncPage />} />
+            <Route path="import" element={<ImportPage />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </I18nProvider>
   </StrictMode>,
 );

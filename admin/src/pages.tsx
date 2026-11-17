@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
-  ago, api, auth, fmtDate, fmtNum, type Category, type Paged, type ProductRow, type Stats, type SyncLogRow,
+  api, auth, makeFmt, type Category, type Paged, type ProductRow, type Stats, type SyncLogRow,
 } from './api';
+import { useI18n, type TKey } from './i18n';
 
 /** Loads data and reloads it every `refreshMs` (live view of the store). */
 function useData<T>(path: string, refreshMs = 0) {
@@ -18,50 +19,62 @@ function useData<T>(path: string, refreshMs = 0) {
   return { data, error };
 }
 
-const FromAccess = () => <span className="badge">from Access</span>;
+/** Translations + locale-aware formatters. */
+function useT() {
+  const { t, locale } = useI18n();
+  return { t, fmt: makeFmt(locale, t) };
+}
+
+function FromAccess() {
+  const { t } = useT();
+  return <span className="badge">{t('common.fromAccess')}</span>;
+}
 
 function SyncBadge({ at }: { at: string | null }) {
+  const { t, fmt } = useT();
   const sec = at ? (Date.now() - new Date(at).getTime()) / 1000 : Infinity;
   const cls = sec < 600 ? 'ok' : sec < 3600 ? 'warn' : 'bad';
-  return <span className={`dot ${cls}`}>Last sync: {ago(at)}</span>;
+  return <span className={`dot ${cls}`}>{t('sync.last', { ago: fmt.ago(at) })}</span>;
 }
 
 // ------------------------------------------------------------------ Dashboard
 
 export function DashboardPage() {
+  const { t, fmt } = useT();
   const { data: s, error } = useData<Stats>('/admin/stats', 10000);
   return (
     <>
-      <header className="page-head"><h1>Dashboard</h1>{s && <SyncBadge at={s.lastSyncAt} />}</header>
+      <header className="page-head"><h1>{t('dash.title')}</h1>{s && <SyncBadge at={s.lastSyncAt} />}</header>
       {error && <div className="error">{error}</div>}
       {s && (
         <div className="tiles">
-          <Link to="/products" className="tile"><b>{fmtNum(s.products, 0)}</b><span>Products</span></Link>
-          <Link to="/products?stock=in" className="tile"><b>{fmtNum(s.inStock, 0)}</b><span>In stock</span></Link>
-          <Link to="/products?stock=out" className="tile"><b>{fmtNum(s.outOfStock, 0)}</b><span>Out of stock</span></Link>
-          <Link to="/categories" className="tile"><b>{fmtNum(s.categories, 0)}</b><span>Categories</span></Link>
-          <Link to="/products?deleted=1" className="tile"><b>{fmtNum(s.deleted, 0)}</b><span>Removed in Access</span></Link>
+          <Link to="/products" className="tile"><b>{fmt.num(s.products, 0)}</b><span>{t('dash.products')}</span></Link>
+          <Link to="/products?stock=in" className="tile"><b>{fmt.num(s.inStock, 0)}</b><span>{t('dash.inStock')}</span></Link>
+          <Link to="/products?stock=out" className="tile"><b>{fmt.num(s.outOfStock, 0)}</b><span>{t('dash.outOfStock')}</span></Link>
+          <Link to="/categories" className="tile"><b>{fmt.num(s.categories, 0)}</b><span>{t('dash.categories')}</span></Link>
+          <Link to="/products?deleted=1" className="tile"><b>{fmt.num(s.deleted, 0)}</b><span>{t('dash.deleted')}</span></Link>
         </div>
       )}
-      <p className="muted">Data comes from the store's Microsoft Access database through the sync agent and refreshes automatically.</p>
+      <p className="muted">{t('dash.note')}</p>
     </>
   );
 }
 
 // ------------------------------------------------------------------ Products
 
-const COLS: { key: string; label: string; sort?: string; num?: boolean }[] = [
-  { key: 'externalId', label: 'Code', sort: 'externalId', num: true },
-  { key: 'name', label: 'Name', sort: 'name' },
-  { key: 'barcode', label: 'Barcode' },
-  { key: 'categoryName', label: 'Category' },
-  { key: 'brand', label: 'Brand' },
-  { key: 'price', label: 'Price', sort: 'price', num: true },
-  { key: 'quantity', label: 'Stock', sort: 'quantity', num: true },
-  { key: 'syncedAt', label: 'Updated', sort: 'syncedAt' },
+const COLS: { key: string; label: TKey; sort?: string; num?: boolean }[] = [
+  { key: 'externalId', label: 'col.code', sort: 'externalId', num: true },
+  { key: 'name', label: 'col.name', sort: 'name' },
+  { key: 'barcode', label: 'col.barcode' },
+  { key: 'categoryName', label: 'col.category' },
+  { key: 'brand', label: 'col.brand' },
+  { key: 'price', label: 'col.price', sort: 'price', num: true },
+  { key: 'quantity', label: 'col.stock', sort: 'quantity', num: true },
+  { key: 'syncedAt', label: 'col.updated', sort: 'syncedAt' },
 ];
 
 export function ProductsPage() {
+  const { t, fmt } = useT();
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get('search') || '');
   const { data: cats } = useData<Category[]>('/admin/categories');
@@ -77,8 +90,8 @@ export function ProductsPage() {
   };
   // debounce search
   useEffect(() => {
-    const t = setTimeout(() => { if (search !== (params.get('search') || '')) set({ search }); }, 350);
-    return () => clearTimeout(t);
+    const tm = setTimeout(() => { if (search !== (params.get('search') || '')) set({ search }); }, 350);
+    return () => clearTimeout(tm);
   }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sort = params.get('sort') || 'name';
@@ -89,27 +102,27 @@ export function ProductsPage() {
   return (
     <>
       <header className="page-head">
-        <h1>Products {data && <small>{fmtNum(data.total, 0)}</small>}</h1>
+        <h1>{t('products.title')} {data && <small>{fmt.num(data.total, 0)}</small>}</h1>
       </header>
       <div className="filters">
-        <input placeholder="Search name, barcode, brand or code…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input placeholder={t('products.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
         <select value={params.get('categoryId') || ''} onChange={(e) => set({ categoryId: e.target.value })}>
-          <option value="">All categories</option>
+          <option value="">{t('products.allCategories')}</option>
           {cats?.map((c) => <option key={c.id} value={c.externalId}>{c.name || `#${c.externalId}`} ({c.productCount})</option>)}
         </select>
         <select value={params.get('stock') || ''} onChange={(e) => set({ stock: e.target.value })}>
-          <option value="">Any stock</option>
-          <option value="in">In stock</option>
-          <option value="out">Out of stock</option>
+          <option value="">{t('products.anyStock')}</option>
+          <option value="in">{t('products.inStock')}</option>
+          <option value="out">{t('products.outOfStock')}</option>
         </select>
         <select value={params.get('discontinued') || ''} onChange={(e) => set({ discontinued: e.target.value })}>
-          <option value="">Active + discontinued</option>
-          <option value="0">Active only</option>
-          <option value="1">Discontinued only</option>
+          <option value="">{t('products.allActive')}</option>
+          <option value="0">{t('products.activeOnly')}</option>
+          <option value="1">{t('products.discOnly')}</option>
         </select>
         <label className="check">
           <input type="checkbox" checked={params.get('deleted') === '1'} onChange={(e) => set({ deleted: e.target.checked ? '1' : '' })} />
-          Show removed
+          {t('products.showRemoved')}
         </label>
       </div>
       {error && <div className="error">{error}</div>}
@@ -120,7 +133,7 @@ export function ProductsPage() {
               {COLS.map((c) => (
                 <th key={c.key} className={`${c.num ? 'num' : ''} ${c.sort ? 'sortable' : ''}`}
                   onClick={() => c.sort && set({ sort: c.sort, dir: sort === c.sort && dir === 'asc' ? 'desc' : 'asc' })}>
-                  {c.label}{sort === c.sort ? (dir === 'asc' ? ' ▲' : ' ▼') : ''}
+                  {t(c.label)}{sort === c.sort ? (dir === 'asc' ? ' ▲' : ' ▼') : ''}
                 </th>
               ))}
             </tr>
@@ -129,25 +142,25 @@ export function ProductsPage() {
             {data?.items.map((p) => (
               <tr key={p.id} className={p.deletedAt ? 'removed' : ''}>
                 <td className="num">{p.externalId}</td>
-                <td><Link to={`/products/${p.id}`}>{p.name || '—'}</Link>{p.discontinued && <span className="tag">discontinued</span>}</td>
+                <td><Link to={`/products/${p.id}`}>{p.name || '—'}</Link>{p.discontinued && <span className="tag">{t('products.discontinued')}</span>}</td>
                 <td className="mono">{p.barcode || '—'}</td>
                 <td>{p.categoryName || (p.categoryExternalId ?? '—')}</td>
                 <td>{p.brand || '—'}</td>
-                <td className="num">{fmtNum(p.price)} <span className="muted">{p.currencyName || ''}</span></td>
-                <td className={`num ${p.quantity > 0 ? 'in' : 'out'}`}>{fmtNum(p.quantity, 3)}</td>
-                <td className="muted">{ago(p.syncedAt)}</td>
+                <td className="num">{fmt.num(p.price)} <span className="muted">{p.currencyName || ''}</span></td>
+                <td className={`num ${p.quantity > 0 ? 'in' : 'out'}`}>{fmt.num(p.quantity, 3)}</td>
+                <td className="muted">{fmt.ago(p.syncedAt)}</td>
               </tr>
             ))}
-            {data && !data.items.length && <tr><td colSpan={COLS.length} className="empty">Nothing found</td></tr>}
+            {data && !data.items.length && <tr><td colSpan={COLS.length} className="empty">{t('common.nothing')}</td></tr>}
           </tbody>
         </table>
       </div>
       <div className="pager">
-        <button disabled={page <= 1} onClick={() => set({ page: String(page - 1) })}>← Prev</button>
-        <span>Page {page} of {pages}</span>
-        <button disabled={page >= pages} onClick={() => set({ page: String(page + 1) })}>Next →</button>
+        <button disabled={page <= 1} onClick={() => set({ page: String(page - 1) })}>{t('common.prev')}</button>
+        <span>{t('common.page', { page, pages })}</span>
+        <button disabled={page >= pages} onClick={() => set({ page: String(page + 1) })}>{t('common.next')}</button>
         <select value={params.get('limit') || '50'} onChange={(e) => set({ limit: e.target.value })}>
-          {[25, 50, 100, 200].map((n) => <option key={n} value={n}>{n} / page</option>)}
+          {[25, 50, 100, 200].map((n) => <option key={n} value={n}>{t('common.perPage', { n })}</option>)}
         </select>
       </div>
     </>
@@ -166,48 +179,50 @@ interface ProductFull {
 }
 
 export function ProductPage() {
+  const { t, fmt } = useT();
   const { id } = useParams();
   const { data: p, error } = useData<ProductFull>(`/admin/products/${id}`, 15000);
   if (error) return <div className="error">{error}</div>;
-  if (!p) return <p className="muted">Loading…</p>;
-  const rows: [string, React.ReactNode][] = [
-    ['Code (КодТовара)', p.externalId],
-    ['Name (Марка)', p.name],
-    ['Barcode (ШтрихКод)', p.barcode || '—'],
-    ['Category (КодТипа)', p.category?.name ?? p.categoryExternalId ?? '—'],
-    ['Brand (Производитель)', p.brand || '—'],
-    ['Unit (ЕдиницаИзмерения)', p.unit || '—'],
-    ['Price (Цена)', `${fmtNum(p.price)} ${p.currency?.name ?? ''}`],
-    ['Stock (НаСкладе)', fmtNum(p.quantity, 3)],
-    ['In price list (Прайс-Лист)', p.inPriceList ? 'Yes' : 'No'],
-    ['Discontinued (ПоставкиПрекращены)', p.discontinued ? 'Yes' : 'No'],
-    ['Weight (Вес)', fmtNum(p.weight, 3)],
-    ['Volume (Объем)', fmtNum(p.volume, 3)],
-    ['Note (Примечание)', p.note || '—'],
-    ...Object.entries(p.raw || {}).map(([k, v]) => [k, v === null || v === '' ? '—' : String(v)] as [string, React.ReactNode]),
+  if (!p) return <p className="muted">{t('common.loading')}</p>;
+  const yn = (b: boolean) => t(b ? 'common.yes' : 'common.no');
+  const rows: [string, ReactNode][] = [
+    [t('f.code'), p.externalId],
+    [t('f.name'), p.name],
+    [t('f.barcode'), p.barcode || '—'],
+    [t('f.category'), p.category?.name ?? p.categoryExternalId ?? '—'],
+    [t('f.brand'), p.brand || '—'],
+    [t('f.unit'), p.unit || '—'],
+    [t('f.price'), `${fmt.num(p.price)} ${p.currency?.name ?? ''}`],
+    [t('f.stock'), fmt.num(p.quantity, 3)],
+    [t('f.priceList'), yn(p.inPriceList)],
+    [t('f.discontinued'), yn(p.discontinued)],
+    [t('f.weight'), fmt.num(p.weight, 3)],
+    [t('f.volume'), fmt.num(p.volume, 3)],
+    [t('f.note'), p.note || '—'],
+    ...Object.entries(p.raw || {}).map(([k, v]) => [k, v === null || v === '' ? '—' : String(v)] as [string, ReactNode]),
   ];
   return (
     <>
-      <p><Link to="/products">← Products</Link></p>
+      <p><Link to="/products">{t('product.back')}</Link></p>
       <header className="page-head">
-        <h1>{p.name || `Product #${p.externalId}`}</h1>
-        {p.deletedAt && <span className="tag">removed in Access {fmtDate(p.deletedAt)}</span>}
+        <h1>{p.name || `#${p.externalId}`}</h1>
+        {p.deletedAt && <span className="tag">{t('product.removed', { date: fmt.date(p.deletedAt) })}</span>}
       </header>
       <div className="grid2">
         <section className="card">
-          <h2>Store data <FromAccess /></h2>
-          <p className="muted small">Read-only. Change these in the store program; the website updates within seconds.</p>
+          <h2>{t('product.store')} <FromAccess /></h2>
+          <p className="muted small">{t('product.storeNote')}</p>
           <dl>{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-          <p className="muted small">Last synced: {fmtDate(p.syncedAt)} · first seen: {fmtDate(p.createdAt)}</p>
+          <p className="muted small">{t('product.lastSynced', { synced: fmt.date(p.syncedAt), created: fmt.date(p.createdAt) })}</p>
         </section>
         <section className="card">
-          <h2>Website data</h2>
-          <p className="muted small">Images, description, SEO and visibility will be editable here (CMS, next step).</p>
+          <h2>{t('product.web')}</h2>
+          <p className="muted small">{t('product.webNote')}</p>
           <dl>
-            <div><dt>Visible on site</dt><dd>{p.isVisible ? 'Yes' : 'No'}</dd></div>
-            <div><dt>Slug</dt><dd>{p.slug || '—'}</dd></div>
-            <div><dt>Images</dt><dd>{p.images?.length || 0}</dd></div>
-            <div><dt>Description</dt><dd>{p.webDescription || '—'}</dd></div>
+            <div><dt>{t('product.visible')}</dt><dd>{yn(p.isVisible)}</dd></div>
+            <div><dt>{t('product.slug')}</dt><dd>{p.slug || '—'}</dd></div>
+            <div><dt>{t('product.images')}</dt><dd>{p.images?.length || 0}</dd></div>
+            <div><dt>{t('product.description')}</dt><dd>{p.webDescription || '—'}</dd></div>
           </dl>
         </section>
       </div>
@@ -218,14 +233,15 @@ export function ProductPage() {
 // ------------------------------------------------------------------ Categories
 
 export function CategoriesPage() {
+  const { t } = useT();
   const { data, error } = useData<Category[]>('/admin/categories', 30000);
   return (
     <>
-      <header className="page-head"><h1>Categories {data && <small>{data.length}</small>} <FromAccess /></h1></header>
+      <header className="page-head"><h1>{t('cat.title')} {data && <small>{data.length}</small>} <FromAccess /></h1></header>
       {error && <div className="error">{error}</div>}
       <div className="table-wrap">
         <table>
-          <thead><tr><th className="num">Code</th><th>Name</th><th className="num">Products</th></tr></thead>
+          <thead><tr><th className="num">{t('col.code')}</th><th>{t('col.name')}</th><th className="num">{t('col.products')}</th></tr></thead>
           <tbody>
             {data?.map((c) => (
               <tr key={c.id} className={c.deletedAt ? 'removed' : ''}>
@@ -243,13 +259,14 @@ export function CategoriesPage() {
 
 // ------------------------------------------------------------------ Import
 
-const IMPORTS = [
-  { kind: 'categories', file: 'Типы.csv', label: 'Categories' },
-  { kind: 'currencies', file: 'Валюты.csv', label: 'Currencies' },
-  { kind: 'products', file: 'products.csv', label: 'Products' },
+const IMPORTS: { kind: string; file: string; label: TKey }[] = [
+  { kind: 'categories', file: 'Типы.csv', label: 'imp.categories' },
+  { kind: 'currencies', file: 'Валюты.csv', label: 'imp.currencies' },
+  { kind: 'products', file: 'products.csv', label: 'imp.products' },
 ];
 
-function ImportRow({ kind, file, label }: { kind: string; file: string; label: string }) {
+function ImportRow({ kind, file, label }: { kind: string; file: string; label: TKey }) {
+  const { t } = useT();
   const [f, setF] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
@@ -275,17 +292,17 @@ function ImportRow({ kind, file, label }: { kind: string; file: string; label: s
   return (
     <section className="card import-row">
       <div>
-        <h2>{label}</h2>
-        <p className="muted small">File: <b>{file}</b></p>
+        <h2>{t(label)}</h2>
+        <p className="muted small">{t('imp.file')} <b>{file}</b></p>
       </div>
       <input type="file" accept=".csv,text/csv" onChange={(e) => { setF(e.target.files?.[0] || null); setResult(null); setError(''); }} />
-      <button disabled={!f || busy} onClick={upload}>{busy ? 'Importing…' : 'Import'}</button>
+      <button disabled={!f || busy} onClick={upload}>{busy ? t('imp.busy') : t('imp.import')}</button>
       {error && <div className="error">{error}</div>}
       {result && (
         <div className="success">
-          Imported {String(result.imported)} of {String(result.rows)} rows.
-          {'nameColumn' in result && <> Name column: <b>{String(result.nameColumn ?? '—')}</b>, code column: <b>{String(result.idColumn)}</b>.</>}
-          {Array.isArray(result.ignored) && result.ignored.length > 0 && <> Ignored columns: {(result.ignored as string[]).join(', ')}.</>}
+          {t('imp.done', { imported: String(result.imported), rows: String(result.rows) })}
+          {'nameColumn' in result && <> {t('imp.columns', { name: String(result.nameColumn ?? '—'), id: String(result.idColumn) })}</>}
+          {Array.isArray(result.ignored) && result.ignored.length > 0 && <> {t('imp.ignored', { cols: (result.ignored as string[]).join(', ') })}</>}
         </div>
       )}
     </section>
@@ -293,14 +310,12 @@ function ImportRow({ kind, file, label }: { kind: string; file: string; label: s
 }
 
 export function ImportPage() {
+  const { t } = useT();
+  const [before, after] = t('imp.note').split('{cmd}');
   return (
     <>
-      <header className="page-head"><h1>Import from CSV</h1></header>
-      <p className="muted">
-        First load of the Access data. On the store server run <code>python export_access_to_csv.py --site</code>,
-        then upload the three files below in this order. Importing again updates rows by their code and never creates duplicates.
-        After this, the sync agent keeps everything up to date automatically.
-      </p>
+      <header className="page-head"><h1>{t('imp.title')}</h1></header>
+      <p className="muted">{before}<code>python export_access_to_csv.py --site</code>{after}</p>
       <div className="import-list">
         {IMPORTS.map((i) => <ImportRow key={i.kind} {...i} />)}
       </div>
@@ -311,37 +326,44 @@ export function ImportPage() {
 // ------------------------------------------------------------------ Sync
 
 export function SyncPage() {
+  const { t, fmt } = useT();
   const [page, setPage] = useState(1);
   const { data: s } = useData<Stats>('/admin/stats', 5000);
   const { data, error } = useData<Paged<SyncLogRow>>(`/admin/sync-log?page=${page}`, 5000);
   const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
+  const entity = (e: string) => (['products', 'categories', 'currencies'].includes(e) ? t(`entity.${e}` as TKey) : e);
   return (
     <>
-      <header className="page-head"><h1>Sync</h1>{s && <SyncBadge at={s.lastSyncAt} />}</header>
-      <p className="muted">Every batch the store agent sent. The agent only sends rows that changed, so a quiet store means few entries.</p>
+      <header className="page-head"><h1>{t('syncp.title')}</h1>{s && <SyncBadge at={s.lastSyncAt} />}</header>
+      <p className="muted">{t('syncp.note')}</p>
       {error && <div className="error">{error}</div>}
       <div className="table-wrap">
         <table>
-          <thead><tr><th>Time</th><th>Table</th><th className="num">Updated</th><th className="num">Removed</th><th>Agent</th><th>Batch</th></tr></thead>
+          <thead>
+            <tr>
+              <th>{t('syncp.time')}</th><th>{t('syncp.table')}</th><th className="num">{t('syncp.updated')}</th>
+              <th className="num">{t('syncp.removed')}</th><th>{t('syncp.agent')}</th><th>{t('syncp.batch')}</th>
+            </tr>
+          </thead>
           <tbody>
             {data?.items.map((r) => (
               <tr key={r.id}>
-                <td>{fmtDate(r.receivedAt)}</td>
-                <td>{r.entity}</td>
+                <td>{fmt.date(r.receivedAt)}</td>
+                <td>{entity(r.entity)}</td>
                 <td className="num">{r.upserts}</td>
                 <td className="num">{r.deletes}</td>
                 <td className="muted">{r.agentVersion || '—'}</td>
                 <td className="mono muted">{r.batchId || '—'}</td>
               </tr>
             ))}
-            {data && !data.items.length && <tr><td colSpan={6} className="empty">No sync yet. Start the agent on the store server.</td></tr>}
+            {data && !data.items.length && <tr><td colSpan={6} className="empty">{t('syncp.empty')}</td></tr>}
           </tbody>
         </table>
       </div>
       <div className="pager">
-        <button disabled={page <= 1} onClick={() => setPage(page - 1)}>← Newer</button>
-        <span>Page {page} of {pages}</span>
-        <button disabled={page >= pages} onClick={() => setPage(page + 1)}>Older →</button>
+        <button disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('syncp.newer')}</button>
+        <span>{t('common.page', { page, pages })}</span>
+        <button disabled={page >= pages} onClick={() => setPage(page + 1)}>{t('syncp.older')}</button>
       </div>
     </>
   );

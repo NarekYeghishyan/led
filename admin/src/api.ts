@@ -42,15 +42,19 @@ export interface SyncLogRow {
   agentVersion: string | null; error: string | null;
 }
 
-export const fmtDate = (s: string | null) => (s ? new Date(s).toLocaleString('ru-RU') : '—');
-export const fmtNum = (n: number | null | undefined, digits = 2) =>
-  n === null || n === undefined ? '—' : n.toLocaleString('ru-RU', { maximumFractionDigits: digits });
-
-export function ago(s: string | null) {
-  if (!s) return 'never';
-  const sec = Math.round((Date.now() - new Date(s).getTime()) / 1000);
-  if (sec < 60) return `${Math.max(sec, 0)} s ago`;
-  if (sec < 3600) return `${Math.round(sec / 60)} min ago`;
-  if (sec < 86400) return `${Math.round(sec / 3600)} h ago`;
-  return `${Math.round(sec / 86400)} days ago`;
+/** Locale-aware formatters; get them with useFmt() in pages. */
+export function makeFmt(locale: string, t: (k: 'ago.never' | 'ago.s' | 'ago.m' | 'ago.h' | 'ago.d', v?: Record<string, number>) => string) {
+  return {
+    date: (s: string | null) => (s ? new Date(s).toLocaleString(locale) : '—'),
+    num: (n: number | null | undefined, digits = 2) =>
+      n === null || n === undefined ? '—' : n.toLocaleString(locale, { maximumFractionDigits: digits }),
+    ago(s: string | null) {
+      if (!s) return t('ago.never');
+      const sec = Math.round((Date.now() - new Date(s).getTime()) / 1000);
+      if (sec < 60) return t('ago.s', { n: Math.max(sec, 0) });
+      if (sec < 3600) return t('ago.m', { n: Math.round(sec / 60) });
+      if (sec < 86400) return t('ago.h', { n: Math.round(sec / 3600) });
+      return t('ago.d', { n: Math.round(sec / 86400) });
+    },
+  };
 }
