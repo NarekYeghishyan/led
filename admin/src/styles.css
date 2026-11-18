@@ -85,21 +85,11 @@ dl div { display: grid; grid-template-columns: 220px 1fr; gap: 10px; padding: 6p
 dt { color: var(--muted); }
 dd { margin: 0; white-space: pre-wrap; word-break: break-word; }
 
-@media (max-width: 800px) {
-  .layout { grid-template-columns: 1fr; }
-  aside { position: static; height: auto; flex-direction: row; align-items: center; flex-wrap: wrap; padding: 12px 16px; gap: 10px; }
-  aside nav { display: flex; flex-wrap: wrap; }
-  main { padding: 16px; }
-  .grid2 { grid-template-columns: 1fr; }
-  dl div { grid-template-columns: 1fr; gap: 2px; }
-}
-
 .import-list { display: grid; gap: 12px; max-width: 760px; }
 .import-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; }
 .import-row .error, .import-row .success { grid-column: 1 / -1; margin: 0; }
 .success { background: #e3f6ea; color: #14633a; padding: 10px 12px; border-radius: 6px; }
 code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
-@media (max-width: 800px) { .import-row { grid-template-columns: 1fr; } }
 
 .lang { display: inline-flex; border: 1px solid #ffffff2e; border-radius: 6px; overflow: hidden; align-self: flex-start; }
 .lang button { background: transparent; color: var(--side-text); padding: 4px 10px; border-radius: 0; font-size: 12px; }
@@ -126,3 +116,96 @@ code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 1
 .login .theme button.on { color: var(--accent-ink); }
 .switches { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .sync-badge { display: inline-flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* ------------------------------------------------------------------ responsive */
+.topbar, .backdrop, .aside-head .close, .mobile-only { display: none; }
+.aside-head { display: flex; align-items: center; justify-content: space-between; }
+.no-scroll { overflow: hidden; }
+
+@media (max-width: 1100px) {
+  .grid2 { grid-template-columns: 1fr; }
+  dl div { grid-template-columns: 180px 1fr; }
+}
+
+@media (max-width: 860px) {
+  .layout { display: block; }
+  main { padding: 16px max(16px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+
+  /* top bar + off-canvas drawer */
+  .topbar {
+    display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 30;
+    background: var(--side); color: var(--side-text);
+    padding: calc(8px + env(safe-area-inset-top)) 16px 8px; min-height: 52px;
+  }
+  .burger { display: grid; gap: 4px; background: transparent; padding: 10px 8px; margin-left: -8px; }
+  .burger span { display: block; width: 20px; height: 2px; border-radius: 1px; background: #fff; }
+  aside {
+    position: fixed; z-index: 50; inset: 0 auto 0 0; width: min(280px, 84vw); height: 100dvh;
+    padding: calc(16px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom));
+    transform: translateX(-100%); transition: transform .22s ease, visibility .22s; overflow-y: auto;
+    visibility: hidden;
+  }
+  .menu-open aside { transform: none; visibility: visible; box-shadow: 0 0 40px #0008; }
+  .backdrop { display: block; position: fixed; inset: 0; z-index: 40; background: #0008; opacity: 0; pointer-events: none; transition: opacity .22s; }
+  .menu-open .backdrop { opacity: 1; pointer-events: auto; }
+  .aside-head .close { display: block; background: transparent; color: var(--side-text); font-size: 26px; line-height: 1; padding: 4px 10px; }
+  aside nav a { padding: 12px; font-size: 15px; }
+  aside .link { text-align: left; padding: 10px 12px; }
+
+  /* touch-friendly controls; 16px stops iOS zoom on focus */
+  input, select, button { font-size: 16px; min-height: 42px; }
+  input[type="checkbox"] { min-height: 0; width: 20px; height: 20px; }
+  .lang button, .theme button { min-height: 34px; font-size: 13px; }
+  .mobile-only { display: block; }
+
+  h1 { font-size: 20px; }
+  .page-head { gap: 8px 12px; }
+  .filters { display: grid; grid-template-columns: 1fr 1fr; }
+  .filters > input:first-child, .filters > .mobile-only, .filters > .check:has(input[type="checkbox"]) { grid-column: 1 / -1; }
+  .filters > * { width: 100%; min-width: 0; }
+  .filters .check input[type="date"] { flex: 1; min-width: 0; }
+
+  .tiles { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .tile { padding: 14px; }
+  .tile b { font-size: 22px; }
+
+  .card { padding: 16px; }
+  dl div { grid-template-columns: 1fr; gap: 2px; }
+  .import-row { grid-template-columns: 1fr; }
+  .import-row input[type="file"] { min-height: 0; max-width: 100%; }
+
+  /* tables -> stacked cards; labels come from data-label */
+  .table-wrap.responsive { background: none; border: 0; overflow: visible; }
+  .responsive table, .responsive tbody, .responsive tr, .responsive td { display: block; width: 100%; }
+  .responsive thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .responsive tr { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 6px 14px; margin-bottom: 10px; }
+  .responsive tbody tr:hover { background: var(--panel); }
+  .responsive td {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    padding: 7px 0; white-space: normal; text-align: right; min-width: 0; word-break: break-word;
+  }
+  .responsive td:last-child { border-bottom: 0; }
+  .responsive td[data-label]::before {
+    content: attr(data-label); flex: none; max-width: 45%; text-align: left;
+    color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .3px;
+  }
+  .responsive td.title { display: block; text-align: left; font-size: 15px; font-weight: 600; padding: 10px 0; }
+  .responsive td.title::before { display: none; }
+  .responsive td.wide { display: block; text-align: left; }
+  .responsive td.wide::before { display: block; margin-bottom: 4px; max-width: none; }
+  .responsive td.empty { display: block; text-align: center; border: 0; }
+  .responsive td.empty::before { display: none; }
+  .mono { word-break: break-all; }
+
+  .pager { justify-content: space-between; }
+  .pager span { flex: 1; text-align: center; }
+  .pager select { flex-basis: 100%; }
+}
+
+@media (max-width: 380px) {
+  .filters { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  aside, .backdrop { transition: none; }
+}

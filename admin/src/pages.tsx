@@ -130,13 +130,19 @@ export function ProductsPage() {
           <option value="0">{t('products.activeOnly')}</option>
           <option value="1">{t('products.discOnly')}</option>
         </select>
+        <select className="mobile-only" aria-label={t('products.sortBy')} value={`${sort}:${dir}`}
+          onChange={(e) => { const [s2, d2] = e.target.value.split(':'); set({ sort: s2, dir: d2 }); }}>
+          {COLS.filter((c) => c.sort).flatMap((c) => (['asc', 'desc'] as const).map((d) => (
+            <option key={`${c.sort}:${d}`} value={`${c.sort}:${d}`}>{t('products.sortBy')}: {t(c.label)} — {t(`products.${d}`)}</option>
+          )))}
+        </select>
         <label className="check">
           <input type="checkbox" checked={params.get('deleted') === '1'} onChange={(e) => set({ deleted: e.target.checked ? '1' : '' })} />
           {t('products.showRemoved')}
         </label>
       </div>
       {error && <div className="error">{error}</div>}
-      <div className="table-wrap">
+      <div className="table-wrap responsive">
         <table>
           <thead>
             <tr>
@@ -151,14 +157,14 @@ export function ProductsPage() {
           <tbody>
             {data?.items.map((p) => (
               <tr key={p.id} className={p.deletedAt ? 'removed' : ''}>
-                <td className="num">{p.externalId}</td>
-                <td><Link to={`/products/${p.id}`}>{p.name || '—'}</Link>{p.discontinued && <span className="tag">{t('products.discontinued')}</span>}</td>
-                <td className="mono">{p.barcode || '—'}</td>
-                <td>{p.categoryName || (p.categoryExternalId ?? '—')}</td>
-                <td>{p.brand || '—'}</td>
-                <td className="num">{fmt.num(p.price)} <span className="muted">{p.currencyName || ''}</span></td>
-                <td className={`num ${p.quantity > 0 ? 'in' : 'out'}`}>{fmt.num(p.quantity, 3)}</td>
-                <td className="muted">{fmt.ago(p.syncedAt)}</td>
+                <td data-label={t('col.code')} className="num">{p.externalId}</td>
+                <td data-label={t('col.name')} className="title"><Link to={`/products/${p.id}`}>{p.name || '—'}</Link>{p.discontinued && <span className="tag">{t('products.discontinued')}</span>}</td>
+                <td data-label={t('col.barcode')} className="mono">{p.barcode || '—'}</td>
+                <td data-label={t('col.category')}>{p.categoryName || (p.categoryExternalId ?? '—')}</td>
+                <td data-label={t('col.brand')}>{p.brand || '—'}</td>
+                <td data-label={t('col.price')} className="num">{fmt.num(p.price)} <span className="muted">{p.currencyName || ''}</span></td>
+                <td data-label={t('col.stock')} className={`num ${p.quantity > 0 ? 'in' : 'out'}`}>{fmt.num(p.quantity, 3)}</td>
+                <td data-label={t('col.updated')} className="muted">{fmt.ago(p.syncedAt)}</td>
               </tr>
             ))}
             {data && !data.items.length && <tr><td colSpan={COLS.length} className="empty">{t('common.nothing')}</td></tr>}
@@ -249,15 +255,15 @@ export function CategoriesPage() {
     <>
       <header className="page-head"><h1>{t('cat.title')} {data && <small>{data.length}</small>} <FromAccess /></h1></header>
       {error && <div className="error">{error}</div>}
-      <div className="table-wrap">
+      <div className="table-wrap responsive">
         <table>
           <thead><tr><th className="num">{t('col.code')}</th><th>{t('col.name')}</th><th className="num">{t('col.products')}</th></tr></thead>
           <tbody>
             {data?.map((c) => (
               <tr key={c.id} className={c.deletedAt ? 'removed' : ''}>
-                <td className="num">{c.externalId}</td>
-                <td><Link to={`/products?categoryId=${c.externalId}`}>{c.name || '—'}</Link></td>
-                <td className="num">{c.productCount}</td>
+                <td data-label={t('col.code')} className="num">{c.externalId}</td>
+                <td data-label={t('col.name')}><Link to={`/products?categoryId=${c.externalId}`}>{c.name || '—'}</Link></td>
+                <td data-label={t('col.products')} className="num">{c.productCount}</td>
               </tr>
             ))}
           </tbody>
@@ -347,7 +353,7 @@ export function SyncPage() {
       <header className="page-head"><h1>{t('syncp.title')}</h1>{s && <SyncBadge s={s} />}</header>
       <p className="muted">{t('syncp.note')}</p>
       {error && <div className="error">{error}</div>}
-      <div className="table-wrap">
+      <div className="table-wrap responsive">
         <table>
           <thead>
             <tr>
@@ -358,12 +364,12 @@ export function SyncPage() {
           <tbody>
             {data?.items.map((r) => (
               <tr key={r.id}>
-                <td>{fmt.date(r.receivedAt)}</td>
-                <td>{entity(r.entity)}</td>
-                <td className="num">{r.upserts}</td>
-                <td className="num">{r.deletes}</td>
-                <td className="muted">{r.agentVersion || '—'}</td>
-                <td className="mono muted">{r.batchId || '—'}</td>
+                <td data-label={t('syncp.time')}>{fmt.date(r.receivedAt)}</td>
+                <td data-label={t('syncp.table')}>{entity(r.entity)}</td>
+                <td data-label={t('syncp.updated')} className="num">{r.upserts}</td>
+                <td data-label={t('syncp.removed')} className="num">{r.deletes}</td>
+                <td data-label={t('syncp.agent')} className="muted">{r.agentVersion || '—'}</td>
+                <td data-label={t('syncp.batch')} className="mono muted">{r.batchId || '—'}</td>
               </tr>
             ))}
             {data && !data.items.length && <tr><td colSpan={6} className="empty">{t('syncp.empty')}</td></tr>}
@@ -424,7 +430,7 @@ export function LogsPage() {
         <label className="check">{t('logs.to')}<input type="date" value={params.get('to') || ''} onChange={(e) => set({ to: e.target.value })} /></label>
       </div>
       {error && <div className="error">{error}</div>}
-      <div className="table-wrap">
+      <div className="table-wrap responsive">
         <table>
           <thead>
             <tr><th>{t('logs.time')}</th><th>{t('logs.table')}</th><th>{t('logs.action')}</th><th>{t('logs.item')}</th><th>{t('logs.changes')}</th></tr>
@@ -432,14 +438,14 @@ export function LogsPage() {
           <tbody>
             {data?.items.map((r) => (
               <tr key={r.id}>
-                <td className="nowrap">{fmt.date(r.at)}</td>
-                <td>{t(`entity.${r.entity}` as TKey)}</td>
-                <td><span className={`act act-${r.action}`}>{t(`act.${r.action}` as TKey)}</span></td>
-                <td>
+                <td data-label={t('logs.time')} className="nowrap">{fmt.date(r.at)}</td>
+                <td data-label={t('logs.table')}>{t(`entity.${r.entity}` as TKey)}</td>
+                <td data-label={t('logs.action')}><span className={`act act-${r.action}`}>{t(`act.${r.action}` as TKey)}</span></td>
+                <td data-label={t('logs.item')}>
                   {r.entity === 'products' ? <Link to={`/products?search=${r.externalId}`}>#{r.externalId}</Link> : `#${r.externalId}`}{' '}
                   {r.name}
                 </td>
-                <td>
+                <td data-label={t('logs.changes')} className="wide">
                   {Object.entries(r.changes || {}).map(([f, [a, b]]) => (
                     <div key={f} className="chg">
                       <span className="muted">{FIELD_LABEL[f] ? t(FIELD_LABEL[f]) : f}:</span>{' '}

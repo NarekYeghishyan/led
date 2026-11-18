@@ -1,6 +1,6 @@
-import { StrictMode, useState, type FormEvent } from 'react';
+import { StrictMode, useEffect, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { api, ApiError, auth } from './api';
 import { I18nProvider, LangSwitch, useI18n } from './i18n';
 import { ThemeSwitch } from './theme';
@@ -47,11 +47,35 @@ function Login() {
 function Layout() {
   const { t } = useI18n();
   const nav = useNavigate();
+  const { pathname, search } = useLocation();
+  const [open, setOpen] = useState(false);
+
+  // Close the drawer on navigation; Escape closes it; lock page scroll while open.
+  useEffect(() => setOpen(false), [pathname, search]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKey);
+    document.body.classList.add('no-scroll');
+    return () => { document.removeEventListener('keydown', onKey); document.body.classList.remove('no-scroll'); };
+  }, [open]);
+
   if (!auth.token) return <Navigate to="/login" replace />;
+  const brand = <div className="brand">LED<span>{t('brand.sub')}</span></div>;
   return (
-    <div className="layout">
-      <aside>
-        <div className="brand">LED<span>{t('brand.sub')}</span></div>
+    <div className={`layout${open ? ' menu-open' : ''}`}>
+      <header className="topbar">
+        <button className="burger" aria-label={t('nav.menu')} aria-expanded={open} aria-controls="sidebar" onClick={() => setOpen(true)}>
+          <span /><span /><span />
+        </button>
+        {brand}
+      </header>
+      <div className="backdrop" onClick={() => setOpen(false)} aria-hidden="true" />
+      <aside id="sidebar">
+        <div className="aside-head">
+          {brand}
+          <button className="close" aria-label={t('nav.close')} onClick={() => setOpen(false)}>×</button>
+        </div>
         <nav>
           <NavLink to="/" end>{t('nav.dashboard')}</NavLink>
           <NavLink to="/products">{t('nav.products')}</NavLink>
