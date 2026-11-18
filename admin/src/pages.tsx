@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
-  api, auth, makeFmt, type Category, type Paged, type ProductRow, type Stats, type SyncLogRow,
+  api, auth, makeFmt, type Category, type ChangeRow, type Paged, type ProductRow, type Stats, type SyncLogRow,
 } from './api';
 import { useI18n, type TKey } from './i18n';
 
@@ -364,6 +364,89 @@ export function SyncPage() {
         <button disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('syncp.newer')}</button>
         <span>{t('common.page', { page, pages })}</span>
         <button disabled={page >= pages} onClick={() => setPage(page + 1)}>{t('syncp.older')}</button>
+      </div>
+    </>
+  );
+}
+
+// ------------------------------------------------------------------ Change log
+
+const FIELD_LABEL: Record<string, TKey> = {
+  name: 'col.name', barcode: 'col.barcode', categoryExternalId: 'col.category', brand: 'col.brand',
+  unit: 'f.unit', price: 'col.price', currencyExternalId: 'f.currency', quantity: 'col.stock',
+  inPriceList: 'f.priceList', discontinued: 'f.discontinued', note: 'f.note', weight: 'f.weight', volume: 'f.volume',
+};
+
+export function LogsPage() {
+  const { t, fmt } = useT();
+  const [params, setParams] = useSearchParams();
+  const [search, setSearch] = useState(params.get('search') || '');
+  const { data, error } = useData<Paged<ChangeRow>>(`/admin/changes?${params}`, 5000);
+  const set = (patch: Record<string, string>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) v ? next.set(k, v) : next.delete(k);
+    if (!('page' in patch)) next.delete('page');
+    setParams(next);
+  };
+  useEffect(() => {
+    const tm = setTimeout(() => { if (search !== (params.get('search') || '')) set({ search }); }, 350);
+    return () => clearTimeout(tm);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+  const page = Number(params.get('page') || 1);
+  const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
+  const val = (v: unknown) => (v === null || v === undefined ? '—' : v === true ? t('common.yes') : v === false ? t('common.no') : String(v));
+
+  return (
+    <>
+      <header className="page-head"><h1>{t('logs.title')} {data && <small>{fmt.num(data.total, 0)}</small>}</h1></header>
+      <p className="muted">{t('logs.note', { days: 30 })}</p>
+      <div className="filters">
+        <input placeholder={t('logs.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
+        <select value={params.get('entity') || ''} onChange={(e) => set({ entity: e.target.value })}>
+          <option value="">{t('logs.allEntities')}</option>
+          {['products', 'categories', 'currencies'].map((e) => <option key={e} value={e}>{t(`entity.${e}` as TKey)}</option>)}
+        </select>
+        <select value={params.get('action') || ''} onChange={(e) => set({ action: e.target.value })}>
+          <option value="">{t('logs.allActions')}</option>
+          {['created', 'updated', 'restored', 'deleted'].map((a) => <option key={a} value={a}>{t(`act.${a}` as TKey)}</option>)}
+        </select>
+        <label className="check">{t('logs.from')}<input type="date" value={params.get('from') || ''} onChange={(e) => set({ from: e.target.value })} /></label>
+        <label className="check">{t('logs.to')}<input type="date" value={params.get('to') || ''} onChange={(e) => set({ to: e.target.value })} /></label>
+      </div>
+      {error && <div className="error">{error}</div>}
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr><th>{t('logs.time')}</th><th>{t('logs.table')}</th><th>{t('logs.action')}</th><th>{t('logs.item')}</th><th>{t('logs.changes')}</th></tr>
+          </thead>
+          <tbody>
+            {data?.items.map((r) => (
+              <tr key={r.id}>
+                <td className="nowrap">{fmt.date(r.at)}</td>
+                <td>{t(`entity.${r.entity}` as TKey)}</td>
+                <td><span className={`act act-${r.action}`}>{t(`act.${r.action}` as TKey)}</span></td>
+                <td>
+                  {r.entity === 'products' ? <Link to={`/products?search=${r.externalId}`}>#{r.externalId}</Link> : `#${r.externalId}`}{' '}
+                  {r.name}
+                </td>
+                <td>
+                  {Object.entries(r.changes || {}).map(([f, [a, b]]) => (
+                    <div key={f} className="chg">
+                      <span className="muted">{FIELD_LABEL[f] ? t(FIELD_LABEL[f]) : f}:</span>{' '}
+                      <s>{val(a)}</s> → <b>{val(b)}</b>
+                    </div>
+                  ))}
+                </td>
+              </tr>
+            ))}
+            {data && !data.items.length && <tr><td colSpan={5} className="empty">{t('logs.empty')}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <div className="pager">
+        <button disabled={page <= 1} onClick={() => set({ page: String(page - 1) })}>{t('syncp.newer')}</button>
+        <span>{t('common.page', { page, pages })}</span>
+        <button disabled={page >= pages} onClick={() => set({ page: String(page + 1) })}>{t('syncp.older')}</button>
       </div>
     </>
   );

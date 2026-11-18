@@ -70,6 +70,17 @@ export class SyncLog {
   @Column({ type: 'text', nullable: true }) error: string | null;
 }
 
+@Entity('change_log')
+export class ChangeLog {
+  @PrimaryGeneratedColumn({ type: 'bigint' }) id: string;
+  @CreateDateColumn({ type: 'timestamptz' }) at: Date;
+  @Column({ type: 'text' }) entity: string;
+  @Column({ type: 'text' }) action: string; // created | updated | restored | deleted
+  @Column({ name: 'external_id', type: 'int' }) externalId: number;
+  @Column({ type: 'text', nullable: true }) name: string | null;
+  @Column({ type: 'jsonb', default: {} }) changes: Record<string, [unknown, unknown]>;
+}
+
 @Entity('admin_users')
 export class AdminUser {
   @PrimaryGeneratedColumn() id: number;
@@ -79,4 +90,4 @@ export class AdminUser {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' }) createdAt: Date;
 }
 
-export const ENTITIES = [Category, Currency, Product, SyncLog, AdminUser];
+export const ENTITIES = [Category, Currency, Product, SyncLog, ChangeLog, AdminUser];

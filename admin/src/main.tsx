@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { api, ApiError, auth } from './api';
 import { I18nProvider, LangSwitch, useI18n } from './i18n';
-import { CategoriesPage, DashboardPage, ImportPage, ProductPage, ProductsPage, SyncPage } from './pages';
+import { CategoriesPage, DashboardPage, ImportPage, LogsPage, ProductPage, ProductsPage, SyncPage } from './pages';
 import './styles.css';
 
 function Login() {
@@ -56,6 +56,7 @@ function Layout() {
           <NavLink to="/products">{t('nav.products')}</NavLink>
           <NavLink to="/categories">{t('nav.categories')}</NavLink>
           <NavLink to="/sync">{t('nav.sync')}</NavLink>
+          <NavLink to="/logs">{t('nav.logs')}</NavLink>
           <NavLink to="/import">{t('nav.import')}</NavLink>
         </nav>
         <LangSwitch />
@@ -79,6 +80,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="sync" element={<SyncPage />} />
             <Route path="import" element={<ImportPage />} />
+            <Route path="logs" element={<LogsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -8,6 +8,7 @@ import { AdminController } from './admin';
 import { ApiKeyGuard, AuthController, AuthService, JwtGuard } from './auth';
 import { AdminUser, ENTITIES } from './entities';
 import { Init1763380000000 } from './migrations/1763380000000-init';
+import { ChangeLog1763900000000 } from './migrations/1763900000000-change-log';
 import { SyncController, SyncService } from './sync';
 import { ImportController } from './import';
 
@@ -26,7 +27,7 @@ class HealthController {
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: ENTITIES,
-      migrations: [Init1763380000000],
+      migrations: [Init1763380000000, ChangeLog1763900000000],
       migrationsRun: true,
       synchronize: false,
     }),

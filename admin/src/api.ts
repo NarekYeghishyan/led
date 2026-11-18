@@ -37,6 +37,10 @@ export interface Category { id: number; externalId: number; name: string; produc
 export interface Stats {
   products: number; inStock: number; outOfStock: number; deleted: number; categories: number; lastSyncAt: string | null;
 }
+export interface ChangeRow {
+  id: string; at: string; entity: string; action: 'created' | 'updated' | 'restored' | 'deleted';
+  externalId: number; name: string | null; changes: Record<string, [unknown, unknown]>;
+}
 export interface SyncLogRow {
   id: number; receivedAt: string; entity: string; batchId: string | null; upserts: number; deletes: number;
   agentVersion: string | null; error: string | null;

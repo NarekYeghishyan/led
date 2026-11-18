@@ -104,3 +104,12 @@ code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 1
 .login .lang button { color: var(--muted); }
 .login .lang button.on { color: var(--accent-ink); }
 .login-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+
+/* change log */
+.nowrap { white-space: nowrap; }
+.chg { font-size: 13px; line-height: 1.5; }
+.chg s { opacity: .6; }
+.act { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #e5e7eb; color: #374151; white-space: nowrap; }
+.act-created, .act-restored { background: #dcfce7; color: #166534; }
+.act-updated { background: #dbeafe; color: #1e40af; }
+.act-deleted { background: #fee2e2; color: #991b1b; }

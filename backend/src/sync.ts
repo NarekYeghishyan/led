@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Get, Injectable, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
+import { OnModuleInit, BadRequestException, Body, Controller, Get, Injectable, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, In } from 'typeorm';
 import { ApiKeyGuard } from './auth';
-import { Category, Currency, Product, SyncLog } from './entities';
+import { Category, ChangeLog, Currency, Product, SyncLog } from './entities';
 
 interface Batch<T> {
   batchId?: string;
@@ -12,6 +12,21 @@ interface Batch<T> {
 }
 
 const MAX_BATCH = 2000;
+const LOG_DAYS = 30;
+
+// Fields compared for the change log (entity property names).
+const PRODUCT_TRACKED = [
+  'name', 'barcode', 'categoryExternalId', 'brand', 'unit', 'price', 'currencyExternalId',
+  'quantity', 'inPriceList', 'discontinued', 'note', 'weight', 'volume',
+];
+const LOOKUP_TRACKED = ['name'];
+
+const norm = (v: unknown) => {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'boolean') return v;
+  const n = Number(v);
+  return typeof v !== 'string' || (v.trim() !== '' && !Number.isNaN(n)) ? (Number.isNaN(n) ? String(v) : n) : v;
+};
 
 // Columns the agent may update. Web fields (slug, images, SEO, is_visible...) are never touched here.
 const PRODUCT_COLUMNS = [
@@ -25,8 +40,15 @@ const toStr = (v: unknown) => (v === null || v === undefined ? null : String(v))
 const toBool = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true' || v === -1;
 
 @Injectable()
-export class SyncService {
+export class SyncService implements OnModuleInit {
   constructor(@InjectDataSource() private ds: DataSource) {}
+
+  // Keep the change log small: drop entries older than LOG_DAYS, once at start and then hourly.
+  onModuleInit() {
+    const clean = () => this.ds.query(`DELETE FROM change_log WHERE at < now() - interval '${LOG_DAYS} days'`).catch(() => undefined);
+    setTimeout(clean, 60_000);
+    setInterval(clean, 3600_000).unref();
+  }
 
   private check(batch: Batch<unknown>) {
     const n = (batch?.upserts?.length || 0) + (batch?.deletes?.length || 0);
@@ -60,7 +82,7 @@ export class SyncService {
       };
       return p;
     });
-    return this.apply(Product, 'products', batch, rows, PRODUCT_COLUMNS, now);
+    return this.apply(Product, 'products', batch, rows, PRODUCT_COLUMNS, now, PRODUCT_TRACKED);
   }
 
   async lookup(entity: typeof Category | typeof Currency, name: string, batch: Batch<Record<string, unknown>>) {
@@ -71,12 +93,37 @@ export class SyncService {
       if (externalId === null || Number.isNaN(externalId)) throw new BadRequestException('externalId required');
       return { externalId, name: toStr(r.name) ?? '', raw: (r.raw as object) ?? {}, deletedAt: null, syncedAt: now };
     });
-    return this.apply(entity, name, batch, rows, ['name', 'raw', 'deleted_at', 'synced_at'], now);
+    return this.apply(entity, name, batch, rows, ['name', 'raw', 'deleted_at', 'synced_at'], now, LOOKUP_TRACKED);
   }
 
-  private async apply(entity: any, name: string, batch: Batch<unknown>, rows: object[], cols: string[], now: Date) {
+  private async apply(entity: any, name: string, batch: Batch<unknown>, rows: any[], cols: string[], now: Date, tracked: string[]) {
     const deletes = (batch.deletes || []).map(toInt).filter((x): x is number => x !== null && !Number.isNaN(x));
     await this.ds.transaction(async (m) => {
+      // Compare with what the site has now, so the log shows exactly what changed.
+      const ids = [...rows.map((r) => r.externalId), ...deletes];
+      const existing = new Map<number, any>();
+      if (ids.length) {
+        for (const e of await m.getRepository(entity).find({ where: { externalId: In(ids) } })) existing.set(e.externalId, e);
+      }
+      const log: Partial<ChangeLog>[] = [];
+      for (const r of rows) {
+        const old = existing.get(r.externalId);
+        if (!old || old.deletedAt) {
+          log.push({ entity: name, action: old ? 'restored' : 'created', externalId: r.externalId, name: r.name, changes: {} });
+          continue;
+        }
+        const changes: Record<string, [unknown, unknown]> = {};
+        for (const f of tracked) {
+          const a = norm(old[f]); const b = norm(r[f]);
+          if (a !== b) changes[f] = [a, b];
+        }
+        if (Object.keys(changes).length) log.push({ entity: name, action: 'updated', externalId: r.externalId, name: r.name, changes });
+      }
+      for (const id of deletes) {
+        const old = existing.get(id);
+        if (old && !old.deletedAt) log.push({ entity: name, action: 'deleted', externalId: id, name: old.name, changes: {} });
+      }
+      if (log.length) await m.getRepository(ChangeLog).insert(log as any[]);
       if (rows.length) {
         await m.createQueryBuilder().insert().into(entity).values(rows).orUpdate(cols, ['external_id']).execute();
       }

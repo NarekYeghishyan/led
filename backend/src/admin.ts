@@ -2,7 +2,7 @@ import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query, UseGuar
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
-import { Category, Currency, Product, SyncLog } from './entities';
+import { Category, ChangeLog, Currency, Product, SyncLog } from './entities';
 
 const SORTS: Record<string, string> = {
   name: 'p.name', price: 'p.price', quantity: 'p.quantity', externalId: 'p.external_id', syncedAt: 'p.synced_at',
@@ -83,6 +83,24 @@ export class AdminController {
     const [cat] = await this.ds.query(`SELECT COUNT(*)::int AS n FROM categories WHERE deleted_at IS NULL`);
     const last = await this.ds.getRepository(SyncLog).find({ order: { id: 'DESC' }, take: 1 });
     return { ...row, categories: cat.n, lastSyncAt: last[0]?.receivedAt ?? null };
+  }
+
+  @Get('changes')
+  async changes(@Query() q: Record<string, string>) {
+    const page = Math.max(1, Number(q.page) || 1);
+    const limit = 100;
+    const qb = this.ds.getRepository(ChangeLog).createQueryBuilder('c').orderBy('c.id', 'DESC');
+    if (q.entity) qb.andWhere('c.entity = :entity', { entity: q.entity });
+    if (q.action) qb.andWhere('c.action = :action', { action: q.action });
+    if (q.from) qb.andWhere('c.at >= :from', { from: q.from });
+    if (q.to) qb.andWhere("c.at < (:to::date + 1)", { to: q.to });
+    if (q.search) {
+      const s = q.search.trim();
+      if (/^\d+$/.test(s)) qb.andWhere('(c.external_id = :id OR c.name ILIKE :s)', { id: Number(s), s: `%${s}%` });
+      else qb.andWhere('c.name ILIKE :s', { s: `%${s}%` });
+    }
+    const [items, total] = await qb.skip((page - 1) * limit).take(limit).getManyAndCount();
+    return { items, total, page, limit };
   }
 
   @Get('sync-log')
