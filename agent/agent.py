@@ -96,13 +96,24 @@ def plain(v):
     return v
 
 
-def read_table(conn, table):
-    cur = conn.cursor()
-    cur.execute(f"SELECT * FROM [{table}]")
-    cols = [d[0] for d in cur.description]
-    rows = [dict(zip(cols, (plain(v) for v in r))) for r in cur.fetchall()]
-    cur.close()
-    return cols, rows
+def read_table(conn, table, columns=None, attempts=5):
+    """Read a whole table. If the store program deletes a row while we read
+    (Access error HY109 "Record is deleted"), wait a moment and read again."""
+    sql = f"SELECT {', '.join(f'[{c}]' for c in columns) if columns else '*'} FROM [{table}]"
+    for attempt in range(1, attempts + 1):
+        cur = conn.cursor()
+        try:
+            cur.execute(sql)
+            cols = [d[0] for d in cur.description]
+            rows = [dict(zip(cols, (plain(v) for v in r))) for r in cur.fetchall()]
+            return cols, rows
+        except Exception as e:
+            if "HY109" not in str(e) or attempt == attempts:
+                raise
+            log.warning("%s: a row changed while reading (%s), retry %d", table, e, attempt)
+            time.sleep(attempt)
+        finally:
+            cur.close()
 
 
 def pick(row, name):
@@ -274,7 +285,9 @@ def sync_pass(cfg, api, state, include_lookups, dry_run=False, reconcile=False):
                 cols, rows = read_table(conn, table)
                 data = map_lookup(cols, rows, cfg.get(sec, "id_column", fallback=""), cfg.get(sec, "name_column", fallback=""))
                 sync_entity(api, state, entity, data, batch, dry_run, reconcile)
-        _, rows = read_table(conn, cfg.get("products", "table", fallback="Товары"))
+        # only the synced columns: faster, and skips memo/OLE columns (Log, ClearText...)
+        _, rows = read_table(conn, cfg.get("products", "table", fallback="Товары"),
+                             list(PRODUCT_MAP) + PRODUCT_RAW)
         sync_entity(api, state, "products", map_products(rows), batch, dry_run, reconcile)
     finally:
         conn.close()
