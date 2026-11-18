@@ -36,7 +36,7 @@ export interface Paged<T> { items: T[]; total: number; page: number; limit: numb
 export interface Category { id: number; externalId: number; name: string; productCount: number; deletedAt: string | null }
 export interface Stats {
   products: number; inStock: number; outOfStock: number; deleted: number; categories: number; lastSyncAt: string | null;
-  agentSeenAt: string | null; agentVersion: string | null; agentError: string | null;
+  agentSeenAt: string | null; agentVersion: string | null; agentError: string | null; serverNow: string;
 }
 export interface ChangeRow {
   id: string; at: string; entity: string; action: 'created' | 'updated' | 'restored' | 'deleted';

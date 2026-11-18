@@ -84,7 +84,7 @@ export class AdminController {
     const [cat] = await this.ds.query(`SELECT COUNT(*)::int AS n FROM categories WHERE deleted_at IS NULL`);
     const last = await this.ds.getRepository(SyncLog).find({ order: { id: 'DESC' }, take: 1 });
     return { ...row, categories: cat.n, lastSyncAt: last[0]?.receivedAt ?? null,
-      agentSeenAt: agentState.seenAt, agentVersion: agentState.version, agentError: agentState.error };
+      agentSeenAt: agentState.seenAt, agentVersion: agentState.version, agentError: agentState.error, serverNow: new Date() };
   }
 
   @Get('changes')

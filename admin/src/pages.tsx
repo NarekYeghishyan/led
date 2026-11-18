@@ -32,15 +32,19 @@ function FromAccess() {
 
 function SyncBadge({ s }: { s: Stats }) {
   const { t, fmt } = useT();
-  const sec = s.agentSeenAt ? (Date.now() - new Date(s.agentSeenAt).getTime()) / 1000 : Infinity;
+  // Age is measured on the server clock, so a wrong clock on this computer does not matter.
+  const skew = Date.now() - new Date(s.serverNow).getTime();
+  const local = (d: string | null) => (d ? new Date(new Date(d).getTime() + skew).toISOString() : null);
+  const seen = local(s.agentSeenAt);
+  const sec = s.agentSeenAt ? (new Date(s.serverNow).getTime() - new Date(s.agentSeenAt).getTime()) / 1000 : Infinity;
   const agent = !s.agentSeenAt
     ? <span className="dot bad">{t('agent.never')}</span>
     : sec > 180
-      ? <span className="dot bad">{t('agent.offline', { ago: fmt.ago(s.agentSeenAt) })}</span>
+      ? <span className="dot bad">{t('agent.offline', { ago: fmt.ago(seen) })}</span>
       : s.agentError
         ? <span className="dot warn" title={s.agentError}>{t('agent.error')}</span>
         : <span className="dot ok" title={s.agentVersion ? `v${s.agentVersion}` : undefined}>{t('agent.online')}</span>;
-  return <span className="sync-badge">{agent}<span className="muted small">{t('sync.last', { ago: fmt.ago(s.lastSyncAt) })}</span></span>;
+  return <span className="sync-badge">{agent}<span className="muted small">{t('sync.last', { ago: fmt.ago(local(s.lastSyncAt)) })}</span></span>;
 }
 
 // ------------------------------------------------------------------ Dashboard
