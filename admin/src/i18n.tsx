@@ -29,6 +29,9 @@ const ru = {
   'act.restored': 'восстановлен',
   'act.deleted': 'удалён',
   'nav.signout': 'Выйти',
+  'theme.auto': 'Как в системе',
+  'theme.light': 'Светлая тема',
+  'theme.dark': 'Тёмная тема',
 
   'login.title': 'Панель управления',
   'login.email': 'Email',
@@ -165,6 +168,9 @@ const en: Record<keyof typeof ru, string> = {
   'act.restored': 'restored',
   'act.deleted': 'deleted',
   'nav.signout': 'Sign out',
+  'theme.auto': 'Match system',
+  'theme.light': 'Light theme',
+  'theme.dark': 'Dark theme',
 
   'login.title': 'Admin panel',
   'login.email': 'Email',

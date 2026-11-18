@@ -7,10 +7,14 @@
   font-size: 14px;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f131a; --panel: #171c25; --text: #e5e9f0; --muted: #8b95a7; --line: #262d3a;
     --accent: #4c9ef5; --side: #0b0f15; --side-text: #aab4c5; color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+    --bg: #0f131a; --panel: #171c25; --text: #e5e9f0; --muted: #8b95a7; --line: #262d3a;
+    --accent: #4c9ef5; --side: #0b0f15; --side-text: #aab4c5; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); }
@@ -113,3 +117,11 @@ code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 1
 .act-created, .act-restored { background: #dcfce7; color: #166534; }
 .act-updated { background: #dbeafe; color: #1e40af; }
 .act-deleted { background: #fee2e2; color: #991b1b; }
+
+.theme { display: inline-flex; border: 1px solid #ffffff2e; border-radius: 6px; overflow: hidden; align-self: flex-start; }
+.theme button { background: transparent; color: var(--side-text); padding: 4px 9px; border-radius: 0; font-size: 13px; line-height: 1; }
+.theme button.on { background: var(--accent); color: var(--accent-ink); }
+.login .theme { border-color: var(--line); }
+.login .theme button { color: var(--muted); }
+.login .theme button.on { color: var(--accent-ink); }
+.switches { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }

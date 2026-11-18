@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { api, ApiError, auth } from './api';
 import { I18nProvider, LangSwitch, useI18n } from './i18n';
+import { ThemeSwitch } from './theme';
 import { CategoriesPage, DashboardPage, ImportPage, LogsPage, ProductPage, ProductsPage, SyncPage } from './pages';
 import './styles.css';
 
@@ -32,7 +33,7 @@ function Login() {
   return (
     <div className="login">
       <form onSubmit={submit} className="card">
-        <div className="login-head"><h1>LED Computers</h1><LangSwitch /></div>
+        <div className="login-head"><h1>LED Computers</h1><div className="switches"><ThemeSwitch /><LangSwitch /></div></div>
         <p className="muted">{t('login.title')}</p>
         <label>{t('login.email')}<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
         <label>{t('login.password')}<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
@@ -59,7 +60,7 @@ function Layout() {
           <NavLink to="/logs">{t('nav.logs')}</NavLink>
           <NavLink to="/import">{t('nav.import')}</NavLink>
         </nav>
-        <LangSwitch />
+        <div className="switches"><LangSwitch /><ThemeSwitch /></div>
         <button className="link" onClick={() => { auth.set(null); nav('/login'); }}>{t('nav.signout')}</button>
       </aside>
       <main><Outlet /></main>
