@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Injectable, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Injectable, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, In } from 'typeorm';
 import { ApiKeyGuard } from './auth';
@@ -94,6 +94,15 @@ export class SyncService {
     return { ok: true, upserted: rows.length, deleted: deletes.length };
   }
 
+  // External ids that are live on the site; the agent uses them to find rows already removed from Access.
+  async ids(name: string) {
+    const entity = ({ products: Product, categories: Category, currencies: Currency } as Record<string, any>)[name];
+    if (!entity) throw new NotFoundException();
+    const rows = await this.ds.getRepository(entity).createQueryBuilder('x')
+      .select('x.external_id', 'id').where('x.deleted_at IS NULL').getRawMany();
+    return rows.map((r) => Number(r.id));
+  }
+
   async status() {
     const last = await this.ds.getRepository(SyncLog).find({ order: { id: 'DESC' }, take: 1 });
     const count = (e: any) => this.ds.getRepository(e).createQueryBuilder('x').where('x.deleted_at IS NULL').getCount();
@@ -115,4 +124,5 @@ export class SyncController {
   @Post('categories') categories(@Body() b: Batch<Record<string, unknown>>) { return this.sync.lookup(Category, 'categories', b); }
   @Post('currencies') currencies(@Body() b: Batch<Record<string, unknown>>) { return this.sync.lookup(Currency, 'currencies', b); }
   @Get('status') status() { return this.sync.status(); }
+  @Get('ids/:entity') ids(@Param('entity') e: string) { return this.sync.ids(e); }
 }

@@ -12,6 +12,10 @@ Usage:
     python agent.py --full     # forget state and resend everything, then keep running
     python agent.py --check    # test Access + API connection and print what would be sent
 
+Rows removed from Access are marked deleted on the site. At start and every
+reconcile_interval_seconds the agent also asks the site which ids it has, so rows removed
+while the agent was not running (or before the first CSV load) are removed too.
+
 Config: config.ini next to this file (copy config.example.ini).
 """
 
@@ -30,7 +34,7 @@ import urllib.error
 import urllib.request
 import uuid
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -68,9 +72,13 @@ def connect_access(cfg):
         r"DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};"
         f"DBQ={cfg.get('access', 'db_path')};"
         f"PWD={cfg.get('access', 'password')};"
-        "ReadOnly=1;"
     )
-    return pyodbc.connect(conn_str, readonly=True, autocommit=True)
+    try:
+        return pyodbc.connect(conn_str + "ReadOnly=1;", readonly=True, autocommit=True)
+    except pyodbc.Error as e:
+        # some driver versions refuse read-only mode; the agent only runs SELECTs anyway
+        log.warning("Read-only connection failed (%s), using a normal connection", e)
+        return pyodbc.connect(conn_str, autocommit=True)
 
 
 def plain(v):
@@ -204,21 +212,43 @@ class Api:
 
 # --------------------------------------------------------------------------- sync
 
-def sync_entity(api, state, entity, current, batch_size, dry_run=False):
+def site_ids(api, entity):
+    """Ids live on the site, or None if the server does not support it yet."""
+    try:
+        return {str(i) for i in api.call("GET", f"/sync/ids/{entity}")}
+    except Exception as e:
+        log.warning("Could not read %s ids from the site, skipping reconcile: %s", entity, e)
+        return None
+
+
+def sync_entity(api, state, entity, current, batch_size, dry_run=False, reconcile=False):
     """Send rows of `current` ({ext_id: item}) that differ from the saved state."""
     old = state.load(entity)
     hashes = {k: row_hash(v) for k, v in current.items()}
     changed = [k for k, h in hashes.items() if old.get(k) != h]
     deleted = [k for k in old if k not in current]
+    if reconcile:
+        on_site = site_ids(api, entity)
+        if on_site is not None:
+            extra = sorted(on_site - set(current) - set(deleted))
+            if extra and len(extra) > max(50, len(current) // 2):
+                # safety: a broken/partial read must not wipe the catalogue
+                log.error("%s: refusing to delete %d site rows (Access returned only %d)", entity, len(extra), len(current))
+            elif extra:
+                log.info("%s: %d rows are on the site but no longer in Access", entity, len(extra))
+                deleted += extra
+    if not current and deleted:
+        log.error("%s: Access returned 0 rows, refusing to delete %d rows", entity, len(deleted))
+        deleted = []
     if dry_run:
         log.info("%s: %d rows, would send %d upserts, %d deletes", entity, len(current), len(changed), len(deleted))
         return 0
     if not changed and not deleted:
         return 0
 
-    for i in range(0, max(len(changed), 1), batch_size):
+    for i in range(0, max(len(changed), len(deleted), 1), batch_size):
         part = changed[i:i + batch_size]
-        dels = deleted if i == 0 else []
+        dels = deleted[i:i + batch_size]
         if not part and not dels:
             break
         api.call("POST", f"/sync/{entity}", {
@@ -232,7 +262,7 @@ def sync_entity(api, state, entity, current, batch_size, dry_run=False):
     return len(changed) + len(deleted)
 
 
-def sync_pass(cfg, api, state, include_lookups, dry_run=False):
+def sync_pass(cfg, api, state, include_lookups, dry_run=False, reconcile=False):
     batch = cfg.getint("agent", "batch_size", fallback=500)
     conn = connect_access(cfg)
     try:
@@ -243,9 +273,9 @@ def sync_pass(cfg, api, state, include_lookups, dry_run=False):
                     continue
                 cols, rows = read_table(conn, table)
                 data = map_lookup(cols, rows, cfg.get(sec, "id_column", fallback=""), cfg.get(sec, "name_column", fallback=""))
-                sync_entity(api, state, entity, data, batch, dry_run)
+                sync_entity(api, state, entity, data, batch, dry_run, reconcile)
         _, rows = read_table(conn, cfg.get("products", "table", fallback="Товары"))
-        sync_entity(api, state, "products", map_products(rows), batch, dry_run)
+        sync_entity(api, state, "products", map_products(rows), batch, dry_run, reconcile)
     finally:
         conn.close()
 
@@ -259,7 +289,7 @@ def main():
 
     if "--check" in args:
         log.info("API status: %s", api.call("GET", "/sync/status"))
-        sync_pass(cfg, api, state, include_lookups=True, dry_run=True)
+        sync_pass(cfg, api, state, include_lookups=True, dry_run=True, reconcile=True)
         return
     if "--full" in args:
         log.info("Full resync: clearing local state")
@@ -267,17 +297,22 @@ def main():
 
     interval = cfg.getint("agent", "interval_seconds", fallback=5)
     lookup_every = cfg.getint("agent", "lookup_interval_seconds", fallback=120)
+    reconcile_every = cfg.getint("agent", "reconcile_interval_seconds", fallback=3600)
     last_lookup = 0.0
+    last_reconcile = 0.0
     errors = 0
     log.info("Agent %s started, interval %ss, API %s", VERSION, interval, api.base)
 
     while True:
         started = time.time()
         try:
-            include_lookups = started - last_lookup >= lookup_every
-            sync_pass(cfg, api, state, include_lookups)
+            reconcile = started - last_reconcile >= reconcile_every
+            include_lookups = reconcile or started - last_lookup >= lookup_every
+            sync_pass(cfg, api, state, include_lookups, reconcile=reconcile)
             if include_lookups:
                 last_lookup = started
+            if reconcile:
+                last_reconcile = started
             errors = 0
         except Exception as e:  # keep running: network down, mdb locked, etc.
             errors += 1

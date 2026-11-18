@@ -15,6 +15,7 @@ deploy/    docker-compose, .env example, host nginx config for led.creativeweb.a
 2. It hashes every row and compares the hashes with `state.sqlite`. Only new, changed or removed rows are sent.
 3. The agent sends them with `POST /api/sync/{products|categories|currencies}`, protected by the `X-Api-Key` header. The API upserts them by `external_id`.
 4. A row is marked as sent only after the API accepts it. If the internet goes down, the changes are sent later.
+5. At start and every hour, the agent compares its ids with `GET /api/sync/ids/{entity}` and deletes site rows that are gone from Access. If Access returns 0 rows or fewer than half, it refuses to delete them.
 
 Fields from Access are read-only on the website. Web fields (images, SEO, visibility) are never overwritten by the sync. Internal columns (`ЦенаНаНас`, `Надбавка`, dealer prices, `Бух*`, `Log`) are never sent.
 
@@ -42,7 +43,8 @@ cd admin && npm install && npm run dev     # http://localhost:5173/admin/
    python import_csv.py D:\python-script     # uploads them to the website (safe to repeat)
    ```
    Check the result in the admin panel.
-6. Test the live sync with `python agent.py --check`. It prints what it would send.
+6. Test the live sync with `python agent.py --check`. It prints what it would send and how many site rows are no longer in Access.
+   Then run `python agent.py --once`. The first pass sends every row once (state.sqlite is still empty, so this is a harmless upsert) and removes rows deleted from Access since the CSV export.
 7. Install it as a Windows service with [NSSM](https://nssm.cc):
    ```
    nssm install LedSyncAgent "C:\Python312\python.exe" "D:\led-agent\agent.py"
