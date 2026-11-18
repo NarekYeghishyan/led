@@ -398,6 +398,7 @@ export function LogsPage() {
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get('search') || '');
   const { data, error } = useData<Paged<ChangeRow>>(`/admin/changes?${params}`, 5000);
+  const { data: s } = useData<Stats>('/admin/stats', 10000);
   const set = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params);
     for (const [k, v] of Object.entries(patch)) v ? next.set(k, v) : next.delete(k);
@@ -414,7 +415,7 @@ export function LogsPage() {
 
   return (
     <>
-      <header className="page-head"><h1>{t('logs.title')} {data && <small>{fmt.num(data.total, 0)}</small>}</h1></header>
+      <header className="page-head"><h1>{t('logs.title')} {data && <small>{fmt.num(data.total, 0)}</small>}</h1>{s && <SyncBadge s={s} />}</header>
       <p className="muted">{t('logs.note', { days: 30 })}</p>
       <div className="filters">
         <input placeholder={t('logs.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
