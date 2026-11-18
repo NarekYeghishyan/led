@@ -30,11 +30,17 @@ function FromAccess() {
   return <span className="badge">{t('common.fromAccess')}</span>;
 }
 
-function SyncBadge({ at }: { at: string | null }) {
+function SyncBadge({ s }: { s: Stats }) {
   const { t, fmt } = useT();
-  const sec = at ? (Date.now() - new Date(at).getTime()) / 1000 : Infinity;
-  const cls = sec < 600 ? 'ok' : sec < 3600 ? 'warn' : 'bad';
-  return <span className={`dot ${cls}`}>{t('sync.last', { ago: fmt.ago(at) })}</span>;
+  const sec = s.agentSeenAt ? (Date.now() - new Date(s.agentSeenAt).getTime()) / 1000 : Infinity;
+  const agent = !s.agentSeenAt
+    ? <span className="dot bad">{t('agent.never')}</span>
+    : sec > 180
+      ? <span className="dot bad">{t('agent.offline', { ago: fmt.ago(s.agentSeenAt) })}</span>
+      : s.agentError
+        ? <span className="dot warn" title={s.agentError}>{t('agent.error')}</span>
+        : <span className="dot ok" title={s.agentVersion ? `v${s.agentVersion}` : undefined}>{t('agent.online')}</span>;
+  return <span className="sync-badge">{agent}<span className="muted small">{t('sync.last', { ago: fmt.ago(s.lastSyncAt) })}</span></span>;
 }
 
 // ------------------------------------------------------------------ Dashboard
@@ -44,7 +50,7 @@ export function DashboardPage() {
   const { data: s, error } = useData<Stats>('/admin/stats', 10000);
   return (
     <>
-      <header className="page-head"><h1>{t('dash.title')}</h1>{s && <SyncBadge at={s.lastSyncAt} />}</header>
+      <header className="page-head"><h1>{t('dash.title')}</h1>{s && <SyncBadge s={s} />}</header>
       {error && <div className="error">{error}</div>}
       {s && (
         <div className="tiles">
@@ -334,7 +340,7 @@ export function SyncPage() {
   const entity = (e: string) => (['products', 'categories', 'currencies'].includes(e) ? t(`entity.${e}` as TKey) : e);
   return (
     <>
-      <header className="page-head"><h1>{t('syncp.title')}</h1>{s && <SyncBadge at={s.lastSyncAt} />}</header>
+      <header className="page-head"><h1>{t('syncp.title')}</h1>{s && <SyncBadge s={s} />}</header>
       <p className="muted">{t('syncp.note')}</p>
       {error && <div className="error">{error}</div>}
       <div className="table-wrap">

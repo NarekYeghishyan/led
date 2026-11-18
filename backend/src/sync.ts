@@ -39,6 +39,9 @@ const toNum = (v: unknown) => (v === null || v === undefined || v === '' ? null 
 const toStr = (v: unknown) => (v === null || v === undefined ? null : String(v));
 const toBool = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true' || v === -1;
 
+/** Last heartbeat from the Access agent (in memory; the agent re-sends it every minute). */
+export const agentState: { seenAt: Date | null; version: string | null; error: string | null } = { seenAt: null, version: null, error: null };
+
 @Injectable()
 export class SyncService implements OnModuleInit {
   constructor(@InjectDataSource() private ds: DataSource) {}
@@ -170,6 +173,12 @@ export class SyncController {
   @Post('products') products(@Body() b: Batch<Record<string, unknown>>) { return this.sync.products(b); }
   @Post('categories') categories(@Body() b: Batch<Record<string, unknown>>) { return this.sync.lookup(Category, 'categories', b); }
   @Post('currencies') currencies(@Body() b: Batch<Record<string, unknown>>) { return this.sync.lookup(Currency, 'currencies', b); }
+  @Post('heartbeat') heartbeat(@Body() b: { version?: unknown; error?: unknown }) {
+    agentState.seenAt = new Date();
+    agentState.version = typeof b?.version === 'string' ? b.version.slice(0, 32) : null;
+    agentState.error = typeof b?.error === 'string' && b.error ? b.error.slice(0, 500) : null;
+    return { ok: true };
+  }
   @Get('status') status() { return this.sync.status(); }
   @Get('ids/:entity') ids(@Param('entity') e: string) { return this.sync.ids(e); }
 }

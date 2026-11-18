@@ -34,7 +34,7 @@ import urllib.error
 import urllib.request
 import uuid
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -314,6 +314,9 @@ def main():
     last_lookup = 0.0
     last_reconcile = 0.0
     errors = 0
+    last_error = ""
+    last_beat = 0.0
+    beat_every = cfg.getint("agent", "heartbeat_seconds", fallback=60)
     log.info("Agent %s started, interval %ss, API %s", VERSION, interval, api.base)
 
     while True:
@@ -327,9 +330,18 @@ def main():
             if reconcile:
                 last_reconcile = started
             errors = 0
+            last_error = ""
         except Exception as e:  # keep running: network down, mdb locked, etc.
             errors += 1
+            last_error = str(e)
             log.error("Sync failed (%d in a row): %s", errors, e)
+        # tell the site the agent is alive, even when nothing changed
+        if time.time() - last_beat >= beat_every:
+            try:
+                api.call("POST", "/sync/heartbeat", {"version": VERSION, "error": last_error})
+                last_beat = time.time()
+            except Exception as e:
+                log.warning("Heartbeat failed: %s", e)
         if "--once" in args:
             return
         # back off up to 2 minutes while errors continue

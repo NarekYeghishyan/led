@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
 import { Category, ChangeLog, Currency, Product, SyncLog } from './entities';
+import { agentState } from './sync';
 
 const SORTS: Record<string, string> = {
   name: 'p.name', price: 'p.price', quantity: 'p.quantity', externalId: 'p.external_id', syncedAt: 'p.synced_at',
@@ -82,7 +83,8 @@ export class AdminController {
       FROM products`);
     const [cat] = await this.ds.query(`SELECT COUNT(*)::int AS n FROM categories WHERE deleted_at IS NULL`);
     const last = await this.ds.getRepository(SyncLog).find({ order: { id: 'DESC' }, take: 1 });
-    return { ...row, categories: cat.n, lastSyncAt: last[0]?.receivedAt ?? null };
+    return { ...row, categories: cat.n, lastSyncAt: last[0]?.receivedAt ?? null,
+      agentSeenAt: agentState.seenAt, agentVersion: agentState.version, agentError: agentState.error };
   }
 
   @Get('changes')

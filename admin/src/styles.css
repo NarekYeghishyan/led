@@ -125,3 +125,4 @@ code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 1
 .login .theme button { color: var(--muted); }
 .login .theme button.on { color: var(--accent-ink); }
 .switches { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sync-badge { display: inline-flex; gap: 12px; align-items: center; flex-wrap: wrap; }
