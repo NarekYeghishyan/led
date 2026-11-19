@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.4.5"
+VERSION = "0.4.6"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -134,14 +134,14 @@ PRODUCT_MAP = {
     "ЕдиницаИзмерения": "unit",
     "Цена": "price",
     "КодВалюты": "currencyExternalId",
-    "НаСкладе": "quantity",
+    "ОстатокНВС": "quantity",  # real stock (НаСкладе only grows, owner's decision 2026-11-19)
     "Прайс-Лист": "inPriceList",
     "ПоставкиПрекращены": "discontinued",
     "Примечание": "note",
     "Вес": "weight",
     "Объем": "volume",
 }
-PRODUCT_RAW = ["ЦенаПрайса", "Марка2", "ЕдиницаИзмерения2", "МинимальныйЗапас"]
+PRODUCT_RAW = ["НаСкладе", "ЦенаПрайса", "Марка2", "ЕдиницаИзмерения2", "МинимальныйЗапас"]
 
 
 def map_products(rows):

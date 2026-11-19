@@ -46,14 +46,14 @@ COLUMNS = {
     "ЕдиницаИзмерения": "unit",
     "Цена": "price",
     "КодВалюты": "currency_id",        # -> table Валюты
-    "НаСкладе": "quantity",
+    "ОстатокНВС": "quantity",  # real stock; НаСкладе is not
     "Прайс-Лист": "in_price_list",
     "ПоставкиПрекращены": "discontinued",
     "Примечание": "description",
     "Вес": "weight",
     "Объем": "volume",
     # NOT exported on purpose (internal): ЦенаНаНас, Надбавка, Диллерская цена1/2,
-    # Бух*, ОстатокНВС, МинимальныйЗапас, Log, ЦенаПрайса, Марка2, ЕдиницаИзмерения2, Правый, ClearText
+    # Бух*, НаСкладе, МинимальныйЗапас, Log, ЦенаПрайса, Марка2, ЕдиницаИзмерения2, Правый, ClearText
 }
 
 # Optional: your own query (overrides TABLE/COLUMNS), e.g. a JOIN:

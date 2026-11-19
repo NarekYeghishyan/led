@@ -38,7 +38,7 @@ export class Product {
   @Column({ type: 'text', nullable: true }) unit: string | null; // ЕдиницаИзмерения
   @Column({ type: 'numeric', precision: 14, scale: 2, nullable: true, transformer: numeric }) price: number | null; // Цена
   @Column({ name: 'currency_external_id', type: 'int', nullable: true }) currencyExternalId: number | null; // КодВалюты
-  @Column({ type: 'numeric', precision: 14, scale: 3, default: 0, transformer: numeric }) quantity: number; // НаСкладе
+  @Column({ type: 'numeric', precision: 14, scale: 3, default: 0, transformer: numeric }) quantity: number; // ОстатокНВС
   @Column({ name: 'in_price_list', type: 'boolean', default: false }) inPriceList: boolean; // Прайс-Лист
   @Column({ type: 'boolean', default: false }) discontinued: boolean; // ПоставкиПрекращены
   @Column({ type: 'text', nullable: true }) note: string | null; // Примечание

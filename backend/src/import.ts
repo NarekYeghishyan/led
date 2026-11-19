@@ -17,7 +17,7 @@ const PRODUCT_HEADERS: Record<string, string> = {
   unit: 'unit', 'ЕдиницаИзмерения': 'unit',
   price: 'price', 'Цена': 'price',
   currency_id: 'currencyExternalId', 'КодВалюты': 'currencyExternalId',
-  quantity: 'quantity', 'НаСкладе': 'quantity',
+  quantity: 'quantity', 'ОстатокНВС': 'quantity',
   in_price_list: 'inPriceList', 'Прайс-Лист': 'inPriceList',
   discontinued: 'discontinued', 'ПоставкиПрекращены': 'discontinued',
   description: 'note', 'Примечание': 'note',
