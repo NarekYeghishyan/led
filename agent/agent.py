@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.4.4"
+VERSION = "0.4.5"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -383,8 +383,44 @@ def map_mirror(rows, keys):
     return out
 
 
+def long_columns(conn, table):
+    """Memo / OLE columns of a table (Access types LONGCHAR, LONGBINARY)."""
+    cur = conn.cursor()
+    try:
+        return {c.column_name for c in cur.columns(table=table)
+                if (c.type_name or "").upper() in ("LONGCHAR", "LONGBINARY", "MEMO", "OLEOBJECT")}
+    finally:
+        cur.close()
+
+
+_skipped_long = {}  # table -> memo columns left out because a damaged row cannot be read with them
+
+
+def read_mirror(conn, table):
+    """Whole table. If a damaged row makes it unreadable (HY109 every time, usually in a memo
+    field), read it without the memo columns, so the rest of the table is still copied."""
+    if table not in _skipped_long:
+        try:
+            return read_table(conn, table, attempts=2)
+        except Exception as e:
+            if "HY109" not in str(e):
+                raise
+            longs = long_columns(conn, table)
+            if not longs:
+                raise
+            _skipped_long[table] = longs
+            log.warning("%s: cannot be read with memo columns %s (a damaged row in Access); copying it without them",
+                        table, sorted(longs))
+    cur = conn.cursor()
+    try:
+        cols = [c.column_name for c in cur.columns(table=table) if c.column_name not in _skipped_long[table]]
+    finally:
+        cur.close()
+    return read_table(conn, table, cols)
+
+
 def mirror_table(api, state, conn, table, batch_size, dry_run=False, reconcile=False, keys=None):
-    cols, rows = read_table(conn, table)
+    cols, rows = read_mirror(conn, table)
     if keys:
         keys = [k for k in keys if k in cols]
     if not keys:
