@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.4.3"
+VERSION = "0.4.4"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -304,6 +304,9 @@ def sync_pass(cfg, api, state, include_lookups, dry_run=False, reconcile=False):
 # Tables the store owner asked us never to copy (2026-11-19). Always skipped, whatever config.ini says.
 NEVER_MIRROR = ("Computers", "Vazgen", "РасчетныеСчета", "Скидки")
 
+# Keys for tables that have no primary key in Access (config.ini [mirror] keys= overrides these).
+DEFAULT_KEYS = {"Документы": ["КодДокумента"]}
+
 MAX_TEXT = 4000  # long memo fields are cut, so one row stays small
 
 
@@ -343,7 +346,7 @@ def key_columns(conn, table):
 
 def configured_keys(cfg):
     """[mirror] keys = Документы:КодДокумента; Операции:КодДокумента+НомерСтроки"""
-    out = {}
+    out = {k: list(v) for k, v in DEFAULT_KEYS.items()}
     for part in cfg.get("mirror", "keys", fallback="").split(";"):
         if ":" in part:
             t, cols = part.split(":", 1)
