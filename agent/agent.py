@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -196,6 +196,9 @@ class State:
         self.db.executemany("DELETE FROM sent WHERE entity=? AND ext_id=?", [(entity, k) for k in deletes])
         self.db.commit()
 
+    def count(self, entity):
+        return self.db.execute("SELECT COUNT(*) FROM sent WHERE entity=?", (entity,)).fetchone()[0]
+
     def clear(self):
         self.db.execute("DELETE FROM sent")
         self.db.commit()
@@ -337,6 +340,28 @@ def key_columns(conn, table):
     return [c for _, c in sorted(idx[name])]
 
 
+def configured_keys(cfg):
+    """[mirror] keys = Документы:КодДокумента; Операции:КодДокумента+НомерСтроки"""
+    out = {}
+    for part in cfg.get("mirror", "keys", fallback="").split(";"):
+        if ":" in part:
+            t, cols = part.split(":", 1)
+            out[t.strip()] = [c.strip() for c in cols.split("+") if c.strip()]
+    return out
+
+
+def guess_key(cols, rows):
+    """No index: use the first column whose values are all filled and unique (usually a counter like Код...)."""
+    if not rows:
+        return []
+    named = sorted(cols, key=lambda c: (not c.lower().startswith(("код", "id", "номер")) and not c.lower().endswith("id"), cols.index(c)))
+    for c in named:
+        vals = [r.get(c) for r in rows]
+        if all(v is not None and v != "" for v in vals) and len(set(vals)) == len(vals):
+            return [c]
+    return []
+
+
 def map_mirror(rows, keys):
     """{row key: {"key", "data"}}. Without a key, the row content is the key (a change = delete + add)."""
     out = {}
@@ -354,9 +379,12 @@ def map_mirror(rows, keys):
     return out
 
 
-def mirror_table(api, state, conn, table, batch_size, dry_run=False, reconcile=False):
-    keys = key_columns(conn, table)
+def mirror_table(api, state, conn, table, batch_size, dry_run=False, reconcile=False, keys=None):
     cols, rows = read_table(conn, table)
+    if keys:
+        keys = [k for k in keys if k in cols]
+    if not keys:
+        keys = key_columns(conn, table) or guess_key(cols, rows)
     current = map_mirror(rows, keys)
     entity = "m:" + table
     old = state.load(entity)
@@ -400,15 +428,28 @@ def mirror_table(api, state, conn, table, batch_size, dry_run=False, reconcile=F
     log.info("mirror %s: sent %d upserts, %d deletes", table, len(changed), len(deleted))
 
 
+BIG_ROWS = 50_000
+_last_big = {}  # table -> time of last read
+
+
 def mirror_pass(cfg, api, state, dry_run=False, reconcile=False):
+    """Small tables every pass; big ones (Операции, Документы...) only every big_interval_seconds,
+    so the store PC is not reading 800k rows every 30 seconds."""
     if not cfg.getboolean("mirror", "enabled", fallback=True):
         return
     batch = cfg.getint("mirror", "batch_size", fallback=500)
+    big_every = cfg.getint("mirror", "big_interval_seconds", fallback=300)
+    keys = configured_keys(cfg)
     conn = connect_access(cfg)
     try:
         for table in list_tables(conn, cfg):
             try:
-                mirror_table(api, state, conn, table, batch, dry_run, reconcile)
+                if not dry_run and table in _last_big and time.time() - _last_big[table] < big_every:
+                    continue
+                t0 = time.time()
+                mirror_table(api, state, conn, table, batch, dry_run, reconcile, keys.get(table))
+                if state.count("m:" + table) >= BIG_ROWS:
+                    _last_big[table] = t0
             except Exception as e:  # one bad table must not stop the others
                 log.error("mirror %s failed: %s", table, e)
     finally:
@@ -433,7 +474,12 @@ def main():
             cur = conn.cursor()
             n = cur.execute(f"SELECT COUNT(*) FROM [{t}]").fetchone()[0]
             cur.close()
-            print(f"{t}: {n} rows, key {key_columns(conn, t) or '(none)'}")
+            k = configured_keys(cfg).get(t) or key_columns(conn, t)
+            how = "index/config"
+            if not k:
+                cols, rows = read_table(conn, t)
+                k, how = guess_key(cols, rows), "found in data"
+            print(f"{t}: {n} rows, key {k or '(none: row content)'} [{how if k else '-'}]")
         conn.close()
         return
     if "--full" in args:
