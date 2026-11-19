@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.4.2"
+VERSION = "0.4.3"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -79,12 +79,9 @@ def connect_access(cfg):
         f"DBQ={cfg.get('access', 'db_path')};"
         f"PWD={cfg.get('access', 'password')};"
     )
-    try:
-        return pyodbc.connect(conn_str + "ReadOnly=1;", readonly=True, autocommit=True)
-    except pyodbc.Error as e:
-        # some driver versions refuse read-only mode; the agent only runs SELECTs anyway
-        log.warning("Read-only connection failed (%s), using a normal connection", e)
-        return pyodbc.connect(conn_str, autocommit=True)
+    # Access is ONLY read, never changed. If a read-only connection is impossible, stop instead of
+    # opening a writable one (the store owner's rule: nothing may ever change in Access).
+    return pyodbc.connect(conn_str + "ReadOnly=1;", readonly=True, autocommit=True)
 
 
 def plain(v):
