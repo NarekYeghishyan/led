@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -304,12 +304,16 @@ def sync_pass(cfg, api, state, include_lookups, dry_run=False, reconcile=False):
 
 # --------------------------------------------------------------------------- mirror (all tables)
 
+# Tables the store owner asked us never to copy (2026-11-19). Always skipped, whatever config.ini says.
+NEVER_MIRROR = ("Computers", "Vazgen", "РасчетныеСчета", "Скидки")
+
 MAX_TEXT = 4000  # long memo fields are cut, so one row stays small
 
 
 def list_tables(conn, cfg):
     include = [t.strip() for t in cfg.get("mirror", "tables", fallback="").split(",") if t.strip()]
     exclude = {t.strip().lower() for t in cfg.get("mirror", "exclude", fallback="").split(",") if t.strip()}
+    exclude |= {t.lower() for t in NEVER_MIRROR}
     cur = conn.cursor()
     try:
         names = [r.table_name for r in cur.tables(tableType="TABLE")]
