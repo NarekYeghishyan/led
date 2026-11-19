@@ -40,7 +40,15 @@ export interface Stats {
 }
 export interface ChangeRow {
   id: string; at: string; entity: string; action: 'created' | 'updated' | 'restored' | 'deleted';
-  externalId: number; name: string | null; changes: Record<string, [unknown, unknown]>;
+  externalId: number | null; rowKey: string | null; name: string | null; changes: Record<string, [unknown, unknown]>;
+}
+export interface MirrorTable {
+  name: string; columns: string[]; keyColumns: string[]; loaded: boolean; syncedAt: string | null;
+  rows: number; changes: number; lastChangeAt: string | null;
+}
+export interface MirrorRow { key: string; data: Record<string, unknown>; deletedAt: string | null; syncedAt: string | null }
+export interface MirrorPage extends Paged<MirrorRow> {
+  name: string; columns: string[]; keyColumns: string[]; loaded: boolean; syncedAt: string | null;
 }
 export interface SyncLogRow {
   id: number; receivedAt: string; entity: string; batchId: string | null; upserts: number; deletes: number;

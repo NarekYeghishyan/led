@@ -92,17 +92,55 @@ export class AdminController {
     const page = Math.max(1, Number(q.page) || 1);
     const limit = 100;
     const qb = this.ds.getRepository(ChangeLog).createQueryBuilder('c').orderBy('c.id', 'DESC');
-    if (q.entity) qb.andWhere('c.entity = :entity', { entity: q.entity });
+    if (q.entity && q.entity !== 'tables') qb.andWhere('c.entity = :entity', { entity: q.entity });
     if (q.action) qb.andWhere('c.action = :action', { action: q.action });
     if (q.from) qb.andWhere('c.at >= :from', { from: q.from });
     if (q.to) qb.andWhere("c.at < (:to::date + 1)", { to: q.to });
+    if (q.entity === 'tables') qb.andWhere("c.entity LIKE 't:%'");
+    if (q.key) qb.andWhere('c.row_key = :key', { key: q.key });
     if (q.search) {
       const s = q.search.trim();
-      if (/^\d+$/.test(s)) qb.andWhere('(c.external_id = :id OR c.name ILIKE :s)', { id: Number(s), s: `%${s}%` });
-      else qb.andWhere('c.name ILIKE :s', { s: `%${s}%` });
+      if (/^\d+$/.test(s)) qb.andWhere('(c.external_id = :id OR c.row_key = :s0 OR c.name ILIKE :s)', { id: Number(s), s0: s, s: `%${s}%` });
+      else qb.andWhere('(c.name ILIKE :s OR c.row_key = :s0 OR c.changes::text ILIKE :s)', { s0: s, s: `%${s}%` });
     }
     const [items, total] = await qb.skip((page - 1) * limit).take(limit).getManyAndCount();
     return { items, total, page, limit };
+  }
+
+  // ---- Copy of all Access tables ----
+
+  @Get('tables')
+  tables() {
+    return this.ds.query(`
+      SELECT t.name, t.columns, t.key_columns AS "keyColumns", t.loaded, t.synced_at AS "syncedAt",
+             COALESCE(r.n, 0)::int AS rows,
+             (SELECT COUNT(*)::int FROM change_log c WHERE c.entity = 't:' || t.name) AS changes,
+             (SELECT MAX(c.at) FROM change_log c WHERE c.entity = 't:' || t.name) AS "lastChangeAt"
+      FROM mirror_tables t
+      LEFT JOIN (SELECT tbl, COUNT(*) AS n FROM mirror_rows WHERE deleted_at IS NULL GROUP BY tbl) r ON r.tbl = t.name
+      ORDER BY t.name`);
+  }
+
+  @Get('tables/:name')
+  async table(@Param('name') name: string, @Query() q: Record<string, string>) {
+    const [meta] = await this.ds.query(
+      `SELECT name, columns, key_columns AS "keyColumns", loaded, synced_at AS "syncedAt" FROM mirror_tables WHERE name = $1`, [name]);
+    if (!meta) throw new NotFoundException();
+    const page = Math.max(1, Number(q.page) || 1);
+    const limit = Math.min(200, Math.max(1, Number(q.limit) || 50));
+    const where = ['tbl = $1', q.deleted === '1' ? 'TRUE' : 'deleted_at IS NULL'];
+    const args: unknown[] = [name];
+    if (q.search?.trim()) { args.push(`%${q.search.trim()}%`); where.push(`(key ILIKE $${args.length} OR data::text ILIKE $${args.length})`); }
+    if (q.key) { args.push(q.key); where.push(`key = $${args.length}`); }
+    const w = where.join(' AND ');
+    const [{ n }] = await this.ds.query(`SELECT COUNT(*)::int AS n FROM mirror_rows WHERE ${w}`, args);
+    let order = 'key';
+    if (q.sort && (meta.columns as string[]).includes(q.sort)) { args.push(q.sort); order = `data -> $${args.length}`; }
+    const dir = q.dir === 'desc' ? 'DESC' : 'ASC';
+    const items = await this.ds.query(
+      `SELECT key, data, deleted_at AS "deletedAt", synced_at AS "syncedAt" FROM mirror_rows WHERE ${w}
+       ORDER BY ${order} ${dir} NULLS LAST, key LIMIT ${limit} OFFSET ${(page - 1) * limit}`, args);
+    return { ...meta, items, total: n, page, limit };
   }
 
   @Get('sync-log')

@@ -4,7 +4,7 @@ import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation, u
 import { api, ApiError, auth } from './api';
 import { I18nProvider, LangSwitch, useI18n } from './i18n';
 import { ThemeSwitch } from './theme';
-import { CategoriesPage, DashboardPage, ImportPage, LogsPage, ProductPage, ProductsPage, SyncPage } from './pages';
+import { CategoriesPage, DashboardPage, ImportPage, LogsPage, TablePage, TablesPage, ProductPage, ProductsPage, SyncPage } from './pages';
 import './styles.css';
 
 function Login() {
@@ -81,6 +81,7 @@ function Layout() {
           <NavLink to="/products">{t('nav.products')}</NavLink>
           <NavLink to="/categories">{t('nav.categories')}</NavLink>
           <NavLink to="/sync">{t('nav.sync')}</NavLink>
+          <NavLink to="/tables">{t('nav.tables')}</NavLink>
           <NavLink to="/logs">{t('nav.logs')}</NavLink>
           <NavLink to="/import">{t('nav.import')}</NavLink>
         </nav>
@@ -106,6 +107,8 @@ createRoot(document.getElementById('root')!).render(
             <Route path="sync" element={<SyncPage />} />
             <Route path="import" element={<ImportPage />} />
             <Route path="logs" element={<LogsPage />} />
+            <Route path="tables" element={<TablesPage />} />
+            <Route path="tables/:name" element={<TablePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

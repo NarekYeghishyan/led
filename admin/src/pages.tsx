@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
-  api, auth, makeFmt, type Category, type ChangeRow, type Paged, type ProductRow, type Stats, type SyncLogRow,
+  api, auth, makeFmt, type Category, type ChangeRow, type MirrorPage, type MirrorTable, type Paged, type ProductRow, type Stats, type SyncLogRow,
 } from './api';
 import { useI18n, type TKey } from './i18n';
 
@@ -399,6 +399,7 @@ export function LogsPage() {
   const [search, setSearch] = useState(params.get('search') || '');
   const { data, error } = useData<Paged<ChangeRow>>(`/admin/changes?${params}`, 5000);
   const { data: s } = useData<Stats>('/admin/stats', 10000);
+  const { data: tables } = useData<MirrorTable[]>('/admin/tables', 60000);
   const set = (patch: Record<string, string>) => {
     const next = new URLSearchParams(params);
     for (const [k, v] of Object.entries(patch)) v ? next.set(k, v) : next.delete(k);
@@ -416,12 +417,14 @@ export function LogsPage() {
   return (
     <>
       <header className="page-head"><h1>{t('logs.title')} {data && <small>{fmt.num(data.total, 0)}</small>}</h1>{s && <SyncBadge s={s} />}</header>
-      <p className="muted">{t('logs.note', { days: 30 })}</p>
+      <p className="muted">{t('logs.note')}</p>
       <div className="filters">
         <input placeholder={t('logs.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
         <select value={params.get('entity') || ''} onChange={(e) => set({ entity: e.target.value })}>
           <option value="">{t('logs.allEntities')}</option>
           {['products', 'categories', 'currencies'].map((e) => <option key={e} value={e}>{t(`entity.${e}` as TKey)}</option>)}
+          {tables && tables.length > 0 && <option value="tables">{t('logs.allTables')}</option>}
+          {tables?.map((tb) => <option key={tb.name} value={`t:${tb.name}`}>{tb.name}</option>)}
         </select>
         <select value={params.get('action') || ''} onChange={(e) => set({ action: e.target.value })}>
           <option value="">{t('logs.allActions')}</option>
@@ -440,16 +443,18 @@ export function LogsPage() {
             {data?.items.map((r) => (
               <tr key={r.id}>
                 <td data-label={t('logs.time')} className="nowrap">{fmt.date(r.at)}</td>
-                <td data-label={t('logs.table')}>{t(`entity.${r.entity}` as TKey)}</td>
+                <td data-label={t('logs.table')}>{entityLabel(r.entity, t)}</td>
                 <td data-label={t('logs.action')}><span className={`act act-${r.action}`}>{t(`act.${r.action}` as TKey)}</span></td>
                 <td data-label={t('logs.item')}>
-                  {r.entity === 'products' ? <Link to={`/products?search=${r.externalId}`}>#{r.externalId}</Link> : `#${r.externalId}`}{' '}
+                  {r.entity.startsWith('t:')
+                    ? <Link to={`/tables/${encodeURIComponent(r.entity.slice(2))}?key=${encodeURIComponent(r.rowKey ?? '')}`}>#{r.rowKey}</Link>
+                    : r.entity === 'products' ? <Link to={`/products?search=${r.externalId}`}>#{r.externalId}</Link> : `#${r.externalId}`}{' '}
                   {r.name}
                 </td>
                 <td data-label={t('logs.changes')} className="wide">
                   {Object.entries(r.changes || {}).map(([f, [a, b]]) => (
                     <div key={f} className="chg">
-                      <span className="muted">{FIELD_LABEL[f] ? t(FIELD_LABEL[f]) : f}:</span>{' '}
+                      <span className="muted">{!r.entity.startsWith('t:') && FIELD_LABEL[f] ? t(FIELD_LABEL[f]) : f}:</span>{' '}
                       <s>{val(a)}</s> → <b>{val(b)}</b>
                     </div>
                   ))}
@@ -464,6 +469,144 @@ export function LogsPage() {
         <button disabled={page <= 1} onClick={() => set({ page: String(page - 1) })}>{t('syncp.newer')}</button>
         <span>{t('common.page', { page, pages })}</span>
         <button disabled={page >= pages} onClick={() => set({ page: String(page + 1) })}>{t('syncp.older')}</button>
+      </div>
+    </>
+  );
+}
+
+const entityLabel = (e: string, t: (k: TKey) => string) => (e.startsWith('t:') ? e.slice(2) : t(`entity.${e}` as TKey));
+
+const cell = (v: unknown, t: (k: TKey) => string) =>
+  v === null || v === undefined || v === '' ? <span className="muted">—</span>
+    : v === true ? t('common.yes') : v === false ? t('common.no') : String(v);
+
+// ------------------------------------------------------------------ Access tables (full copy)
+
+export function TablesPage() {
+  const { t, fmt } = useT();
+  const { data, error } = useData<MirrorTable[]>('/admin/tables', 15000);
+  const { data: s } = useData<Stats>('/admin/stats', 10000);
+  return (
+    <>
+      <header className="page-head"><h1>{t('tbl.title')} {data && <small>{data.length}</small>}</h1>{s && <SyncBadge s={s} />}</header>
+      <p className="muted">{t('tbl.note')}</p>
+      {error && <div className="error">{error}</div>}
+      <div className="table-wrap responsive">
+        <table>
+          <thead><tr><th>{t('tbl.name')}</th><th className="num">{t('tbl.rows')}</th><th className="num">{t('tbl.changes')}</th><th>{t('tbl.lastChange')}</th></tr></thead>
+          <tbody>
+            {data?.map((tb) => (
+              <tr key={tb.name}>
+                <td data-label={t('tbl.name')}>
+                  <Link to={`/tables/${encodeURIComponent(tb.name)}`}><b>{tb.name}</b></Link>{' '}
+                  <span className="muted small">{tb.columns.length} col.</span>
+                  {!tb.loaded && <span className="muted small"> · {t('tbl.loading')}</span>}
+                </td>
+                <td data-label={t('tbl.rows')} className="num">{fmt.num(tb.rows, 0)}</td>
+                <td data-label={t('tbl.changes')} className="num">
+                  {tb.changes ? <Link to={`/logs?entity=${encodeURIComponent(`t:${tb.name}`)}`}>{fmt.num(tb.changes, 0)}</Link> : '0'}
+                </td>
+                <td data-label={t('tbl.lastChange')} className="nowrap">{tb.lastChangeAt ? fmt.date(tb.lastChangeAt) : '—'}</td>
+              </tr>
+            ))}
+            {data && !data.length && <tr><td colSpan={4} className="empty">{t('tbl.empty')}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+function RowHistory({ table, rowKey }: { table: string; rowKey: string }) {
+  const { t, fmt } = useT();
+  const { data } = useData<Paged<ChangeRow>>(`/admin/changes?entity=${encodeURIComponent(`t:${table}`)}&key=${encodeURIComponent(rowKey)}`, 10000);
+  if (!data) return <p className="muted">{t('common.loading')}</p>;
+  if (!data.items.length) return <p className="muted">{t('tbl.noHistory')}</p>;
+  return (
+    <div className="history">
+      {data.items.map((r) => (
+        <div key={r.id} className="history-item">
+          <span className="nowrap muted small">{fmt.date(r.at)}</span>{' '}
+          <span className={`act act-${r.action}`}>{t(`act.${r.action}` as TKey)}</span>
+          {Object.entries(r.changes || {}).map(([f, [a, b]]) => (
+            <div key={f} className="chg"><span className="muted">{f}:</span> <s>{cell(a, t)}</s> → <b>{cell(b, t)}</b></div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TablePage() {
+  const { t, fmt } = useT();
+  const { name = '' } = useParams();
+  const [params, setParams] = useSearchParams();
+  const [search, setSearch] = useState(params.get('search') || '');
+  const [open, setOpen] = useState<string | null>(params.get('key'));
+  const qs = new URLSearchParams(params);
+  qs.delete('key');
+  if (params.get('key')) qs.set('key', params.get('key')!);
+  const { data, error } = useData<MirrorPage>(`/admin/tables/${encodeURIComponent(name)}?${qs}`, 15000);
+  const set = (patch: Record<string, string>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) v ? next.set(k, v) : next.delete(k);
+    if (!('page' in patch)) next.delete('page');
+    setParams(next);
+  };
+  useEffect(() => {
+    const tm = setTimeout(() => { if (search !== (params.get('search') || '')) set({ search, key: '' }); }, 350);
+    return () => clearTimeout(tm);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+  const page = Number(params.get('page') || 1);
+  const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
+  const sort = params.get('sort') || '';
+  const dir = params.get('dir') || 'asc';
+  const sortBy = (c: string) => set({ sort: c, dir: sort === c && dir === 'asc' ? 'desc' : 'asc' });
+  const cols = data?.columns || [];
+
+  return (
+    <>
+      <p><Link to="/tables">{t('tbl.back')}</Link></p>
+      <header className="page-head"><h1>{name} {data && <small>{fmt.num(data.total, 0)}</small>}</h1></header>
+      {data && <p className="muted small">{data.keyColumns.length ? t('tbl.key', { cols: data.keyColumns.join(', ') }) : t('tbl.noKey')}</p>}
+      <div className="filters">
+        <input placeholder={t('tbl.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
+        <label className="check"><input type="checkbox" checked={params.get('deleted') === '1'} onChange={(e) => set({ deleted: e.target.checked ? '1' : '' })} /> {t('tbl.deleted')}</label>
+        {params.get('key') && <button onClick={() => set({ key: '' })}>× #{params.get('key')}</button>}
+      </div>
+      {error && <div className="error">{error}</div>}
+      <div className="table-wrap mirror">
+        <table>
+          <thead>
+            <tr>{cols.map((c) => (
+              <th key={c} className="sortable nowrap" onClick={() => sortBy(c)}>{c}{sort === c ? (dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>
+            ))}</tr>
+          </thead>
+          <tbody>
+            {data?.items.map((r) => (
+              <Fragment key={r.key}>
+                <tr className={`clickable${r.deletedAt ? ' deleted' : ''}${open === r.key ? ' open' : ''}`} onClick={() => setOpen(open === r.key ? null : r.key)}>
+                  {cols.map((c) => <td key={c} title={r.data[c] == null ? '' : String(r.data[c])}>{cell(r.data[c], t)}</td>)}
+                </tr>
+                {open === r.key && (
+                  <tr className="history-row"><td colSpan={cols.length || 1}>
+                    <b>{t('tbl.history')} #{r.key}</b>
+                    <RowHistory table={name} rowKey={r.key} />
+                  </td></tr>
+                )}
+              </Fragment>
+            ))}
+            {data && !data.items.length && <tr><td colSpan={cols.length || 1} className="empty">{t('common.nothing')}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <div className="pager">
+        <button disabled={page <= 1} onClick={() => set({ page: String(page - 1) })}>{t('common.prev')}</button>
+        <span>{t('common.page', { page, pages })}</span>
+        <button disabled={page >= pages} onClick={() => set({ page: String(page + 1) })}>{t('common.next')}</button>
+        <select value={params.get('limit') || '50'} onChange={(e) => set({ limit: e.target.value })}>
+          {[25, 50, 100, 200].map((n) => <option key={n} value={n}>{t('common.perPage', { n })}</option>)}
+        </select>
       </div>
     </>
   );

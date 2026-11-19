@@ -209,3 +209,14 @@ code { background: #0000000d; padding: 1px 5px; border-radius: 4px; font-size: 1
 @media (prefers-reduced-motion: reduce) {
   aside, .backdrop { transition: none; }
 }
+
+/* Access tables mirror */
+.table-wrap.mirror { max-height: 70vh; overflow: auto; }
+.table-wrap.mirror td { white-space: nowrap; max-width: 280px; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+th.sortable { cursor: pointer; user-select: none; }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td, tr.open td { background: color-mix(in srgb, var(--panel) 85%, #3b82f6); }
+tr.deleted td { opacity: .5; text-decoration: line-through; }
+.table-wrap.mirror tr.history-row td { white-space: normal; max-width: none; position: sticky; left: 0; }
+.history { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; max-width: 900px; }
+.history-item { border-left: 3px solid var(--line); padding-left: 10px; }

@@ -76,7 +76,8 @@ export class ChangeLog {
   @CreateDateColumn({ type: 'timestamptz' }) at: Date;
   @Column({ type: 'text' }) entity: string;
   @Column({ type: 'text' }) action: string; // created | updated | restored | deleted
-  @Column({ name: 'external_id', type: 'int' }) externalId: number;
+  @Column({ name: 'external_id', type: 'int', nullable: true }) externalId: number | null;
+  @Column({ name: 'row_key', type: 'text', nullable: true }) rowKey: string | null; // Access tables mirror: row key
   @Column({ type: 'text', nullable: true }) name: string | null;
   @Column({ type: 'jsonb', default: {} }) changes: Record<string, [unknown, unknown]>;
 }

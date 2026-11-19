@@ -11,6 +11,11 @@ Usage:
     python agent.py --once     # one sync pass, then exit
     python agent.py --full     # forget state and resend everything, then keep running
     python agent.py --check    # test Access + API connection and print what would be sent
+    python agent.py --tables   # list the tables the mirror would copy, with row count and key
+
+Besides products/categories/currencies it also copies EVERY table of the database
+("mirror", section [mirror] in config.ini) so the admin panel can show all of them and
+log every change, field by field.
 
 Rows removed from Access are marked deleted on the site. At start and every
 reconcile_interval_seconds the agent also asks the site which ids it has, so rows removed
@@ -31,10 +36,11 @@ import sqlite3
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 log = logging.getLogger("agent")
 
@@ -293,6 +299,122 @@ def sync_pass(cfg, api, state, include_lookups, dry_run=False, reconcile=False):
         conn.close()
 
 
+# --------------------------------------------------------------------------- mirror (all tables)
+
+MAX_TEXT = 4000  # long memo fields are cut, so one row stays small
+
+
+def list_tables(conn, cfg):
+    include = [t.strip() for t in cfg.get("mirror", "tables", fallback="").split(",") if t.strip()]
+    exclude = {t.strip().lower() for t in cfg.get("mirror", "exclude", fallback="").split(",") if t.strip()}
+    cur = conn.cursor()
+    try:
+        names = [r.table_name for r in cur.tables(tableType="TABLE")]
+    finally:
+        cur.close()
+    names = [n for n in names if not n.startswith(("MSys", "~", "USys"))]
+    if include:
+        names = [n for n in names if n in include]
+    return [n for n in names if n.lower() not in exclude]
+
+
+def key_columns(conn, table):
+    """Primary key columns of an Access table (index "PrimaryKey"), else the first unique index."""
+    cur = conn.cursor()
+    try:
+        idx = {}
+        for r in cur.statistics(table, unique=True):
+            if r.index_name and r.column_name:
+                idx.setdefault(r.index_name, []).append((r.ordinal_position or 0, r.column_name))
+    except Exception as e:
+        log.warning("%s: cannot read indexes (%s)", table, e)
+        return []
+    finally:
+        cur.close()
+    if not idx:
+        return []
+    name = "PrimaryKey" if "PrimaryKey" in idx else sorted(idx)[0]
+    return [c for _, c in sorted(idx[name])]
+
+
+def map_mirror(rows, keys):
+    """{row key: {"key", "data"}}. Without a key, the row content is the key (a change = delete + add)."""
+    out = {}
+    for r in rows:
+        data = {k: (v[:MAX_TEXT] if isinstance(v, str) else v) for k, v in r.items()}
+        if keys:
+            key = "|".join("" if data.get(c) is None else str(data.get(c)) for c in keys)
+        else:
+            key = row_hash(data)[:16]
+        n, base = 1, key
+        while key in out:  # duplicate key/rows: keep them all
+            n += 1
+            key = f"{base}#{n}"
+        out[key] = {"key": key, "data": data}
+    return out
+
+
+def mirror_table(api, state, conn, table, batch_size, dry_run=False, reconcile=False):
+    keys = key_columns(conn, table)
+    cols, rows = read_table(conn, table)
+    current = map_mirror(rows, keys)
+    entity = "m:" + table
+    old = state.load(entity)
+    meta = row_hash({"cols": cols, "keys": keys})
+    first = state.load("mirror-meta").get(table) != meta  # new table, new columns, or --full
+    hashes = {k: row_hash(v) for k, v in current.items()}
+    changed = [k for k, h in hashes.items() if old.get(k) != h]
+    deleted = [k for k in old if k not in current]
+    if reconcile and not first:
+        try:
+            on_site = set(api.call("GET", "/sync/mirror-keys/" + urllib.parse.quote(table, safe="")))
+            extra = sorted(on_site - set(current) - set(deleted))
+            if extra and len(extra) <= max(50, len(current) // 2):
+                deleted += extra
+        except Exception as e:
+            log.warning("%s: could not read keys from the site: %s", table, e)
+    if not current and deleted and len(deleted) > 50:
+        log.error("%s: Access returned 0 rows, refusing to delete %d rows", table, len(deleted))
+        deleted = []
+    if dry_run:
+        log.info("mirror %s: %d rows, key %s, would send %d upserts, %d deletes",
+                 table, len(current), keys or "(none: row content)", len(changed), len(deleted))
+        return
+    if not changed and not deleted and not first:
+        return
+    steps = list(range(0, max(len(changed), len(deleted), 1), batch_size))
+    for n, i in enumerate(steps):
+        part, dels = changed[i:i + batch_size], deleted[i:i + batch_size]
+        api.call("POST", "/sync/mirror/" + urllib.parse.quote(table, safe=""), {
+            "batchId": f"{datetime.datetime.now():%Y%m%d%H%M%S}-{uuid.uuid4().hex[:8]}",
+            "agentVersion": VERSION,
+            "columns": cols,
+            "keyColumns": keys,
+            "final": n == len(steps) - 1,
+            "upserts": [current[k] for k in part],
+            "deletes": dels,
+        })
+        state.save(entity, [(k, hashes[k]) for k in part], dels)
+    if first:
+        state.save("mirror-meta", [(table, meta)], [])
+    log.info("mirror %s: sent %d upserts, %d deletes", table, len(changed), len(deleted))
+
+
+def mirror_pass(cfg, api, state, dry_run=False, reconcile=False):
+    if not cfg.getboolean("mirror", "enabled", fallback=True):
+        return
+    batch = cfg.getint("mirror", "batch_size", fallback=500)
+    conn = connect_access(cfg)
+    try:
+        for table in list_tables(conn, cfg):
+            try:
+                mirror_table(api, state, conn, table, batch, dry_run, reconcile)
+            except Exception as e:  # one bad table must not stop the others
+                log.error("mirror %s failed: %s", table, e)
+    finally:
+        conn.close()
+
+
 def main():
     args = sys.argv[1:]
     cfg = load_config()
@@ -303,6 +425,16 @@ def main():
     if "--check" in args:
         log.info("API status: %s", api.call("GET", "/sync/status"))
         sync_pass(cfg, api, state, include_lookups=True, dry_run=True, reconcile=True)
+        mirror_pass(cfg, api, state, dry_run=True)
+        return
+    if "--tables" in args:
+        conn = connect_access(cfg)
+        for t in list_tables(conn, cfg):
+            cur = conn.cursor()
+            n = cur.execute(f"SELECT COUNT(*) FROM [{t}]").fetchone()[0]
+            cur.close()
+            print(f"{t}: {n} rows, key {key_columns(conn, t) or '(none)'}")
+        conn.close()
         return
     if "--full" in args:
         log.info("Full resync: clearing local state")
@@ -316,6 +448,9 @@ def main():
     errors = 0
     last_error = ""
     last_beat = 0.0
+    mirror_every = cfg.getint("mirror", "interval_seconds", fallback=30)
+    last_mirror = 0.0
+    last_mirror_reconcile = time.time()  # the first pass sends everything anyway
     beat_every = cfg.getint("agent", "heartbeat_seconds", fallback=60)
     log.info("Agent %s started, interval %ss, API %s", VERSION, interval, api.base)
 
@@ -335,6 +470,15 @@ def main():
             errors += 1
             last_error = str(e)
             log.error("Sync failed (%d in a row): %s", errors, e)
+        if time.time() - last_mirror >= mirror_every:
+            try:
+                mr = time.time() - last_mirror_reconcile >= reconcile_every
+                mirror_pass(cfg, api, state, reconcile=mr)
+                if mr:
+                    last_mirror_reconcile = time.time()
+            except Exception as e:
+                log.error("Mirror failed: %s", e)
+            last_mirror = time.time()
         # tell the site the agent is alive, even when nothing changed
         if time.time() - last_beat >= beat_every:
             try:
