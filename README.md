@@ -54,7 +54,24 @@ cd admin && npm install && npm run dev     # http://localhost:5173/admin/
    ```
    Logs are written to `D:\led-agent\logs\agent.log`.
 
-The agent opens Access **read-only**. `export_access_to_csv.py` (same folder, same `config.ini`) exports one table to CSV and lists tables and columns.
+### On the store server today
+
+- Service `LedSyncAgent` (NSSM) runs `D:\python-script\agent\agent.py`, log `D:\python-script\agent\logs\agent.log`.
+  `nssm.exe` is not on PATH, so use `net stop LedSyncAgent` / `net start LedSyncAgent`.
+- **To update the agent:** replace `agent.py` in that folder and restart the service. Don't also run `python agent.py` by hand, or two agents will run at the same time.
+
+### Copy of all Access tables (agent 0.4+)
+
+The agent also copies **every** Access table to the site (admin → "Таблицы Access") and logs every changed field. The change log is kept forever.
+Settings are in the `[mirror]` section of `config.ini`, and the defaults work without it:
+
+- Tables with 50 000+ rows (Операции, Документы, Касса) are read every `big_interval_seconds` (default 300), other tables every 30 s.
+- Each table needs a key: its primary key, else `DEFAULT_KEYS` in `agent.py` (Документы → КодДокумента) or `keys =`, else the first column with unique values. Without a key, a changed row shows as deleted + added.
+- `NEVER_MIRROR` in `agent.py` (Computers, Vazgen, РасчетныеСчета, Скидки) is never copied, on the store owner's request. Use `exclude =` to skip more tables.
+- If a damaged row makes a table unreadable (error HY109), the table is copied without its memo columns (Товары: Примечание, Log).
+- `python agent.py --tables` lists each table with its row count and the key it will use.
+
+The agent opens Access **read-only** and never writes to it: if a read-only connection fails, it stops. `export_access_to_csv.py` (same folder, same `config.ini`) exports one table to CSV and lists tables and columns.
 
 ## Deploy (Mynewserver, led.creativeweb.am)
 
