@@ -89,6 +89,16 @@ img,video{max-width:100%}
   .fgrid>*:first-child p{max-width:none}
 }
 
+/* category card actions on touch/phones: square compare icon + full "details" button in one row */
+@media (hover:none),(max-width:760px){
+ .cgrid3:not(.list) .mi-act{flex-direction:row!important;gap:8px;margin-top:12px}
+ .cgrid3:not(.list) .mi-act>*{flex:none;height:40px;box-sizing:border-box}
+ .cgrid3:not(.list) .mi-act .cmpb{width:40px;padding:0;gap:0}
+ .cgrid3:not(.list) .mi-act .cmpb span{display:none}
+ .cgrid3:not(.list) .mi-act .cmpb svg.i{width:18px;height:18px}
+ .cgrid3:not(.list) .mi-act .det{flex:1 1 auto;min-width:0;font-size:13px}
+ .cgrid3:not(.list) .mi-act .det span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
 /* phone pass 2 */
 @media (max-width:1000px){.ip>.ip-nav:not(.ac-nav){order:2}}
 @media (max-width:600px){

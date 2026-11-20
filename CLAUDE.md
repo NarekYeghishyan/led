@@ -298,3 +298,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   the content first and the help sidebar under it (≤1000px; not on account — its menu has `.ac-nav`); compact hero on phones. Assembly rows
   on phones: icon + name (+ price, ×) on top, select + qty under it; empty rows hide qty/price. Product specs: name | value in two columns.
   Compare label column narrower. Checked at 390px with headless Chrome. Backup `led-static-backup-20261121p.tgz`. Published.
+- 2026-11-21 — Category cards on phones/touch: compare + "Details" were stacked and squashed to thin strips (column flex with flex:1).
+  Now one row: square 40px compare icon button + full-height "Details" button (`responsive.html`). Backup `led-static-backup-20261121q.tgz`. Published.
