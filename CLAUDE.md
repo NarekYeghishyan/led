@@ -203,3 +203,9 @@ stock and prices from the Access sync. Until then the templates are design refer
   RU/EN text from old led.am/ru and /en, in `site-src/info_content_i18n.html` (block key `<page>.ru` / `<page>.en`); build asserts all 3 exist.
   Backup `led-static-backup-20261120zp.tgz`. Published.
 - 2026-11-20 — Exchange page (HY): added the RU/EN rule that single-use-packaging goods and goods unusable once opened (cartridges, cleaning products) are not exchangeable. Backup `led-static-backup-20261120zq.tgz`. Published.
+- 2026-11-20 — Responsive pass, all 16 pages (`site-src/responsive.html`, added last by `build_shop.py`): checked with no horizontal
+  overflow at 320/375/414/600/768/900/1024/1280/1600 px. Phones: top bar keeps phone + language (help links are in the footer), header
+  is one row (burger, logo, icons), grid tracks `minmax(0,1fr)` (cart/favourites/similar/assembly/contacts overflowed), compare bar
+  full width and lifts above the sticky buy bar / call button, catalog menu full screen with a fixed ✕ and page scroll locked.
+  **Filters button on category now opens a full-screen drawer** (✕, Esc, "Show (N)") — before, it did nothing. Tablets 761–1000 px:
+  search on its own row; top menu wraps instead of overflowing. Backup `led-static-backup-20261120zr.tgz`. Published.
