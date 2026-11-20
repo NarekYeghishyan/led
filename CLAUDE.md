@@ -281,3 +281,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Search/brand cards: compare button (`.sr-cmp`) moved down to top 60px — gap under the ♡. Backup `led-static-backup-20261121h.tgz`. Published.
 - 2026-11-21 — Product page: compare bar lifts above the sticky buy bar on all widths (was phones only; on desktop the buy bar covered it). Backup `led-static-backup-20261121i.tgz`. Published.
 - 2026-11-21 — Track order: "Print" button removed. Backup `led-static-backup-20261121j.tgz`. Published.
+- 2026-11-21 — Sticky side columns (info/account sidebar `.ip-nav`, cart/checkout summary `.sp-side`) now stick at real header height + 16px (`--hdr`); they slid under the taller header. Backup `led-static-backup-20261121k.tgz`. Published.

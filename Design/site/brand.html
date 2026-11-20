@@ -1616,6 +1616,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1891,7 +1906,7 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 .sp-opt input{display:none}.sp-opt svg{width:22px;height:22px;color:var(--slate-500);flex:none;margin-top:1px}
 .sp-opt b{display:block;font-size:14px}.sp-opt small{color:var(--muted);font-size:12.5px}
 .sp-opt.on{border-color:var(--blue-600);background:var(--blue-50)}.sp-opt.on svg{color:var(--blue-600)}
-.sp-side{position:sticky;top:96px;padding:20px}
+.sp-side{position:sticky;top:calc(var(--hdr,84px) + 16px);padding:20px}
 .sp-side h3{margin:0 0 14px;font-size:18px}
 .sp-ln{display:flex;justify-content:space-between;font-size:14.5px;padding:6px 0;color:var(--muted)}.sp-ln b{color:var(--ink);font-weight:600}
 .sp-ln.disc b{color:var(--success)}
@@ -2715,7 +2730,7 @@ syncNav();document.querySelectorAll('.lang button').forEach(b=>b.addEventListene
 
 /* info pages */
 .ip{display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start;margin-bottom:56px}
-.ip-nav{position:sticky;top:96px;display:flex;flex-direction:column;gap:14px}
+.ip-nav{position:sticky;top:calc(var(--hdr,84px) + 16px);display:flex;flex-direction:column;gap:14px}
 .ip-menu{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow);padding:8px}
 .ip-menu h6{margin:8px 10px 6px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .ip-menu a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:inherit;text-decoration:none;font-size:14.5px;font-weight:500;transition:background .2s,color .2s,transform .2s}
