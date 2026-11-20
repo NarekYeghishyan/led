@@ -91,3 +91,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   delivery/warranty perks, sticky section tabs under the header, spec table with search, description, store stock,
   bundle, reviews, similar products, bottom sticky buy bar, Product JSON-LD, RU/HY/EN strings. Category cards' "Подробнее"
   now open `/product.html`. Backup `led-static-backup-20261120d.tgz`. Reviews/ratings are placeholders — the store has no review data yet.
+- 2026-11-20 — Catalog menu hover: stays open while the mouse is anywhere over the header or the menu, closes 250 ms after
+  it leaves both (was closing on the way from the button to the menu). All three pages. product.html now has the hidden
+  `#stubs` block like category.html: the shared script needs those elements, without them the catalog menu never started.
+  **Any new page built from category.html must keep `#stubs`.** Backup `led-static-backup-20261120e.tgz`.
