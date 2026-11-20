@@ -148,3 +148,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Product gallery: main photo (`.stage`) gets spotlight + border glow + slow sweep + slight zoom/parallax (all off while click-zoom
   is on); thumbnails lift, glow and zoom their image; prev/next arrows get the secondary button effect. Fix: `.fx` no longer forces
   `position:relative` (broke absolutely placed buttons). Backup `led-static-backup-20261120y.tgz`. Published.
+- 2026-11-20 — Cart page hover effects: item rows (`.sp-row`) spotlight + slide + photo zoom; delivery options (`.sp-opt`) and upsell cards
+  (`.sp-mi`) lift + glow; summary, free-delivery bar, delivery block and empty state get the banner spotlight/border glow; qty ± and promo
+  "Apply" get the button effect. Also applies on favourites/compare where the same classes appear. Backup `led-static-backup-20261120z.tgz`. Published.
