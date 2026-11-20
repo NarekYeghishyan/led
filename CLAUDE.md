@@ -115,3 +115,8 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Product page "В избранное" / "Сравнить" (`.sec-act .fv/.cp`) toggle the shared favourites/compare store (state shown on load,
   header counts, compare bar links to `/compare.html`). Script `<!--pdp-store-->` runs on DOMContentLoaded because build_shop.py puts the
   shared store after it. Cart upsell heading → "Միասին հաճախ գնում են". Backup `led-static-backup-20261120o.tgz`. Published.
+- 2026-11-20 — New page `assembly.html` (PC configurator, like led.am/ru/assembly.html): 16 component rows in 4 groups (required ones marked *),
+  demo parts with prices, qty, compatibility checks (CPU socket ↔ motherboard, DDR4/DDR5, PSU wattage), recommended PSU, progress bar, sticky
+  summary with total and cash price (−3%, demo), "Add to cart" puts every part in the shared cart, print, reset. Choices saved in localStorage
+  `led-asm`. Built by `build_shop.py` (sources `site-src/assembly_page.html`, `site-src/asm_link.html`). Every "Собрать ПК"/configurator link
+  on all pages (top-menu icon, mega menu) opens `/assembly.html`. Backup `led-static-backup-20261120p.tgz`. Published.
