@@ -1098,6 +1098,11 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1210,7 +1215,7 @@ document.addEventListener('submit',e=>{const bad=[...e.target.querySelectorAll(s
 .stage .nav.fx:hover svg.i{transform:none}
 </style><script>
 (function(){
-const P='.search button,.btn.p,.addc,.sp-b.p,.asm-b.p,.add,.prod .cart,.loadmore,#sAdd,.mi-act .det';
+const P='.bsum button,.search button,.btn.p,.addc,.sp-b.p,.asm-b.p,.add,.prod .cart,.loadmore,#sAdd,.mi-act .det';
 const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec-act button,.sb,.sl-arr,.sp-seg button:not(.on),.stage .nav,.sp-qty button,.asm-q button,.asm-row .x,.sp-f .ht,.sp-f .cb,.sp-pc .x,.sp-promo button,.view button:not(.on),.fbtn,.tf,.rm';
 const skip=el=>el.closest('#stubs,.catbtn,.fab,.lang')||el.classList.contains('catbtn');
 function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pri&&!el.matches(S))return null;el._fx=1;
@@ -1382,13 +1387,23 @@ nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
 .rbars div:hover i{height:8px;box-shadow:0 0 0 3px rgba(245,165,36,.15)}
 .rbars i:before{transition:filter .25s}.rbars div:hover i:before{filter:brightness(1.08) saturate(1.2)}
 @media (prefers-reduced-motion:reduce){.rv.pc:hover,.rbars div:hover{translate:none}}
+/* ---- product bundle ---- */
+.bi.pc{transition:.2s,translate .25s cubic-bezier(.2,.8,.2,1)}
+.bi.pc:hover{translate:0 -3px;box-shadow:0 14px 30px rgba(16,27,47,.12)}
+.bi img{transition:transform .4s cubic-bezier(.3,1.6,.5,1),translate .2s ease-out}
+.bi.pc:hover img{transform:scale(1.08) rotate(-3deg);translate:var(--pc-tx,0px) var(--pc-ty,0px)}
+.bi b,.bi strong{transition:color .2s}.bi.pc:hover b{color:var(--blue-600)}.bi.pc:hover strong{color:var(--blue-700)}
+.bi input{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}.bi.pc:hover input{transform:scale(1.15)}
+.bi.on.pc:hover{box-shadow:0 14px 30px rgba(20,104,220,.2)}
+.bsum.pc b{display:inline-block;transition:transform .35s cubic-bezier(.3,1.6,.5,1)}.bsum.pc:hover b{transform:scale(1.04)}
+@media (prefers-reduced-motion:reduce){.bi.pc:hover{translate:none}.bi.pc:hover img{transform:none;translate:none}}
 </style><script>
 (function(){
-const CARD='.prod,.sp-f,.sp-pc',TILE='.rv,.rv-top .big,.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p',ALL=[CARD,TILE,BAN].join(',');
+const CARD='.prod,.sp-f,.sp-pc',TILE='.bi,.rv,.rv-top .big,.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p,.bsum',ALL=[CARD,TILE,BAN].join(',');
 function prep(c){if(c.closest('#stubs'))return;if(c._pc){if(!c.querySelector(':scope>.pc-g'))c._pc=0;else return}c._pc=1;
  const kind=c.matches(CARD)?'card':c.matches(BAN)?'ban':'tile';
  if(getComputedStyle(c).position==='static')c.style.position='relative';
- const bg=getComputedStyle(c).backgroundColor,m=bg.match(/\d+/g),dark=c.matches('.build,.promo,.mega-p')||(m&&(+m[0]+ +m[1]+ +m[2])<200&&+(m[3]??1)>0);
+ const bg=getComputedStyle(c).backgroundColor,m=bg.match(/\d+/g),dark=c.matches('.build,.promo,.mega-p,.bsum')||(m&&(+m[0]+ +m[1]+ +m[2])<200&&+(m[3]??1)>0);
  c.classList.add('pc','pc-'+kind);if(dark)c.classList.add('pc-dark');
  if(kind==='ban')c.style.setProperty('--pc-r','520px');if(kind==='tile')c.style.setProperty('--pc-r','200px');
  c.insertAdjacentHTML('beforeend','<span class="pc-g"></span><span class="pc-b"></span>');
