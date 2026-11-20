@@ -177,3 +177,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   total card (`.bsum`, navy) gets the white banner glow + sweep, total pops; its button gets the primary button effect. Backup `led-static-backup-20261120zh.tgz`. Published.
 - 2026-11-20 — Similar products already use the `.prod` card effect (checked live). Section heading links (`.sh>a`, "Все … →") slide with an
   underline on all pages. Published.
+- 2026-11-20 — Mega menu group headings: hover no longer widens letter-spacing (made the last word wrap); now slide 4px + underline. **Hover
+  effects must not change text size/spacing — use translate/colour/underline only.** Published.
