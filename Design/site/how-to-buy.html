@@ -1871,6 +1871,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2968,7 +2983,9 @@ img,video{max-width:100%}
  .asm-row:not(.on){grid-template-areas:"ic t t t" "sel sel sel sel"}
  .asm-row>.asm-warn{grid-column:1/-1}
  .sg dl div{grid-template-columns:minmax(0,42%) minmax(0,1fr)!important;gap:10px!important;font-size:13.5px}
- .sp-ct col.lab{width:96px!important}.sp-ct th,.sp-ct td{font-size:13px}
+ .sp-ct col.lab{width:112px!important}.sp-ct th,.sp-ct td{font-size:13px}
+ .sp-ct tbody th{padding:10px 8px 10px 12px!important;font-size:12px!important;line-height:1.3;overflow-wrap:anywhere;word-break:break-word;hyphens:auto}
+ .sp-ct tr.sec th{white-space:nowrap;overflow:visible;font-size:11.5px!important;z-index:2}
  footer a[href^="tel"]{white-space:nowrap}
 }
 </style>

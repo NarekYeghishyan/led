@@ -304,3 +304,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   38px buttons stacked (Համեմատել, Մանրամասն), arrow hidden ≤420px. Checked at 375px in HY. `build_shop.py` now strips the old
   `<!--responsive-->` block from category's tail before its assert (the build failed once `responsive.html` mentioned `cgrid3`).
   Backup `led-static-backup-20261121r.tgz`. Published.
+- 2026-11-21 — Compare on phones: long Armenian labels ("գնահատական") ran past the label column. Label column 112px, labels 12px with word
+  wrapping, section headings on one line over the row. Checked at 375px in HY. Backup `led-static-backup-20261121s.tgz`. Published.
