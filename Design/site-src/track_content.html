@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div class="tr-bar"><i style="width:${step/4*100}%"></i></div>
       <div class="tr-steps">${S.map((s,i)=>`<div class="${i<=step?'dn':''}${i===step&&o.s!==2?' cur':''}"><span class="dot">${i<=step?ic('check'):''}</span><b>${tt(s)}</b>${i<=step?`<small>${df(dt(o.d,offs[i]),1)}</small>`:''}</div>`).join('')}</div>`}
       <div class="tr-act"><label class="tr-sms"><input type="checkbox" class="tr-smsc"${st.sms?' checked':''}> <span>${st.sms?t('smsOn'):t('sms')}</span></label>
-        <a class="btn" href="tel:+37410502802">${ic('call')}${t('call')}</a><button class="btn tr-pr" type="button" style="font:inherit;cursor:pointer">${t('print')}</button></div></div>
+        <a class="btn" href="tel:+37410502802">${ic('call')}${t('call')}</a></div></div>
     <div class="tr-cols"><div class="ip-card"><h2><span class="ic">${ic('clock')}</span>${t('hist')}</h2><ul class="tr-log">${log.map(([e,d])=>`<li>${e}<small>${df(d,1)}</small></li>`).join('')}</ul></div>
       <div class="ip-card"><h2><span class="ic">${ic('ix-info')}</span>${t('det')}</h2><div class="tr-info"><span>${t('dlv')}</span><b>${pick?t('pick'):t('cour')}</b><span>${t('pay')}</span><b>${tt(T.pays[o.pay||0])}</b></div>
         ${!pick&&o.s===1?`<div class="tr-cour"><span class="av">ԱՄ</span><div><b>${['Арман М.','Արման Մ.','Arman M.'][L()]}</b><small>${t('courier')} · ${t('hours')}</small></div><a href="tel:+37499502802" aria-label="${t('call')}">${ic('call')}</a></div>`:''}</div></div>
