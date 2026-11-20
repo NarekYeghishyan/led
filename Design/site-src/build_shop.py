@@ -37,6 +37,7 @@ mask = (pathlib.Path(__file__).parent / "phone_mask.html").read_text(encoding="u
 fx = (pathlib.Path(__file__).parent / "btn_fx.html").read_text(encoding="utf-8")
 cfx = (pathlib.Path(__file__).parent / "card_fx.html").read_text(encoding="utf-8")
 resp = (pathlib.Path(__file__).parent / "responsive.html").read_text(encoding="utf-8")
+oc = (pathlib.Path(__file__).parent / "oneclick.html").read_text(encoding="utf-8")
 h = head.replace("<title>LED.AM Category Page</title>", "<title>Собери свою конфигурацию — LED Computers</title>")
 html = (h + '<main class="wrap asm" id="shop" data-page="assembly"><div id="spRoot"></div>\n' + stubs
         + "</main>" + tail.replace("</body>", shared + asm + "</body>"))
@@ -72,7 +73,8 @@ for name in ["index.html", "category.html", "product.html", "cart.html", "favori
     t = re.sub(r"<!--btn-fx-->.*?<!--/btn-fx-->", "", t, flags=re.S)
     t = re.sub(r"<!--card-fx-->.*?<!--/card-fx-->", "", t, flags=re.S)
     t = re.sub(r"<!--responsive-->.*?<!--/responsive-->", "", t, flags=re.S)
+    t = re.sub(r"<!--one-click-->.*?<!--/one-click-->", "", t, flags=re.S)
     t = re.sub(r"<!--info-shared-->.*?<!--/info-shared-->", "", t, flags=re.S)
-    t = t.replace("</body>", link + mask + fx + cfx + info_js + resp + "</body>", 1)
+    t = t.replace("</body>", link + mask + fx + cfx + info_js + oc + resp + "</body>", 1)
     p.write_text(t, encoding="utf-8")
     print("linked", name)

@@ -234,3 +234,8 @@ stock and prices from the Access sync. Until then the templates are design refer
   6/12/24/36-month monthly amount, bank transfer for companies), 4 comment + "call me". Sticky summary with items, totals, terms checkbox.
   Validation marks every missing field (runs before the phone mask). Success screen: order number, next steps, items; order saved to
   localStorage `led-orders` and shown in the account's orders; cart emptied. Demo — nothing is sent. Backup `led-static-backup-20261120zv.tgz`. Published.
+- 2026-11-20 — 1-click buy works: shared modal `site-src/oneclick.html` (all pages via `build_shop.py`, `window.LEDOneClick(items,{clear})`),
+  HY/RU/EN. Product page "Купить в 1 клик" (`#oneclick`) → this product with current price (follows options) and qty (± in the modal);
+  cart "Գնել 1 քայլով" (`#spOne`) → all cart items, cart emptied after. Name prefilled from `led-user`, phone required (+374 mask, 8 digits),
+  comment. Success: request number, "manager calls in 10 min"; saved to `led-orders` (shows in account). Esc/✕/backdrop close; bottom
+  sheet on phones. The old `#mdl` on product.html is no longer opened. Demo — nothing is sent. Backup `led-static-backup-20261120zw.tgz`. Published.

@@ -1388,6 +1388,19 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2081,6 +2094,109 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 })();
 </script>
 <!--/info-shared-->
+<!--one-click-->
+<style>
+.oc{position:fixed;inset:0;z-index:90;background:rgba(10,18,32,.55);display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.oc.open{display:flex}
+.oc-box{background:#fff;border-radius:20px;width:100%;max-width:460px;max-height:calc(100vh - 32px);overflow:auto;position:relative;box-shadow:0 30px 80px rgba(10,18,32,.35);animation:ocIn .3s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes ocIn{from{transform:translateY(16px) scale(.97);opacity:0}}
+.oc-hd{padding:22px 24px 0}.oc-hd h3{margin:0;font-size:21px;display:flex;align-items:center;gap:10px}
+.oc-hd h3 .ic{width:38px;height:38px;border-radius:12px;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center}.oc-hd h3 .ic svg{width:19px;height:19px}
+.oc-hd p{margin:8px 0 0;color:var(--muted);font-size:13.5px}
+.oc-x{all:unset;cursor:pointer;position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--muted);font-size:18px;transition:background .2s,transform .3s}
+.oc-x:hover{background:var(--bg);transform:rotate(90deg)}
+.oc-its{margin:16px 24px 0;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}
+.oc-it{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;font-size:13.5px}
+.oc-it img{width:52px;height:52px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff}
+.oc-it .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
+.oc-it small{color:var(--muted)}
+.oc-q{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;margin-top:4px}
+.oc-q button{all:unset;cursor:pointer;width:26px;height:24px;text-align:center;color:var(--blue-600);font-weight:700}.oc-q span{min-width:18px;text-align:center;font-size:13px}
+.oc-tot{display:flex;justify-content:space-between;align-items:baseline;margin:12px 24px 0;font-weight:600}.oc-tot b{font-size:22px}
+.oc-f{padding:14px 24px 22px;display:grid;gap:12px}
+.oc-f label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#33415A}
+.oc-f input,.oc-f textarea{font:inherit;font-size:15px;font-weight:400;border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;box-sizing:border-box}
+.oc-f textarea{min-height:64px;resize:vertical}
+.oc-f input:focus,.oc-f textarea:focus{border-color:var(--blue-600);box-shadow:0 0 0 4px rgba(20,104,220,.14)}
+.oc-f .bad{border-color:#E5484D!important;box-shadow:0 0 0 4px rgba(229,72,77,.12)!important}
+.oc-go{all:unset;box-sizing:border-box;cursor:pointer;height:50px;border-radius:12px;background:var(--blue-600);color:#fff;font-weight:700;font-size:15.5px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s}
+.oc-go:hover{background:var(--blue-700)}.oc-go:active{transform:scale(.98)}.oc-go svg{width:18px;height:18px}
+.oc-f small{color:var(--muted);font-size:12px;text-align:center}.oc-f small a{color:var(--blue-600)}
+.oc-ok{padding:34px 26px 26px;text-align:center}
+.oc-ok .art{width:68px;height:68px;border-radius:50%;background:#E6F6EC;color:#1C7C43;display:grid;place-items:center;margin:0 auto 12px;animation:ocPop .5s cubic-bezier(.3,1.6,.5,1)}
+.oc-ok .art svg{width:32px;height:32px}@keyframes ocPop{from{transform:scale(.3);opacity:0}}
+.oc-ok h3{margin:0 0 8px;font-size:21px}.oc-ok p{color:var(--muted);margin:0 0 6px;font-size:14px}
+.oc-ok .n{display:inline-block;background:var(--blue-50);color:var(--blue-700);font-weight:700;border-radius:10px;padding:8px 16px;margin:8px 0 16px;font-size:17px}
+.oc-ok .bt{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.oc-ok .bt a,.oc-ok .bt button{all:unset;cursor:pointer;padding:11px 18px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px}
+.oc-ok .bt .p{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
+body.oc-lock{overflow:hidden}
+@media (max-width:600px){.oc{align-items:flex-end;padding:0}.oc-box{border-radius:20px 20px 0 0;max-height:92vh;animation-name:ocUp}@keyframes ocUp{from{transform:translateY(100%)}}}
+</style>
+<script>
+(function(){
+  /* [ru, hy, en] */
+  const T={h:['Купить в 1 клик','Գնել 1 քայլով','Buy in 1 click'],p:['Оставьте телефон — менеджер перезвонит в течение 10 минут и оформит заказ.','Թողեք հեռախոսահամարը․ մենեջերը կզանգի 10 րոպեի ընթացքում և կձևակերպի պատվերը։','Leave your phone number — a manager will call within 10 minutes to complete the order.'],
+    name:['Имя','Անուն','Name'],namePh:['Как к вам обращаться','Ինչպես դիմել ձեզ','How should we address you'],phone:['Телефон','Հեռախոս','Phone'],cmt:['Комментарий','Մեկնաբանություն','Comment'],cmtPh:['Удобное время для звонка, вопросы…','Զանգի հարմար ժամ, հարցեր…','Best time to call, questions…'],
+    total:['Итого','Ընդամենը','Total'],go:['Жду звонка','Սպասում եմ զանգի','Call me back'],agree:['Нажимая кнопку, вы соглашаетесь с','Սեղմելով կոճակը՝ համաձայնում եք','By clicking you agree to the'],terms:['условиями покупки','գնման պայմաններին','purchase terms'],
+    ok:['Заявка принята!','Հայտն ընդունված է։','Request received!'],okP:['Менеджер перезвонит на','Մենեջերը կզանգի','A manager will call'],okT:['в течение 10 минут (Пн–Сб 10:30–19:30).','10 րոպեի ընթացքում (Երկ–Շբթ 10:30–19:30)։','within 10 minutes (Mon–Sat 10:30–19:30).'],
+    num:['Заявка','Հայտ','Request'],close:['Закрыть','Փակել','Close'],acc:['Мои заказы','Իմ պատվերները','My orders'],demo:['Демо: заявка не отправляется в магазин.','Դեմո՝ հայտը խանութ չի ուղարկվում։','Demo: the request is not sent to the store.'],pcs:['шт.','հատ','pcs']};
+  const L=()=>({hy:1,en:2}[document.documentElement.lang]||0),t=k=>T[k][L()];
+  const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' ֏';
+  const num=s=>+String(s||'').replace(/\D/g,'')||0;
+  const user=()=>{try{return JSON.parse(localStorage.getItem('led-user'))}catch(e){return null}};
+  let st=null; /* {items:[{t,img,p,q,id}], single, clear, done, name, phone, cmt} */
+  const el=document.createElement('div');el.className='oc';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');
+  document.body.appendChild(el);
+  const render=()=>{if(!st)return;const tot=st.items.reduce((s,x)=>s+x.p*x.q,0);
+    if(st.done){const u=user();el.innerHTML=`<div class="oc-box"><button class="oc-x" type="button" aria-label="${t('close')}">✕</button><div class="oc-ok"><div class="art"><svg class="i"><use href="#check"/></svg></div>
+      <h3>${t('ok')}</h3><p>${t('okP')} <b>${st.phone}</b> ${t('okT')}</p><div class="n">${t('num')} № ${st.done}</div>
+      <div class="bt">${u?`<a class="p" href="/account.html#orders">${t('acc')}</a>`:''}<button type="button" class="oc-cl${u?'':' p'}">${t('close')}</button></div><p style="font-size:12px;margin-top:14px">${t('demo')}</p></div></div>`;return}
+    el.innerHTML=`<div class="oc-box"><button class="oc-x" type="button" aria-label="${t('close')}">✕</button>
+    <div class="oc-hd"><h3><span class="ic"><svg class="i"><use href="#call"/></svg></span>${t('h')}</h3><p>${t('p')}</p></div>
+    <div class="oc-its">${st.items.map((x,i)=>`<div class="oc-it"><img src="${x.img}" alt=""><div><span class="t">${x.t}</span>
+      ${st.single?`<div class="oc-q"><button type="button" data-d="-1" aria-label="−">−</button><span>${x.q}</span><button type="button" data-d="1" aria-label="+">+</button></div>`:`<small>${x.q} ${t('pcs')} × ${fmt(x.p)}</small>`}</div><b>${fmt(x.p*x.q)}</b></div>`).join('')}</div>
+    <div class="oc-tot"><span>${t('total')}</span><b>${fmt(tot)}</b></div>
+    <form class="oc-f" novalidate><label>${t('name')}<input name="name" autocomplete="name" placeholder="${t('namePh')}" value="${(st.name||'').replace(/"/g,'&quot;')}"></label>
+      <label>${t('phone')} *<input name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+374 __ ___ ___" value="${st.phone||''}"></label>
+      <label>${t('cmt')}<textarea name="cmt" placeholder="${t('cmtPh')}">${st.cmt||''}</textarea></label>
+      <button class="oc-go" type="submit"><svg class="i"><use href="#call"/></svg>${t('go')}</button>
+      <small>${t('agree')} <a href="/exchange.html" target="_blank">${t('terms')}</a></small></form></div>`;
+  };
+  const open=(items,opts={})=>{if(!items.length)return;const u=user();
+    st={items,single:items.length===1&&!opts.clear,clear:!!opts.clear,name:u?(u.fname||u.login||''):'',phone:u&&u.phone||'',cmt:''};
+    render();el.classList.add('open');document.body.classList.add('oc-lock');
+    setTimeout(()=>{const i=el.querySelector('[name=phone]');i&&i.focus();i&&i.dispatchEvent(new Event('input',{bubbles:true}))},60);};
+  const close=()=>{el.classList.remove('open');document.body.classList.remove('oc-lock');st=null;};
+  window.LEDOneClick=open;
+  el.addEventListener('click',e=>{if(e.target===el||e.target.closest('.oc-x,.oc-cl'))return close();
+    const d=e.target.closest('[data-d]');if(d&&st){const x=st.items[0];x.q=Math.max(1,Math.min(9,x.q+ +d.dataset.d));render();}});
+  el.addEventListener('input',e=>{if(st&&e.target.name)st[e.target.name]=e.target.value;e.target.classList.remove('bad');});
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&el.classList.contains('open'))close();});
+  /* validate before the phone mask's own submit check */
+  addEventListener('submit',e=>{if(!el.contains(e.target))return;e.preventDefault();e.stopImmediatePropagation();
+    const ph=el.querySelector('[name=phone]'),ok=ph.value.replace(/\D/g,'').length>=11;ph.classList.toggle('bad',!ok);if(!ok){ph.focus();return}
+    const n='LED-'+(106000+Math.floor(Math.random()*900));
+    const o={n,d:new Date().toISOString().slice(0,10),s:0,step:0,pay:0,dl:0,it:st.items.map(x=>[x.t,x.img,x.q,x.p]),oneClick:1};
+    try{const v=JSON.parse(localStorage.getItem('led-orders'))||[];v.unshift(o);localStorage.setItem('led-orders',JSON.stringify(v.slice(0,20)))}catch(_){}
+    if(st.clear&&window.LEDStore)LEDStore.set('cart',[]);
+    st.done=n;st.phone=ph.value;render();},true);
+  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+
+  /* triggers: product page button + cart "Buy in 1 click" (capture: replaces the old handlers) */
+  document.addEventListener('click',e=>{
+    const pb=e.target.closest('#oneclick');
+    if(pb){e.preventDefault();e.stopImmediatePropagation();
+      const h=document.querySelector('.pdp h1, main h1'),img=document.getElementById('mainImg'),pr=document.getElementById('price'),qv=document.getElementById('qv');
+      open([{id:'pdp',t:h?h.textContent.trim():'',img:img?img.getAttribute('src'):'img/p2.webp',p:num(pr&&pr.textContent),q:Math.max(1,num(qv&&qv.value)||1)}]);return}
+    if(e.target.closest('#spOne')){e.preventDefault();e.stopImmediatePropagation();
+      const cards=[...document.querySelectorAll('.sp-row')].map(r=>({t:r.querySelector('h4').textContent.trim(),img:r.querySelector('img').getAttribute('src'),
+        q:num(r.querySelector('.sp-qty span').textContent)||1,p:0,sum:num(r.querySelector('.sp-sum b').textContent)}));
+      open(cards.map(c=>({...c,p:c.sum/c.q})),{clear:true});}
+  },true);
+})();
+</script>
+<!--/one-click-->
 <!--responsive--><style>
 /* Responsive fixes for tablets and phones (all pages). Added last by build_shop.py. */
 html,body{max-width:100%;overflow-x:clip}
