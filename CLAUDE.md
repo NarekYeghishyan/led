@@ -160,3 +160,9 @@ stock and prices from the Access sync. Until then the templates are design refer
   top-menu icons spring + blue underline grows + soft spotlight ("Акции" flame flickers), header icons tint blue, logo tilt + glow, top-bar
   links underline. Footer: links slide right with blue underline, contact icons spring, social buttons lift in brand colours
   (fb/ig/tg/wa/vb), payment chips lift, newsletter input glow. Backup `led-static-backup-20261120zc.tgz`. Published.
+- 2026-11-20 — Top menu = catalog popup: the icon row (12 icons) is replaced by the popup's 6 sections, icon + name (`nav.cats` without
+  `.icons`, `data-m=0..5`), plus the wrench (configurator) and "Акции". Names are copied from the popup buttons at runtime (`syncNav` in
+  card_fx.html), so they always match in every language. Hovered item no longer turns vertical (`.act` class clash with header icons).
+  Mega menu hover effects: section buttons spotlight/slide/icon spring, links slide with underline, popular tiles lift, brand tiles
+  lift/glow, promo banner glow+sweep, ✕ rotates. Fix: mega brand logos were empty on category/product pages (hidden `#stubs` → getBBox 0 →
+  viewBox "0 0 0 0"); now skipped when 0. Backup `led-static-backup-20261120zd.tgz`. Published.
