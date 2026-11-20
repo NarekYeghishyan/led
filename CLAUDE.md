@@ -217,3 +217,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   type (private / dealer → company name / company → name, legal & actual address, tax code, bank account), login/password; repeat email and
   password must match, min 3 chars, demo submit. Info-page layout (sidebar item "Գրանցում"); header "Кабинет" icon links to it. Source
   `site-src/register_content.html` (generated block, read by `build_shop.py`). Backup `led-static-backup-20261120zs.tgz`. Published.
+- 2026-11-20 — New page `login.html` (Մուտք), HY/RU/EN: login/email + password, "remember me", "forgot password" panel on the same page
+  (`/login.html#forgot`, e-mail → demo "link sent"), card with account benefits + "Register" → `/registration.html`. Header "Кабинет" icon now
+  opens `/login.html`; registration page's login/forgot links point here. Source `site-src/login_content.html`. Backup `led-static-backup-20261120zt.tgz`. Published.

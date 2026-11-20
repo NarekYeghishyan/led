@@ -135,6 +135,10 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 .ip-form.rg .rg-g{display:contents}
 .ip-form.rg .rg-g[hidden]{display:none}
 .rg-mis{color:#E5484D;font-size:13px;font-weight:600}
+.lg-rem{flex-direction:row!important;align-items:center;gap:8px!important;font-weight:500!important}.lg-rem input{width:16px;height:16px;accent-color:var(--blue-600)}
+.lg-sw{color:var(--blue-600);font-weight:600;font-size:14px}
+.lg-why{list-style:none;padding:0;margin:0;display:grid;gap:10px}.lg-why li{display:flex;gap:10px;align-items:center}.lg-why svg{width:18px;height:18px;color:var(--success)}
+.ip-form[hidden]{display:none}
 .rg-alt{margin:18px 0 0;font-size:14px;color:var(--muted)}
 .rg-alt a{color:var(--blue-600);font-weight:600}
 @media (max-width:1000px){.ip{grid-template-columns:1fr}.ip-nav{position:static}.ip-stats,.ip-cc{grid-template-columns:repeat(2,1fr)}.ip-2,.ip-pay{grid-template-columns:1fr}}
@@ -146,10 +150,10 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
   const T={credit:["Рассрочка","Ապառիկ","Instalments"],about:["О нас","Մեր մասին","About us"],help:["Помощь","Օգնություն","Help"],
     buy:["Как купить","Ինչպես գնել","How to buy"],order:["Как заказать","Ինչպես պատվիրել","How to order"],pay:["Как оплатить","Ինչպես վճարել","How to pay"],
     delivery:["Доставка","Առաքում","Delivery"],warranty:["Гарантия","Երաշխիք","Warranty"],exchange:["Обмен и возврат","Փոխանակում","Exchange & returns"],
-    contacts:["Контакты","Կոնտակտներ","Contacts"],register:["Регистрация","Գրանցում","Registration"],home:["Главная","Գլխավոր","Home"],info:["Покупателям","Գնորդներին","Customers"],
+    contacts:["Контакты","Կոնտակտներ","Contacts"],register:["Регистрация","Գրանցում","Registration"],login:["Вход","Մուտք","Log in"],home:["Главная","Գլխավոր","Home"],info:["Покупателям","Գնորդներին","Customers"],
     q:["Остались вопросы?","Հարցեր ունե՞ք","Have a question?"],qd:["Пн–Сб 10:30–19:30","Երկ–Շբթ 10:30–19:30","Mon–Sat 10:30–19:30"]};
-  const P={credit:"/credit.html",about:"/about.html",buy:"/how-to-buy.html",order:"/how-to-order.html",pay:"/how-to-pay.html",delivery:"/delivery.html",warranty:"/warranty.html",exchange:"/exchange.html",contacts:"/contacts.html",register:"/registration.html"};
-  const IC={credit:"#card",about:"#store",buy:"#cart",order:"#ix-box",pay:"#ix-wallet",delivery:"#truck",warranty:"#shield",exchange:"#ix-ref",contacts:"#pin",register:"#user"};
+  const P={credit:"/credit.html",about:"/about.html",buy:"/how-to-buy.html",order:"/how-to-order.html",pay:"/how-to-pay.html",delivery:"/delivery.html",warranty:"/warranty.html",exchange:"/exchange.html",contacts:"/contacts.html",register:"/registration.html",login:"/login.html"};
+  const IC={credit:"#card",about:"#store",buy:"#cart",order:"#ix-box",pay:"#ix-wallet",delivery:"#truck",warranty:"#shield",exchange:"#ix-ref",contacts:"#pin",register:"#user",login:"#shield"};
   const HELP=["buy","order","pay","delivery","warranty","exchange"];
   const here=(location.pathname.split('/').pop()||'').replace('.html','');
   const cur=Object.keys(P).find(k=>P[k]==='/'+here+'.html');
@@ -185,7 +189,7 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
   /* info page chrome */
   const nav=document.getElementById('ipNav');
   if(nav){
-    const main=["credit","about"],rest=["contacts","register"];
+    const main=["credit","about"],rest=["contacts","login","register"];
     const item=k=>`<a href="${P[k]}" data-k="${k}"${k===cur?' class="on" aria-current="page"':''}>${ic(IC[k])}<span></span></a>`;
     nav.innerHTML=`<div class="ip-menu"><h6 data-k="info"></h6>${main.map(item).join('')}<hr><h6 data-k="help"></h6>${HELP.map(item).join('')}<hr>${rest.map(item).join('')}</div>`+
       `<div class="ip-call"><b data-k="q"></b><a href="tel:+37410502802">${ic('#call')}010 502‑802</a><a href="tel:+37499502802">${ic('#call')}099 502‑802</a><small data-k="qd"></small></div>`;
@@ -201,12 +205,16 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 
   /* contact forms (one per language) */
   /* header "Кабинет" → registration */
-  document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=P.register;});
+  document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=P.login;});
   /* registration: customer type shows dealer / company fields */
   document.querySelectorAll('.ip-form.rg').forEach(f=>{const sel=f.querySelector('.rg-type');
     const sync=()=>f.querySelectorAll('.rg-g').forEach(g=>{const on=g.dataset.t===sel.value;g.hidden=!on;g.querySelectorAll('input').forEach(x=>x.disabled=!on);});
     sel.addEventListener('change',sync);sync();
-    f.querySelectorAll('.rg-login').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});}));});
+});
+  /* login ⇄ forgot password */
+  const lgShow=fg=>document.querySelectorAll('.lg-w').forEach(w=>{w.querySelector('.lg-in').hidden=fg;w.querySelector('.lg-fg').hidden=!fg;});
+  if(document.querySelector('.lg-w')){lgShow(location.hash==='#forgot');addEventListener('hashchange',()=>lgShow(location.hash==='#forgot'));
+    document.querySelectorAll('.lg-sw').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const fg=a.getAttribute('href')==='#forgot';history.replaceState(null,'',fg?'#forgot':location.pathname);lgShow(fg);}));}
   document.querySelectorAll('.ip-form').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();let ok=true;
     const mis=f.querySelector('.rg-mis');let mm=false;
     f.querySelectorAll('[data-same]').forEach(x=>{const o=f.querySelector(`[name="${x.dataset.same}"]`);const bad=x.value!==o.value;if(bad&&x.value){x.classList.add('bad');ok=false;mm=true;}});
