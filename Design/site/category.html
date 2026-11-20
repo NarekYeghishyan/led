@@ -1011,6 +1011,11 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1126,12 +1131,12 @@ const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec
 const skip=el=>el.closest('#stubs,.catbtn,.fab,.lang')||el.classList.contains('catbtn');
 function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pri&&!el.matches(S))return null;el._fx=1;
  if(getComputedStyle(el).position==='static')el.style.position='relative';
- el.classList.add('fx',pri?'fx-p':'fx-s');el.insertAdjacentHTML('afterbegin','<span class="fx-g"></span><span class="fx-sh"></span>');return el}
+ el.classList.add('fx',pri?'fx-p':'fx-s');el.insertAdjacentHTML('beforeend','<span class="fx-g"></span><span class="fx-sh"></span>');return el}
 const big=el=>el.offsetWidth>90;
 document.addEventListener('pointerover',e=>{const el=e.target.closest&&e.target.closest('button,a');if(el)prep(el)});
 document.addEventListener('pointermove',e=>{const el=e.target.closest&&e.target.closest('.fx');if(!el)return;const r=el.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
  el.style.setProperty('--fx-x',x+'px');el.style.setProperty('--fx-y',y+'px');
- if(el.classList.contains('fx-p')&&big(el)){el.style.setProperty('--fx-tx',((x/r.width-.5)*6).toFixed(1)+'px');el.style.setProperty('--fx-ty',((y/r.height-.5)*4).toFixed(1)+'px')}},{passive:true});
+ if(el.classList.contains('fx-p')&&big(el)){el.style.setProperty('--fx-tx',((x/r.width-.5)*3).toFixed(1)+'px');el.style.setProperty('--fx-ty',((y/r.height-.5)*2).toFixed(1)+'px')}},{passive:true});
 document.addEventListener('pointerout',e=>{const el=e.target.closest&&e.target.closest('.fx');if(el&&!el.contains(e.relatedTarget)){el.style.removeProperty('--fx-tx');el.style.removeProperty('--fx-ty')}});
 document.addEventListener('pointerdown',e=>{const el=e.target.closest&&(e.target.closest('.fx')||prep(e.target.closest('button,a')||document.body));if(!el||!el.classList)return;
  const r=el.getBoundingClientRect(),s=document.createElement('span');s.className='fx-r';s.style.left=e.clientX-r.left+'px';s.style.top=e.clientY-r.top+'px';el.appendChild(s);setTimeout(()=>s.remove(),650)});
@@ -1173,7 +1178,7 @@ function prep(c){if(c._pc||c.closest('#stubs'))return;c._pc=1;
  const bg=getComputedStyle(c).backgroundColor,m=bg.match(/\d+/g),dark=c.matches('.build,.promo')||(m&&(+m[0]+ +m[1]+ +m[2])<200&&+(m[3]??1)>0);
  c.classList.add('pc','pc-'+kind);if(dark)c.classList.add('pc-dark');
  if(kind==='ban')c.style.setProperty('--pc-r','520px');if(kind==='tile')c.style.setProperty('--pc-r','200px');
- c.insertAdjacentHTML('afterbegin','<span class="pc-g"></span><span class="pc-b"></span>');
+ c.insertAdjacentHTML('beforeend','<span class="pc-g"></span><span class="pc-b"></span>');
  const host=kind==='card'?c.querySelector('.img'):c;if(host)host.insertAdjacentHTML('beforeend','<span class="pc-sh"></span>')}
 document.addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest(ALL);if(c)prep(c)});
 document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.pc');if(!c)return;

@@ -143,3 +143,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Same hover language extended to tiles (`.t` trust, `.feats>div`, `.brands a`, mega-menu `.mh`, `.c`) and banners (`.promo`,
   `.build`, `.credit`, `.b2b`): spotlight + border glow following the cursor, light sweep (slower on banners), icon/visual parallax; dark
   banners get a white glow. All in `site-src/card_fx.html`. Backup `led-static-backup-20261120w.tgz`. Published.
+- 2026-11-20 — Fix: hover-effect spans are now appended at the END of buttons/cards (page scripts use `querySelector('span')`, e.g. product
+  "add to cart" wrote ✓ into the effect span). Magnetic pull halved. **Effect markup must never be the first child.** Backup `led-static-backup-20261120x.tgz`. Published.
