@@ -629,7 +629,7 @@ header.h{z-index:5;position:sticky;top:0}
 
 <header class="h"><div class="wrap">
   <div class="row">
-    <a class="logo" href="#"><img src="img/logo.png" alt="LED Computers" width="94" height="48"></a>
+    <a class="logo" href="/"><img src="/img/logo.png" alt="LED Computers" width="94" height="48"></a>
     <a class="catbtn" href="#" id="catBtn" aria-expanded="false" aria-controls="mega"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span><span>Каталог</span></a>
     <div class="search"><input placeholder="Поиск товаров, брендов и моделей…"><button>Найти</button></div>
     <div class="acts">
@@ -687,7 +687,7 @@ header.h{z-index:5;position:sticky;top:0}
   <div class="wrap">
     <div class="news"><h4>Узнавайте об акциях и скидках первыми</h4><form onsubmit="return false"><input placeholder="Ваш e‑mail"><button class="btn p" style="border:0;font:inherit;font-weight:600">Подписаться</button></form></div>
     <div class="fgrid">
-      <div><a class="logo" href="#"><img src="img/logo.png" alt="LED Computers" width="94" height="48"></a><p>Компьютерная техника и оборудование для дома, офиса и бизнеса в Армении.</p><div class="soc"><span>f</span><span>ig</span><span>tg</span><span>wa</span><span>vb</span></div></div>
+      <div><a class="logo" href="/"><img src="/img/logo.png" alt="LED Computers" width="94" height="48"></a><p>Компьютерная техника и оборудование для дома, офиса и бизнеса в Армении.</p><div class="soc"><span>f</span><span>ig</span><span>tg</span><span>wa</span><span>vb</span></div></div>
       <div><h5>Каталог</h5><ul><li>Компьютеры</li><li>Ноутбуки</li><li>Комплектующие</li><li>Серверы</li><li>Периферия</li></ul></div>
       <div><h5>Покупателям</h5><ul><li>Как заказать</li><li>Доставка и оплата</li><li>Рассрочка</li><li>Гарантия и возврат</li><li>Вакансии</li></ul></div>
       <div><h5>Контакты</h5><ul><li class="ci"><svg class="i"><use href="#pin"/></svg><span>Ереван, ул. Киевяна 11‑34</span></li><li class="ci" style="color:#fff;font-weight:600"><svg class="i"><use href="#call"/></svg><span>010 502‑802 · 099 502‑802</span></li><li class="ci"><svg class="i"><use href="#mail"/></svg><span>led@led.am</span></li><li class="ci"><svg class="i"><use href="#clock"/></svg><span>Пн–Сб 10:00–19:00</span></li></ul></div>
@@ -929,5 +929,9 @@ document.addEventListener('mouseover',e=>{const a=e.target.closest('a');if(a)fix
 document.addEventListener('focusin',e=>{const a=e.target.closest('a');if(a)fix(a)},true);
 new MutationObserver(run).observe(document.body,{childList:true,subtree:true});run();
 document.querySelectorAll('footer li').forEach(li=>{if(li.querySelector('a'))return;const k=key(li.textContent);if(k){li.style.cursor='pointer';li.onclick=()=>location.href=M[k]}});
-})();</script></body>
+})();</script><script>/* category links -> catalog page (same as home) */
+document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a||a.id==='catBtn')return;
+ if(a.closest('nav.cats,.mega')){e.preventDefault();location.href='/category.html'}},true);
+</script>
+</body>
 </html>
