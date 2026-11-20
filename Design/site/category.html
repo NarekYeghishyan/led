@@ -1093,6 +1093,11 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1362,9 +1367,24 @@ nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
 .sg.pc:hover h3 svg.i{transform:scale(1.15) rotate(-8deg)}
 .sg.pc:hover h3{color:var(--blue-700)}.sg h3{transition:color .2s}
 @media (prefers-reduced-motion:reduce){.sg dl div:hover{translate:none}}
+/* ---- product reviews ---- */
+.rv.pc,.rv-top .big.pc{border-radius:12px}.rv.pc>.pc-b,.rv.pc>.pc-sh,.rv-top .big.pc>.pc-b{display:none}
+.rv{transition:translate .25s cubic-bezier(.2,.8,.2,1)}
+.rv.pc:hover{translate:6px 0}
+.rv .h b{transition:color .2s}.rv.pc:hover .h b{color:var(--blue-700)}
+.rv .h .stars,.rv-top .big .stars{display:inline-block;transition:transform .35s cubic-bezier(.3,1.6,.5,1),filter .3s}
+.rv.pc:hover .h .stars,.rv-top .big:hover .stars{transform:scale(1.08);filter:drop-shadow(0 0 6px rgba(245,165,36,.55))}
+.rv-top .big b{display:inline-block;transition:transform .35s cubic-bezier(.3,1.6,.5,1),color .2s}
+.rv-top .big:hover b{transform:scale(1.06);color:var(--blue-700)}
+.rbars div{border-radius:6px;cursor:default;transition:color .2s,translate .25s}
+.rbars div:hover{color:var(--ink);translate:4px 0}
+.rbars i{transition:height .25s,box-shadow .25s}
+.rbars div:hover i{height:8px;box-shadow:0 0 0 3px rgba(245,165,36,.15)}
+.rbars i:before{transition:filter .25s}.rbars div:hover i:before{filter:brightness(1.08) saturate(1.2)}
+@media (prefers-reduced-motion:reduce){.rv.pc:hover,.rbars div:hover{translate:none}}
 </style><script>
 (function(){
-const CARD='.prod,.sp-f,.sp-pc',TILE='.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p',ALL=[CARD,TILE,BAN].join(',');
+const CARD='.prod,.sp-f,.sp-pc',TILE='.rv,.rv-top .big,.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p',ALL=[CARD,TILE,BAN].join(',');
 function prep(c){if(c.closest('#stubs'))return;if(c._pc){if(!c.querySelector(':scope>.pc-g'))c._pc=0;else return}c._pc=1;
  const kind=c.matches(CARD)?'card':c.matches(BAN)?'ban':'tile';
  if(getComputedStyle(c).position==='static')c.style.position='relative';

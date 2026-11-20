@@ -171,3 +171,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   effect layers) — effect layers now `grid-area:auto`. Backup `led-static-backup-20261120ze.tgz`. Published.
 - 2026-11-20 — Product spec table: each group (`.sg`) gets the cursor spotlight + heading icon spring; rows fill with a blue wash from the
   left, slide 6px, a blue dot appears before the name. Backup `led-static-backup-20261120zf.tgz`. Published.
+- 2026-11-20 — Product reviews hover: each review spotlight + slide, name blue, stars glow; rating summary number/stars pop; rating bars
+  thicken and glow. Home side promo "Подобрать комплектующие" (Ընտրել մասերը) now links to `/assembly.html`. Backup `led-static-backup-20261120zg.tgz`. Published.
