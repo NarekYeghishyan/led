@@ -13,7 +13,7 @@ tail = re.sub(r"<script>\s*\(function\(\)\{\s*const vb=.*?</script>", "", tail, 
 tail = re.sub(r"<!--dual-range-->.*?<!--/dual-range-->", "", tail, flags=re.S)
 assert "getElementById('tree')" not in tail and "cgrid3" not in tail
 
-TITLES = {"cart": "Զամբյուղ — LED Computers", "favorites": "Ընտրյալներ — LED Computers", "compare": "Համեմատել — LED Computers", "checkout": "Պատվերի ձևակերպում — LED Computers"}
+TITLES = {"cart": "Զամբյուղ — LED Computers", "favorites": "Ընտրյալներ — LED Computers", "compare": "Համեմատել — LED Computers", "checkout": "Պատվերի ձևակերպում — LED Computers", "search": "Որոնում — LED Computers"}
 for page, title in TITLES.items():
     h = head.replace("<title>LED.AM Category Page</title>", f"<title>{title}</title>")
     html = (h + f'<main class="wrap shop" id="shop" data-page="{page}"><div id="spRoot"></div>\n' + stubs
@@ -38,6 +38,7 @@ fx = (pathlib.Path(__file__).parent / "btn_fx.html").read_text(encoding="utf-8")
 cfx = (pathlib.Path(__file__).parent / "card_fx.html").read_text(encoding="utf-8")
 resp = (pathlib.Path(__file__).parent / "responsive.html").read_text(encoding="utf-8")
 oc = (pathlib.Path(__file__).parent / "oneclick.html").read_text(encoding="utf-8")
+sx = (pathlib.Path(__file__).parent / "search_box.html").read_text(encoding="utf-8")
 h = head.replace("<title>LED.AM Category Page</title>", "<title>Собери свою конфигурацию — LED Computers</title>")
 html = (h + '<main class="wrap asm" id="shop" data-page="assembly"><div id="spRoot"></div>\n' + stubs
         + "</main>" + tail.replace("</body>", shared + asm + "</body>"))
@@ -65,7 +66,7 @@ for key, langs in blocks.items():
     (site / f"{INFO[key]}.html").write_text(html, encoding="utf-8")
     print("info", INFO[key], len(html))
 info_js = (pathlib.Path(__file__).parent / "info_shared.html").read_text(encoding="utf-8")
-for name in ["index.html", "category.html", "product.html", "cart.html", "favorites.html", "compare.html", "checkout.html", "assembly.html"] + [f"{v}.html" for v in INFO.values()]:
+for name in ["index.html", "category.html", "product.html", "cart.html", "favorites.html", "compare.html", "checkout.html", "search.html", "assembly.html"] + [f"{v}.html" for v in INFO.values()]:
     p = site / name
     t = p.read_text(encoding="utf-8").replace("https://www.led.am/ru/assembly.html", "/assembly.html")
     t = re.sub(r"<!--asm-link-->.*?<!--/asm-link-->", "", t, flags=re.S)
@@ -74,7 +75,8 @@ for name in ["index.html", "category.html", "product.html", "cart.html", "favori
     t = re.sub(r"<!--card-fx-->.*?<!--/card-fx-->", "", t, flags=re.S)
     t = re.sub(r"<!--responsive-->.*?<!--/responsive-->", "", t, flags=re.S)
     t = re.sub(r"<!--one-click-->.*?<!--/one-click-->", "", t, flags=re.S)
+    t = re.sub(r"<!--search-box-->.*?<!--/search-box-->", "", t, flags=re.S)
     t = re.sub(r"<!--info-shared-->.*?<!--/info-shared-->", "", t, flags=re.S)
-    t = t.replace("</body>", link + mask + fx + cfx + info_js + oc + resp + "</body>", 1)
+    t = t.replace("</body>", link + mask + fx + cfx + info_js + oc + sx + resp + "</body>", 1)
     p.write_text(t, encoding="utf-8")
     print("linked", name)

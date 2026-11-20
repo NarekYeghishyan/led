@@ -1,4 +1,31 @@
 <style>
+/* search results */
+.sr{display:grid;grid-template-columns:250px minmax(0,1fr);gap:22px;align-items:start}
+.sr-f{position:sticky;top:calc(var(--hdr,84px) + 12px);padding:16px 18px}
+.sr-ft{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px}.sr-ft svg{width:18px;height:18px}
+.sr-ft i{font-style:normal;background:var(--blue-600);color:#fff;border-radius:999px;font-size:12px;padding:1px 8px}
+.sr-f h4{margin:16px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.sr-ck{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:14px;cursor:pointer}.sr-ck input{width:17px;height:17px;accent-color:var(--blue-600)}
+.sr-ck i{margin-left:auto;font-style:normal;color:var(--muted);font-size:12.5px}
+.sr-pr{display:flex;align-items:center;gap:6px;margin-bottom:8px}.sr-pr input{width:100%;min-width:0;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;outline:none}
+.sr-pr input:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(20,104,220,.14)}
+.sr-rs{all:unset;cursor:pointer;margin-top:12px;color:var(--blue-600);font-weight:600;font-size:14px}
+.sr-cats{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.sr-cats a{padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:inherit;text-decoration:none;font-size:14px;font-weight:600;transition:all .2s}
+.sr-cats a i{font-style:normal;color:var(--muted);font-weight:500;margin-left:2px}
+.sr-cats a:hover{border-color:var(--blue-600);color:var(--blue-700)}.sr-cats a.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}.sr-cats a.on i{color:#DCE9FF}
+.sr-sort{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.sr-sort select{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff;color:var(--ink);cursor:pointer}
+.sr-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.sr-grid .pr s{display:block;color:var(--muted);font-size:12.5px}
+.sr-cmp{all:unset;cursor:pointer;position:absolute;top:52px;right:14px;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;color:var(--muted);z-index:2;transition:color .2s,background .2s}
+.sr-cmp svg{width:16px;height:16px}.sr-cmp:hover,.sr-cmp.on{color:#fff;background:var(--blue-600)}
+.sr-pop{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.sr-pop a{padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:inherit;text-decoration:none;font-size:14px}.sr-pop a:hover{border-color:var(--blue-600);color:var(--blue-700)}
+.sr-dym{font-size:16px}.sr-dym a{color:var(--blue-600);font-weight:700}
+@media (min-width:1001px){.sr-ft{pointer-events:none}}
+@media (max-width:1240px){.sr-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media (max-width:1000px){.sr{grid-template-columns:minmax(0,1fr)}.sr-f{position:static}.sr:not(.fo) .sr-fb{display:none}}
+@media (max-width:760px){.sr-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.sp-head .sp-tools{width:100%}.sr-cats{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.sr-cats a{white-space:nowrap}}
 /* checkout */
 .co-s{padding:20px 22px;margin-bottom:16px}
 .co-s h3{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:18px}
@@ -376,6 +403,71 @@ window.addEventListener('submit',e=>{if(page!=='checkout'||e.target.id!=='coForm
  try{const L2=JSON.parse(localStorage.getItem('led-orders'))||[];L2.unshift(o);localStorage.setItem('led-orders',JSON.stringify(L2.slice(0,20)))}catch(_){}
  coDone=o;sessionStorage.removeItem(CO_K);co={};S.set('cart',[]);scrollTo({top:0,behavior:'smooth'})},true);
 
+/* ---------- SEARCH RESULTS ---------- */
+const ST={h:['Результаты поиска','Որոնման արդյունքներ','Search results'],for:['по запросу','հարցման համար','for'],found:['Найдено','Գտնվել է','Found'],goods:['товаров','ապրանք','products'],
+ all:['Все','Բոլորը','All'],brand:['Бренд','Բրենդ','Brand'],price:['Цена, ֏','Գին, ֏','Price, ֏'],from:['от','սկսած','from'],to:['до','մինչև','to'],stock:['Только в наличии','Միայն առկաները','In stock only'],
+ sale:['Со скидкой','Զեղչով','On sale'],reset:['Сбросить','Զրոյացնել','Reset'],sort:['Сортировка','Դասավորել','Sort'],
+ sorts:[['По релевантности','Ըստ համապատասխանության','Relevance'],['Сначала дешёвые','Սկզբում էժանները','Price: low to high'],['Сначала дорогие','Սկզբում թանկերը','Price: high to low'],['По скидке','Ըստ զեղչի','Biggest discount']],
+ none:['Ничего не нашли','Ոչինչ չգտնվեց','Nothing found'],noneP:['Проверьте написание или попробуйте более общий запрос.','Ստուգեք ուղղագրությունը կամ փորձեք ավելի ընդհանուր հարցում։','Check the spelling or try a broader search.'],
+ dym:['Возможно, вы имели в виду','Գուցե նկատի ունեիք','Did you mean'],pop:['Популярные запросы','Հանրաճանաչ որոնումներ','Popular searches'],hits:['Хиты продаж','Վաճառքի հիթեր','Bestsellers'],
+ empty:['Введите запрос в строку поиска','Մուտքագրեք հարցումը որոնման դաշտում','Type what you are looking for in the search box'],
+ inStock:['В наличии','Առկա է','In stock'],order:['Под заказ','Պատվերով','On order'],mo:['от','սկսած','from'],moS:['/мес','/ամիս','/mo'],
+ flt:['Фильтры','Ֆիլտրեր','Filters'],noF:['Нет товаров с такими фильтрами','Այս ֆիլտրերով ապրանքներ չկան','No products match these filters'],
+ added:['Добавлено в корзину','Ավելացվեց զամբյուղ','Added to cart'],go:['Перейти','Անցնել','Open'],fav:['Добавлено в избранное','Ավելացվեց ընտրյալներում','Saved to favourites'],unfav:['Убрано из избранного','Հեռացվեց ընտրյալներից','Removed from favourites'],
+ cmp:['Добавлено к сравнению','Ավելացվեց համեմատման','Added to compare'],uncmp:['Убрано из сравнения','Հեռացվեց համեմատումից','Removed from compare']};
+const st_=k=>ST[k][L()];
+const SQ=()=>{const u=new URLSearchParams(location.search);return{q:u.get('q')||'',cat:u.get('cat')||'',sort:+(u.get('sort')||0)}};
+let sf={brands:[],min:'',max:'',stock:false,sale:false,open:false};
+function srCard(x,q){const X=window.LEDSearch,d=x.o?Math.round((1-x.p/x.o)*100):0;
+ return `<div class="prod" data-id="${x.id}">${d?`<span class="badge">−${d}%</span>`:''}<span class="fav${S.has('fav',x.id)?' on':''}"><svg class="i"><use href="#heart"/></svg></span>
+  <div class="img"><img src="${x.img}" class="cover" alt=""></div><span class="stock"${x.stock?'':' style="color:var(--muted)"'}>${x.stock?st_('inStock'):st_('order')}</span>
+  <h4>${X.hl(x.t,q)}</h4><div class="spec">${X.esc(x.spec)}</div>
+  <div class="pr"><div>${x.o?`<s>${fmt(x.o)}</s>`:''}<b>${fmt(x.p)}</b><span class="mo">${st_('mo')} ${fmt(x.p/24)}${st_('moS')}</span></div><a class="cart" href="#" aria-label="cart"><svg class="i"><use href="#cart"/></svg></a></div>
+  <button class="sr-cmp${S.has('cmp',x.id)?' on':''}" type="button" aria-label="compare"><svg class="i"><use href="#cmp"/></svg></button></div>`}
+function search(){const X=window.LEDSearch;if(!X){root.innerHTML='';addEventListener('DOMContentLoaded',render,{once:true});return}
+ const {q,cat,sort}=SQ();
+ if(!q.trim()){root.innerHTML=crumbs(st_('h'))+`<div class="sp-card sp-empty"><div class="art">${ic('ix-help')}</div><h2>${st_('empty')}</h2><div class="sr-pop">${X.POP.map(p=>`<a href="/search.html?q=${encodeURIComponent(p)}">${X.esc(p)}</a>`).join('')}</div></div>`;return}
+ document.title=`${q} — ${st_('h')} — LED Computers`;
+ const all=X.search(q);
+ if(!all.length){const s=X.suggest(q);const hits=X.I.filter(x=>x.o).slice(0,5);
+  root.innerHTML=crumbs(st_('h'))+`<div class="sp-head"><div><h1><span class="ic">${ic('ix-help')}</span>«${X.esc(q)}»</h1></div></div>
+  <div class="sp-card sp-empty"><div class="art">${ic('ix-alert')}</div><h2>${st_('none')}</h2><p>${st_('noneP')}</p>
+   ${s?`<p class="sr-dym">${st_('dym')}: <a href="/search.html?q=${encodeURIComponent(s)}">${X.esc(s)}</a></p>`:''}
+   <h3 style="margin:18px 0 8px;font-size:15px">${st_('pop')}</h3><div class="sr-pop">${X.POP.map(p=>`<a href="/search.html?q=${encodeURIComponent(p)}">${X.esc(p)}</a>`).join('')}</div></div>
+  <section class="sp-up"><h3>${st_('hits')}</h3><div class="pgrid sr-grid">${hits.map(x=>srCard(x,'')).join('')}</div></section>`;return}
+ const inCat=cat?all.filter(x=>x.cat===cat):all;
+ const brands=[...new Set(inCat.map(x=>x.brand))].sort();
+ sf.brands=sf.brands.filter(b=>brands.includes(b));
+ let v=inCat.filter(x=>(!sf.brands.length||sf.brands.includes(x.brand))&&(!sf.min||x.p>=+sf.min)&&(!sf.max||x.p<=+sf.max)&&(!sf.stock||x.stock)&&(!sf.sale||x.o));
+ if(sort===1)v.sort((a,b)=>a.p-b.p);else if(sort===2)v.sort((a,b)=>b.p-a.p);else if(sort===3)v.sort((a,b)=>(b.o?1-b.p/b.o:0)-(a.o?1-a.p/a.o:0));
+ const cats=[...new Set(all.map(x=>x.cat))];const nF=sf.brands.length+(sf.min?1:0)+(sf.max?1:0)+sf.stock+sf.sale;
+ const url=(o)=>{const u=new URLSearchParams(location.search);Object.entries(o).forEach(([k,val])=>val===''||val===0?u.delete(k):u.set(k,val));return '?'+u};
+ root.innerHTML=crumbs(st_('h'))+`<div class="sp-head"><div><h1><span class="ic">${ic('ix-help')}</span>«${X.esc(q)}»</h1><p>${st_('found')} ${v.length} ${st_('goods')}</p></div>
+  <div class="sp-tools"><label class="sr-sort">${st_('sort')}<select id="srSort">${ST.sorts.map((s,i)=>`<option value="${i}"${i===sort?' selected':''}>${s[L()]}</option>`).join('')}</select></label></div></div>
+ <div class="sr-cats"><a href="${url({cat:''})}" class="${cat?'':'on'}">${st_('all')} <i>${all.length}</i></a>${cats.map(c=>`<a href="${url({cat:c})}" class="${cat===c?'on':''}">${X.CATS[c][L()]} <i>${all.filter(x=>x.cat===c).length}</i></a>`).join('')}</div>
+ <div class="sr${sf.open?' fo':''}"><aside class="sp-card sr-f"><button class="sr-ft" type="button">${ic('filter')}${st_('flt')}${nF?` <i>${nF}</i>`:''}</button><div class="sr-fb">
+  <h4>${st_('brand')}</h4>${brands.map(b=>`<label class="sr-ck"><input type="checkbox" data-b="${X.esc(b)}"${sf.brands.includes(b)?' checked':''}>${X.esc(b)} <i>${inCat.filter(x=>x.brand===b).length}</i></label>`).join('')}
+  <h4>${st_('price')}</h4><div class="sr-pr"><input id="srMin" inputmode="numeric" placeholder="${st_('from')}" value="${sf.min}"><span>—</span><input id="srMax" inputmode="numeric" placeholder="${st_('to')}" value="${sf.max}"></div>
+  <label class="sr-ck"><input type="checkbox" id="srStock"${sf.stock?' checked':''}>${st_('stock')}</label><label class="sr-ck"><input type="checkbox" id="srSale"${sf.sale?' checked':''}>${st_('sale')}</label>
+  ${nF?`<button class="sr-rs" type="button" id="srReset">${st_('reset')}</button>`:''}</div></aside>
+  <div>${v.length?`<div class="pgrid sr-grid">${v.map(x=>srCard(x,q)).join('')}</div>`:`<div class="sp-card sp-empty"><div class="art">${ic('filter')}</div><h2>${st_('noF')}</h2><button class="sp-b p" type="button" id="srReset">${st_('reset')}</button></div>`}</div></div>`;
+}
+root.addEventListener('click',e=>{if(page!=='search')return;
+ if(e.target.closest('#srReset')){sf={...sf,brands:[],min:'',max:'',stock:false,sale:false};render();return}
+ if(e.target.closest('.sr-ft')){sf.open=!sf.open;render();return}
+ const c=e.target.closest('.prod');if(!c)return;const X=window.LEDSearch,x=X.I.find(y=>y.id===c.dataset.id);if(!x)return;
+ const it={id:x.id,t:x.t,img:x.img,p:x.p,spec:x.spec};
+ if(e.target.closest('.cart')){e.preventDefault();e.stopPropagation();S.add('cart',it);S.toast(st_('added'),st_('go'),()=>location.href=S.URL.cart);return}
+ if(e.target.closest('.fav')){e.stopPropagation();const on=S.toggle('fav',it);S.toast(st_(on?'fav':'unfav'),on?st_('go'):'',()=>location.href=S.URL.fav);return}
+ if(e.target.closest('.sr-cmp')){e.stopPropagation();const on=S.toggle('cmp',it);S.toast(st_(on?'cmp':'uncmp'),on?st_('go'):'',()=>location.href=S.URL.cmp);return}
+ window.LEDSearch.remember(SQ().q);},true);
+root.addEventListener('change',e=>{if(page!=='search')return;const t=e.target;
+ if(t.id==='srSort'){const u=new URLSearchParams(location.search);+t.value?u.set('sort',t.value):u.delete('sort');history.replaceState(null,'','?'+u);render();return}
+ if(t.dataset.b!==undefined){sf.brands=t.checked?[...sf.brands,t.dataset.b]:sf.brands.filter(b=>b!==t.dataset.b);render();return}
+ if(t.id==='srStock'){sf.stock=t.checked;render();return}if(t.id==='srSale'){sf.sale=t.checked;render();return}
+ if(t.id==='srMin'||t.id==='srMax'){sf[t.id==='srMin'?'min':'max']=t.value.replace(/\D/g,'');render();}});
+root.addEventListener('keydown',e=>{if(page==='search'&&(e.target.id==='srMin'||e.target.id==='srMax')&&e.key==='Enter')e.target.dispatchEvent(new Event('change',{bubbles:true}))});
+
 /* ---------- FAVOURITES ---------- */
 let fsort=0;
 function fav(){let v=S.get('fav').map(item).reverse();
@@ -424,7 +516,7 @@ root.addEventListener('click',e=>{if(page!=='compare')return;
  if(e.target.closest('.add')){e.preventDefault();if(!S.has('cart',id)){const x=item({id});S.add('cart',{id,t:x.t,img:x.img,p:x.p,spec:x.spec})}else location.href=S.URL.cart}});
 root.addEventListener('change',e=>{if(e.target.id==='spOnly'){only=e.target.checked;root.querySelector('.sp-ct').classList.toggle('only',only)}});
 
-const R={cart,favorites:fav,compare:cmp,checkout};
+const R={cart,favorites:fav,compare:cmp,checkout,search};
 function render(){R[page]()}
 S.subscribe(()=>render());
 document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(render)));

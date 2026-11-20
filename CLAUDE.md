@@ -257,3 +257,12 @@ stock and prices from the Access sync. Until then the templates are design refer
   LED-104511 delivered, LED-104901 processing, LED-103402 cancelled); "not found" message otherwise; `?n=` in the URL. "Track" links on
   account orders, checkout success, 1-click success. Its form runs before the phone mask (phone optional). Armenian dates are formatted by
   hand (browsers lack hy-AM month names) — also in account and checkout. Source `site-src/track_content.html`. Backup `led-static-backup-20261120zz.tgz`. Published.
+- 2026-11-21 — Search. Header search box (all pages, `site-src/search_box.html`): Enter/"Найти" → `/search.html?q=…`; live dropdown while
+  typing — matching categories with counts, top 5 products with highlighted words and prices, "All results (N)"; empty box shows recent
+  searches (localStorage `led-recent`, clear) and popular queries; ↑/↓/Enter/Esc. Demo index of 29 products in 8 categories
+  (`window.LEDSearch`, until /api); every word must match title/spec/brand or a RU/HY/EN category word (ноутбук/նոութբուք/laptop…);
+  "did you mean" via edit distance (lenvo → lenovo). New page `search.html` (shop page `search()` in shop_pages.html): «query» + count,
+  category chips (`&cat=`), filters (brand with counts, price from/to, in stock, on sale, reset; a "Filters" toggle on tablets/phones), sort
+  (relevance/cheap/expensive/discount, `&sort=`), product cards like category (cart/♡/compare work, card opens product), nothing-found state
+  with suggestion, popular queries and bestsellers. `.search` no longer `overflow:hidden` (clipped the dropdown). Class `.t` must not be used
+  inside new widgets (trust-tile effect) — used `.nm`. Account demo orders: `p6.webp` doesn't exist → `p5`. Backup `led-static-backup-20261121a.tgz`. Published.
