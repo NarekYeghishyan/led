@@ -130,3 +130,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   AND between groups; matched against card text, ГБ/ТБ/Вт normalised, "Встроенная"/"Без ОС" special-cased), "in stock" and "instalment"
   toggles, price. Counts next to each value are real, toolbar chips show active filters (✕ removes), "Reset" clears all. Demo cards only.
   Backup `led-static-backup-20261120s.tgz`. Published.
+- 2026-11-20 — Phone mask on every phone field (`input[inputmode=tel]`/`[type=tel]`, also ones added later): `+374 XX XXX XXX`, accepts
+  pasted 0XX…/374…/+374…, a form won't submit until 8 digits are entered (red ring). Source `site-src/phone_mask.html`, added to all 7 pages
+  by `build_shop.py` (which now also strips category's `<!--dual-range-->` block from generated pages). Backup `led-static-backup-20261120t.tgz`. Published.
