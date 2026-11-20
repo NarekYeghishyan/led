@@ -1,4 +1,9 @@
 <!--card-fx--><style>
+/* clickable things show the hand cursor */
+.prod,.sp-f,.sp-pc,.bi,.btn,.sp-b,.addc,.oneclick,.mh,.brands a,.t[href],a[href],button:not(:disabled),label:has(>input[type=radio]),label:has(>input[type=checkbox]),select{cursor:pointer}
+/* touch screens: no sticky hover lift */
+@media (hover:none){.fx,.pc{transform:none!important}}
+
 /* Hover language for cards, tiles and banners: cursor spotlight + blue border glow that follows the cursor,
    light sweep, image parallax. JS adds .pc (+ .pc-tile / .pc-ban / .pc-dark) and the spans on first hover. */
 .pc{isolation:isolate}
@@ -242,8 +247,8 @@ function prep(c){if(c.closest('#stubs'))return;if(c._pc){if(!c.querySelector(':s
  if(kind==='ban')c.style.setProperty('--pc-r','520px');if(kind==='tile')c.style.setProperty('--pc-r','200px');
  c.insertAdjacentHTML('beforeend','<span class="pc-g"></span><span class="pc-b"></span>');
  const host=kind==='card'?c.querySelector('.img,.im'):c;if(host)host.insertAdjacentHTML('beforeend','<span class="pc-sh"></span>')}
-document.addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest(ALL);if(c)prep(c)});
-document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.pc');if(!c)return;
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest(ALL);if(c)prep(c)});
+document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest('.pc');if(!c)return;
  const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,k=c.classList.contains('pc-ban')?12:8;
  c.style.setProperty('--pc-x',x+'px');c.style.setProperty('--pc-y',y+'px');
  c.style.setProperty('--pc-tx',((x/r.width-.5)*-k).toFixed(1)+'px');c.style.setProperty('--pc-ty',((y/Math.max(r.height,1)-.5)*-k*.7).toFixed(1)+'px')},{passive:true});

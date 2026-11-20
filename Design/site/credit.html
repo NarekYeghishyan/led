@@ -1404,6 +1404,19 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1469,6 +1482,7 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 .mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
 </style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
 ['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
 
 
 
@@ -1591,8 +1605,8 @@ function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pr
  if(getComputedStyle(el).position==='static')el.style.position='relative';
  el.classList.add('fx',pri?'fx-p':'fx-s');el.insertAdjacentHTML('beforeend','<span class="fx-g"></span><span class="fx-sh"></span>');return el}
 const big=el=>el.offsetWidth>90;
-document.addEventListener('pointerover',e=>{const el=e.target.closest&&e.target.closest('button,a');if(el)prep(el)});
-document.addEventListener('pointermove',e=>{const el=e.target.closest&&e.target.closest('.fx');if(!el)return;const r=el.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const el=e.target.closest&&e.target.closest('button,a');if(el)prep(el)});
+document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const el=e.target.closest&&e.target.closest('.fx');if(!el)return;const r=el.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
  el.style.setProperty('--fx-x',x+'px');el.style.setProperty('--fx-y',y+'px');
  if(el.classList.contains('fx-p')&&big(el)){el.style.setProperty('--fx-tx',((x/r.width-.5)*3).toFixed(1)+'px');el.style.setProperty('--fx-ty',((y/r.height-.5)*2).toFixed(1)+'px')}},{passive:true});
 document.addEventListener('pointerout',e=>{const el=e.target.closest&&e.target.closest('.fx');if(el&&!el.contains(e.relatedTarget)){el.style.removeProperty('--fx-tx');el.style.removeProperty('--fx-ty')}});
@@ -1601,6 +1615,11 @@ document.addEventListener('pointerdown',e=>{const el=e.target.closest&&(e.target
 })();
 </script><!--/btn-fx-->
 <!--card-fx--><style>
+/* clickable things show the hand cursor */
+.prod,.sp-f,.sp-pc,.bi,.btn,.sp-b,.addc,.oneclick,.mh,.brands a,.t[href],a[href],button:not(:disabled),label:has(>input[type=radio]),label:has(>input[type=checkbox]),select{cursor:pointer}
+/* touch screens: no sticky hover lift */
+@media (hover:none){.fx,.pc{transform:none!important}}
+
 /* Hover language for cards, tiles and banners: cursor spotlight + blue border glow that follows the cursor,
    light sweep, image parallax. JS adds .pc (+ .pc-tile / .pc-ban / .pc-dark) and the spans on first hover. */
 .pc{isolation:isolate}
@@ -1844,8 +1863,8 @@ function prep(c){if(c.closest('#stubs'))return;if(c._pc){if(!c.querySelector(':s
  if(kind==='ban')c.style.setProperty('--pc-r','520px');if(kind==='tile')c.style.setProperty('--pc-r','200px');
  c.insertAdjacentHTML('beforeend','<span class="pc-g"></span><span class="pc-b"></span>');
  const host=kind==='card'?c.querySelector('.img,.im'):c;if(host)host.insertAdjacentHTML('beforeend','<span class="pc-sh"></span>')}
-document.addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest(ALL);if(c)prep(c)});
-document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.pc');if(!c)return;
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest(ALL);if(c)prep(c)});
+document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const c=e.target.closest&&e.target.closest('.pc');if(!c)return;
  const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,k=c.classList.contains('pc-ban')?12:8;
  c.style.setProperty('--pc-x',x+'px');c.style.setProperty('--pc-y',y+'px');
  c.style.setProperty('--pc-tx',((x/r.width-.5)*-k).toFixed(1)+'px');c.style.setProperty('--pc-ty',((y/Math.max(r.height,1)-.5)*-k*.7).toFixed(1)+'px')},{passive:true});
@@ -2111,7 +2130,7 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 .oc-its{margin:16px 24px 0;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}
 .oc-it{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;font-size:13.5px}
 .oc-it img{width:52px;height:52px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff}
-.oc-it .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
+.oc-it .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
 .oc-it small{color:var(--muted)}
 .oc-q{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;margin-top:4px}
 .oc-q button{all:unset;cursor:pointer;width:26px;height:24px;text-align:center;color:var(--blue-600);font-weight:700}.oc-q span{min-width:18px;text-align:center;font-size:13px}
@@ -2157,7 +2176,7 @@ body.oc-lock{overflow:hidden}
       <div class="bt">${u?`<a class="p" href="/account.html#orders">${t('acc')}</a>`:''}<button type="button" class="oc-cl${u?'':' p'}">${t('close')}</button></div><p style="font-size:12px;margin-top:14px">${t('demo')}</p></div></div>`;return}
     el.innerHTML=`<div class="oc-box"><button class="oc-x" type="button" aria-label="${t('close')}">✕</button>
     <div class="oc-hd"><h3><span class="ic"><svg class="i"><use href="#call"/></svg></span>${t('h')}</h3><p>${t('p')}</p></div>
-    <div class="oc-its">${st.items.map((x,i)=>`<div class="oc-it"><img src="${x.img}" alt=""><div><span class="t">${x.t}</span>
+    <div class="oc-its">${st.items.map((x,i)=>`<div class="oc-it"><img src="${x.img}" alt=""><div><span class="nm">${x.t}</span>
       ${st.single?`<div class="oc-q"><button type="button" data-d="-1" aria-label="−">−</button><span>${x.q}</span><button type="button" data-d="1" aria-label="+">+</button></div>`:`<small>${x.q} ${t('pcs')} × ${fmt(x.p)}</small>`}</div><b>${fmt(x.p*x.q)}</b></div>`).join('')}</div>
     <div class="oc-tot"><span>${t('total')}</span><b>${fmt(tot)}</b></div>
     <form class="oc-f" novalidate><label>${t('name')}<input name="name" autocomplete="name" placeholder="${t('namePh')}" value="${(st.name||'').replace(/"/g,'&quot;')}"></label>

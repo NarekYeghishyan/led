@@ -37,8 +37,8 @@ function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pr
  if(getComputedStyle(el).position==='static')el.style.position='relative';
  el.classList.add('fx',pri?'fx-p':'fx-s');el.insertAdjacentHTML('beforeend','<span class="fx-g"></span><span class="fx-sh"></span>');return el}
 const big=el=>el.offsetWidth>90;
-document.addEventListener('pointerover',e=>{const el=e.target.closest&&e.target.closest('button,a');if(el)prep(el)});
-document.addEventListener('pointermove',e=>{const el=e.target.closest&&e.target.closest('.fx');if(!el)return;const r=el.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse')return;const el=e.target.closest&&e.target.closest('button,a');if(el)prep(el)});
+document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const el=e.target.closest&&e.target.closest('.fx');if(!el)return;const r=el.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
  el.style.setProperty('--fx-x',x+'px');el.style.setProperty('--fx-y',y+'px');
  if(el.classList.contains('fx-p')&&big(el)){el.style.setProperty('--fx-tx',((x/r.width-.5)*3).toFixed(1)+'px');el.style.setProperty('--fx-ty',((y/r.height-.5)*2).toFixed(1)+'px')}},{passive:true});
 document.addEventListener('pointerout',e=>{const el=e.target.closest&&e.target.closest('.fx');if(el&&!el.contains(e.relatedTarget)){el.style.removeProperty('--fx-tx');el.style.removeProperty('--fx-ty')}});

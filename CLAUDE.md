@@ -239,3 +239,8 @@ stock and prices from the Access sync. Until then the templates are design refer
   cart "Գնել 1 քայլով" (`#spOne`) → all cart items, cart emptied after. Name prefilled from `led-user`, phone required (+374 mask, 8 digits),
   comment. Success: request number, "manager calls in 10 min"; saved to `led-orders` (shows in account). Esc/✕/backdrop close; bottom
   sheet on phones. The old `#mdl` on product.html is no longer opened. Demo — nothing is sent. Backup `led-static-backup-20261120zw.tgz`. Published.
+- 2026-11-20 — Hand cursor on everything clickable (product cards `.prod`, favourites/compare cards, bundle items, all buttons/links,
+  radio/checkbox labels, selects) — rule at the top of `card_fx.html`. Mobile fix: button/card hover effects (btn_fx/card_fx) now start
+  only for a real mouse (`pointerType==='mouse'`); on phones they added spans on the first touch, so iOS took the first tap as hover and
+  buttons (incl. 1-click) needed two taps. 1-click modal item name class `.t` → `.nm` (`.t` is the trust-tile class and got its effect).
+  Backup `led-static-backup-20261120zx.tgz`. Published.

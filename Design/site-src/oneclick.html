@@ -12,7 +12,7 @@
 .oc-its{margin:16px 24px 0;border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow:auto}
 .oc-it{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;font-size:13.5px}
 .oc-it img{width:52px;height:52px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff}
-.oc-it .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
+.oc-it .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
 .oc-it small{color:var(--muted)}
 .oc-q{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;margin-top:4px}
 .oc-q button{all:unset;cursor:pointer;width:26px;height:24px;text-align:center;color:var(--blue-600);font-weight:700}.oc-q span{min-width:18px;text-align:center;font-size:13px}
@@ -58,7 +58,7 @@ body.oc-lock{overflow:hidden}
       <div class="bt">${u?`<a class="p" href="/account.html#orders">${t('acc')}</a>`:''}<button type="button" class="oc-cl${u?'':' p'}">${t('close')}</button></div><p style="font-size:12px;margin-top:14px">${t('demo')}</p></div></div>`;return}
     el.innerHTML=`<div class="oc-box"><button class="oc-x" type="button" aria-label="${t('close')}">✕</button>
     <div class="oc-hd"><h3><span class="ic"><svg class="i"><use href="#call"/></svg></span>${t('h')}</h3><p>${t('p')}</p></div>
-    <div class="oc-its">${st.items.map((x,i)=>`<div class="oc-it"><img src="${x.img}" alt=""><div><span class="t">${x.t}</span>
+    <div class="oc-its">${st.items.map((x,i)=>`<div class="oc-it"><img src="${x.img}" alt=""><div><span class="nm">${x.t}</span>
       ${st.single?`<div class="oc-q"><button type="button" data-d="-1" aria-label="−">−</button><span>${x.q}</span><button type="button" data-d="1" aria-label="+">+</button></div>`:`<small>${x.q} ${t('pcs')} × ${fmt(x.p)}</small>`}</div><b>${fmt(x.p*x.q)}</b></div>`).join('')}</div>
     <div class="oc-tot"><span>${t('total')}</span><b>${fmt(tot)}</b></div>
     <form class="oc-f" novalidate><label>${t('name')}<input name="name" autocomplete="name" placeholder="${t('namePh')}" value="${(st.name||'').replace(/"/g,'&quot;')}"></label>
