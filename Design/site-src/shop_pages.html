@@ -1,4 +1,46 @@
 <style>
+/* checkout */
+.co-s{padding:20px 22px;margin-bottom:16px}
+.co-s h3{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:18px}
+.co-s h3 i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--blue-600);color:#fff;display:grid;place-items:center;font-size:13px}
+.co-hint{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:14px;color:var(--muted)}.co-hint svg{width:18px;height:18px;color:var(--blue-600)}.co-hint a{color:var(--blue-600);font-weight:600}
+.co-seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:14px}
+.co-seg label{padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);transition:all .2s}
+.co-seg label.on{background:#fff;color:var(--blue-700);box-shadow:0 2px 8px rgba(14,26,46,.08)}.co-seg input,.co-inst input{display:none}
+.co-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:12px}
+.co-g label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#33415A}.co-g label.w{grid-column:1/-1}
+.co input:not([type=radio]):not([type=checkbox]),.co select,.co textarea{font:inherit;font-size:14.5px;font-weight:400;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff;color:inherit;outline:none;width:100%;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+.co textarea{min-height:90px;resize:vertical}
+.co input:focus,.co select:focus,.co textarea:focus{border-color:var(--blue-600);box-shadow:0 0 0 4px rgba(20,104,220,.14)}
+.co .bad{border-color:#E5484D!important;box-shadow:0 0 0 4px rgba(229,72,77,.12)!important}
+.co-store{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--blue-50)}
+.co-store>svg{width:22px;height:22px;color:var(--blue-600);flex:none}.co-store div{flex:1;display:flex;flex-direction:column;gap:3px}.co-store small{color:#4A5870;font-size:13px}
+.co-store a{color:var(--blue-600)}.co-store a svg{width:20px;height:20px}
+.co-chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}.co-chips small{color:var(--muted)}
+.co-chips button{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer}.co-chips button:hover{border-color:var(--blue-600);color:var(--blue-700)}
+.co-pay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.co-inst{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:14px}
+.co-inst label{border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-weight:600}.co-inst label.on{border-color:var(--blue-600);background:var(--blue-50);color:var(--blue-700)}
+.co-inst b{margin-left:auto;font-size:17px}.co-inst b small{font-weight:400;color:var(--muted);font-size:12.5px}
+.co-chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px;cursor:pointer;border-radius:8px}.co-chk{align-items:flex-start;line-height:1.4}.co-chk input{margin-top:1px;width:17px;height:17px;accent-color:var(--blue-600);flex:none}.co-chk a{color:var(--blue-600)}
+.co-chk.bad{color:#C23B3F;box-shadow:none!important}
+.co-its{display:flex;flex-direction:column;gap:10px;max-height:260px;overflow:auto;margin-bottom:12px;padding:2px 2px 12px;border-bottom:1px solid var(--line)}
+.co-its>div{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13.5px}
+.co-its .im{position:relative;width:44px;height:44px;border:1px solid var(--line);border-radius:8px;background:#fff}.co-its img{width:100%;height:100%;object-fit:contain}
+.co-its .im i{position:absolute;top:-6px;right:-6px;font-style:normal;background:var(--slate-500,#64748B);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;display:grid;place-items:center}
+.co-its .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.co-err{display:block;color:#C23B3F;font-weight:600;margin-top:8px;min-height:1em}
+.co-done{max-width:720px;margin:10px auto 0;padding:36px 32px;text-align:center}
+.co-done .art{width:72px;height:72px;border-radius:50%;background:#E6F6EC;color:#1C7C43;display:grid;place-items:center;margin:0 auto 14px;animation:coPop .5s cubic-bezier(.3,1.6,.5,1)}
+.co-done .art svg{width:36px;height:36px}@keyframes coPop{from{transform:scale(.3);opacity:0}}
+.co-done h1{margin:0 0 12px;font-size:28px}.co-num{display:inline-flex;flex-direction:column;background:var(--blue-50);border-radius:12px;padding:10px 22px;margin-bottom:10px}
+.co-num small{color:var(--muted)}.co-num b{font-size:22px;color:var(--blue-700)}
+.co-next{text-align:left;margin:22px 0}.co-next h3{margin:0 0 10px}.co-next ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.co-next li{display:flex;gap:12px;align-items:center}.co-next li svg{width:20px;height:20px;color:var(--blue-600);flex:none}
+.co-sum2{text-align:left;border-top:1px solid var(--line);padding-top:12px;font-size:14px}.co-sum2>div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+.co-sum2 .t{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-size:17px}
+.co-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}.co-demo{display:block;color:var(--muted);margin-top:14px}
+@media (max-width:600px){.co-g,.co-pay{grid-template-columns:minmax(0,1fr)}.co-s{padding:16px}.co-done{padding:24px 16px}}
 .shop{padding-bottom:56px}
 .sp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:6px 0 22px}
 .sp-head h1{font-size:32px;letter-spacing:-.02em;margin:0;display:flex;align-items:center;gap:12px}
@@ -226,8 +268,113 @@ root.addEventListener('click',e=>{if(page!=='cart')return;const r=e.target.close
  if(e.target.closest('.tf')){const x=item({id});if(!S.has('fav',id))S.add('fav',{id,t:x.t,img:x.img,p:x.p,spec:x.spec});render();return}
  const u=e.target.closest('[data-up]');if(u){const x=C[u.dataset.up];if(!S.has('cart',x.id))S.add('cart',{id:x.id});return}
  if(e.target.id==='spApply'){const ok=document.getElementById('spCode').value.trim().toUpperCase()==='LED5';promo=ok;render();if(!ok){const m=document.getElementById('spPm');m.textContent=T.promoBad;m.className='bad'}return}
- if(e.target.id==='spGo'||e.target.id==='spOne'){S.toast(T.orderOk)}});
+ if(e.target.id==='spGo'){sessionStorage.setItem('led-co',JSON.stringify({...(JSON.parse(sessionStorage.getItem('led-co')||'{}')),ship,promo}));location.href='/checkout.html';return}
+ if(e.target.id==='spOne'){S.toast(T.orderOk)}});
 root.addEventListener('change',e=>{if(e.target.name==='ship'){ship=e.target.value;render()}});
+
+/* ---------- CHECKOUT ---------- */
+const CT={
+ h:['Оформление заказа','Պատվերի ձևակերպում','Checkout'],back:['← Вернуться в корзину','← Վերադառնալ զամբյուղ','← Back to cart'],
+ c1:['Контактные данные','Կոնտակտային տվյալներ','Contact details'],have:['Уже покупали у нас?','Արդեն գնե՞լ եք մեզանից','Bought from us before?'],in:['Войти','Մուտք','Log in'],
+ hello:['Вы вошли как','Դուք մուտք եք գործել որպես','Logged in as'],per:['Частное лицо','Ֆիզիկական անձ','Private person'],com:['Компания','Ընկերություն','Company'],
+ name:['Имя и фамилия','Անուն, ազգանուն','Full name'],phone:['Телефон','Հեռախոս','Phone'],email:['E‑mail','Էլ. հասցե','Email'],
+ cname:['Название компании','Ընկերության անվանում','Company name'],tax:['ИНН (ՀՎՀՀ)','ՀՎՀՀ','Tax code (TIN)'],
+ c2:['Способ получения','Ստանալու եղանակը','Delivery'],city:['Город','Քաղաք','City'],marz:['Область','Մարզ','Province'],adr:['Улица, дом, квартира','Փողոց, շենք, բնակարան','Street, building, flat'],
+ date:['Дата','Ամսաթիվ','Date'],time:['Время','Ժամ','Time'],saved:['Мои адреса','Իմ հասցեները','My addresses'],
+ store:['Шоурум LED Computers','LED Computers ցուցասրահ','LED Computers showroom'],storeA:['Киевян 11‑34, Ереван · Пн–Сб 10:30–19:30','Կիևյան 11‑34, Երևան · Երկ–Շբթ 10:30–19:30','Kievyan 11‑34, Yerevan · Mon–Sat 10:30–19:30'],
+ storeR:['Заказ будет готов через 1 час — мы пришлём SMS.','Պատվերը պատրաստ կլինի 1 ժամից․ կուղարկենք SMS։','Your order will be ready in 1 hour — we will text you.'],
+ c3:['Способ оплаты','Վճարման եղանակը','Payment'],
+ cash:['Наличными при получении','Կանխիկ ստանալիս','Cash on delivery'],cashS:['Курьеру или в магазине','Առաքիչին կամ խանութում','To the courier or in store'],
+ card:['Картой онлайн','Քարտով առցանց','Card online'],cardS:['ArCa, Visa, Mastercard','ArCa, Visa, Mastercard','ArCa, Visa, Mastercard'],
+ idram:['Idram / TelCell','Idram / TelCell','Idram / TelCell'],idramS:['Электронный кошелёк','Էլեկտրոնային դրամապանակ','E‑wallet'],
+ inst:['Рассрочка','Ապառիկ','Instalments'],instS:['Без первого взноса, решение за 15 мин','Առանց կանխավճարի, որոշումը՝ 15 րոպեում','No down payment, decision in 15 min'],
+ bank:['Безналичный расчёт','Անկանխիկ փոխանցում','Bank transfer'],bankS:['Счёт для юр. лиц с НДС','Հաշիվ-ապրանքագիր ԱԱՀ-ով','VAT invoice for companies'],
+ months:['Срок','Ժամկետ','Term'],mon:['мес.','ամիս','mo.'],perMo:['в месяц','ամսական','per month'],
+ c4:['Комментарий к заказу','Մեկնաբանություն','Order comment'],cmt:['Например: позвоните за час до доставки','Օրինակ՝ զանգահարեք առաքումից մեկ ժամ առաջ','E.g. call an hour before delivery'],
+ call:['Перезвоните мне для подтверждения','Զանգահարեք ինձ հաստատելու համար','Call me to confirm'],agree:['Я согласен с','Համաձայն եմ','I agree to the'],terms:['условиями покупки и возврата','գնման և վերադարձի պայմաններին','purchase and return terms'],
+ place:['Подтвердить заказ','Հաստատել պատվերը','Place order'],items:['Товары в заказе','Պատվերի ապրանքները','Items in order'],edit:['Изменить','Փոխել','Edit'],
+ req:['Заполните обязательные поля','Լրացրեք պարտադիր դաշտերը','Please fill in the required fields'],agreeReq:['Подтвердите согласие с условиями','Հաստատեք պայմանների համաձայնությունը','Please accept the terms'],
+ ok:['Спасибо! Заказ принят','Շնորհակալություն։ Պատվերն ընդունված է','Thank you! Your order is placed'],num:['Номер заказа','Պատվերի համար','Order number'],
+ okP:['Мы отправили подтверждение на','Հաստատումն ուղարկել ենք','We sent a confirmation to'],next:['Что дальше','Ինչ է լինելու հետո','What happens next'],
+ n1:['Менеджер позвонит в течение 15 минут для подтверждения','Մենեջերը կզանգի 15 րոպեի ընթացքում՝ հաստատելու համար','A manager will call within 15 minutes to confirm'],
+ n2:['Мы соберём и проверим заказ','Կհավաքենք և կստուգենք պատվերը','We pack and check your order'],
+ n3:['Доставим или подготовим к самовывозу','Կառաքենք կամ կպատրաստենք ինքնատարման համար','We deliver it or get it ready for pick-up'],
+ toAcc:['Мои заказы','Իմ պատվերները','My orders'],cont:['Продолжить покупки','Շարունակել գնումները','Continue shopping'],demo:['Демо: заказ не отправляется в магазин.','Դեմո՝ պատվերը խանութ չի ուղարկվում։','Demo: the order is not sent to the store.'],
+ today:['Сегодня','Այսօր','Today'],tomorrow:['Завтра','Վաղը','Tomorrow']
+};
+const ct=k=>CT[k][L()];
+const MARZ=[['Ереван','Երևան','Yerevan'],['Арагацотн','Արագածոտն','Aragatsotn'],['Арарат','Արարատ','Ararat'],['Армавир','Արմավիր','Armavir'],['Гегаркуник','Գեղարքունիք','Gegharkunik'],['Котайк','Կոտայք','Kotayk'],['Лори','Լոռի','Lori'],['Ширак','Շիրակ','Shirak'],['Сюник','Սյունիք','Syunik'],['Тавуш','Տավուշ','Tavush'],['Вайоц Дзор','Վայոց Ձոր','Vayots Dzor']];
+const CO_K='led-co';
+let co=(()=>{try{return JSON.parse(sessionStorage.getItem(CO_K))||{}}catch(e){return{}}})();
+const coSave=()=>sessionStorage.setItem(CO_K,JSON.stringify(co));
+let coDone=null;
+function checkout(){
+ const u=(()=>{try{return JSON.parse(localStorage.getItem('led-user'))}catch(e){return null}})();
+ if(coDone){const o=coDone;root.innerHTML=crumbs(ct('h'))+`<div class="sp-card co-done"><div class="art">${ic('check')}</div><h1>${ct('ok')}</h1>
+   <div class="co-num"><small>${ct('num')}</small><b>№ ${o.n}</b></div>${o.email?`<p>${ct('okP')} <b>${o.email}</b></p>`:''}
+   <div class="co-next"><h3>${ct('next')}</h3><ol><li>${ic('call')}<span>${ct('n1')}</span></li><li>${ic('ix-box')}<span>${ct('n2')}</span></li><li>${ic('truck')}<span>${ct('n3')}</span></li></ol></div>
+   <div class="co-sum2">${o.it.map(x=>`<div><span>${x[0]} × ${x[2]}</span><b>${fmt(x[2]*x[3])}</b></div>`).join('')}<div class="t"><span>${T.total}</span><b>${fmt(o.tot)}</b></div></div>
+   <div class="co-btns">${u?`<a class="sp-b p" href="/account.html#orders">${ct('toAcc')}</a>`:''}<a class="sp-b${u?'':' p'}" href="/category.html">${ct('cont')}</a></div><small class="co-demo">${ct('demo')}</small></div>`;return}
+ const v=S.get('cart').map(item),n=v.reduce((s,x)=>s+x.q,0);
+ if(!v.length){root.innerHTML=head('cart',ct('h'),'')+empty('cart',T.emptyCart,T.emptyCartP);return}
+ if(u&&!co.u){co.u=1;co.name=co.name||u.fname||'';co.email=co.email||u.email||'';co.phone=co.phone||u.phone||'';if(u.type==='dealer'||u.type==='corporate'){co.who='com';co.cname=u.company||u.law_name||u.dealer_company||'';co.tax=u.taxcode||''}if(u.city)co.city=u.city;if(u.address)co.adr=u.address}
+ const ship=co.ship||'pick',pay=co.pay||'cash',who=co.who||'per',promo=!!co.promo;
+ const goods=v.reduce((s,x)=>s+x.p*x.q,0),old=v.reduce((s,x)=>s+(x.o||x.p)*x.q,0),d=promo?Math.round(goods*.05):0;
+ const fee={pick:0,cour:goods>=FREE?0:1000,reg:2500}[ship],tot=goods-d+fee,m=+(co.m||24);
+ const val=k=>(co[k]||'').replace(/"/g,'&quot;');
+ const F=(k,l,ty='text',w='',ex='')=>`<label class="${w}">${l} *<input name="${k}" type="${ty}" value="${val(k)}" required${ty==='tel'?' inputmode="tel" autocomplete="tel"':''}${ex}></label>`;
+ const days=[0,1,2,3,4].map(i=>{const dt=new Date();dt.setDate(dt.getDate()+i+1);return [i,i===0?ct('tomorrow'):dt.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{weekday:'short',day:'numeric',month:'short'})]});
+ const adrs=(()=>{try{return JSON.parse(localStorage.getItem('led-adr'))||[]}catch(e){return[]}})();
+ const PAY=[['cash','ix-wallet'],['card','card'],['idram','phone'],['inst','doc'],...(who==='com'?[['bank','store']]:[])];
+ root.innerHTML=head('ix-box',ct('h'),`${n} ${T.items} · ${fmt(tot)}`,`<div class="sp-steps"><a href="/cart.html" class="on" style="display:flex;gap:6px;align-items:center;color:inherit;text-decoration:none"><i>✓</i>${T.cart}</a><b></b><span class="on"><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+
+ `<form class="sp-cart co" id="coForm" novalidate><div>
+  <div class="sp-card co-s"><h3><i>1</i>${ct('c1')}</h3>
+   ${u?`<p class="co-hint">${ic('user')}${ct('hello')} <b>${u.fname||u.login}</b></p>`:`<p class="co-hint">${ic('user')}${ct('have')} <a href="/login.html">${ct('in')}</a></p>`}
+   <div class="co-seg">${[['per',ct('per')],['com',ct('com')]].map(([k,l])=>`<label class="${who===k?'on':''}"><input type="radio" name="who" value="${k}"${who===k?' checked':''}>${l}</label>`).join('')}</div>
+   <div class="co-g">${F('name',ct('name'),'text','w',' autocomplete="name" minlength="3"')}${F('phone',ct('phone'),'tel')}${F('email',ct('email'),'email','',' autocomplete="email"')}
+    ${who==='com'?F('cname',ct('cname'),'text','',' autocomplete="organization"')+F('tax',ct('tax'),'text','',' inputmode="numeric" minlength="8" maxlength="8"'):''}</div></div>
+  <div class="sp-card co-s"><h3><i>2</i>${ct('c2')}</h3><div class="sp-opts">${[['pick','sp-store',T.pickS,0],['cour','sp-truck',T.courS,goods>=FREE?0:1000],['reg','sp-map',T.regS,2500]].map(([k,i,s,f])=>
+   `<label class="sp-opt${ship===k?' on':''}"><input type="radio" name="ship" value="${k}"${ship===k?' checked':''}>${ic(i)}<span><b>${T[k]}</b><small>${s} · ${f?fmt(f):T.free}</small></span></label>`).join('')}</div>
+   ${ship==='pick'?`<div class="co-store">${ic('pin')}<div><b>${ct('store')}</b><small>${ct('storeA')}</small><small>${ct('storeR')}</small></div><a href="/contacts.html" target="_blank">${ic('arrow')}</a></div>`:
+   `${adrs.length?`<div class="co-chips"><small>${ct('saved')}:</small>${adrs.map((a,i)=>`<button type="button" data-adr="${i}">${a.l}</button>`).join('')}</div>`:''}
+   <div class="co-g">${ship==='reg'?`<label>${ct('marz')} *<select name="marz" required>${MARZ.slice(1).map(x=>`<option${co.marz===x[0]?' selected':''} value="${x[0]}">${x[L()]}</option>`).join('')}</select></label>`+F('city',ct('city')):''}
+    ${F('adr',ct('adr'),'text','w',' autocomplete="street-address" minlength="3"')}
+    ${ship==='cour'?`<label>${ct('date')}<select name="day">${days.map(([i,l])=>`<option value="${i}"${+co.day===i?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label>${ct('time')}<select name="slot">${['10:00–13:00','13:00–16:00','16:00–19:00'].map(s=>`<option${co.slot===s?' selected':''}>${s}</option>`).join('')}</select></label>`:''}</div>`}</div>
+  <div class="sp-card co-s"><h3><i>3</i>${ct('c3')}</h3><div class="co-pay">${PAY.map(([k,i])=>
+   `<label class="sp-opt${pay===k?' on':''}"><input type="radio" name="pay" value="${k}"${pay===k?' checked':''}>${ic(i)}<span><b>${ct(k)}</b><small>${ct(k+'S')}</small></span></label>`).join('')}</div>
+   ${pay==='inst'?`<div class="co-inst"><span>${ct('months')}:</span>${[6,12,24,36].map(x=>`<label class="${m===x?'on':''}"><input type="radio" name="m" value="${x}"${m===x?' checked':''}>${x} ${ct('mon')}</label>`).join('')}<b>${fmt(tot/m)} <small>${ct('perMo')}</small></b></div>`:''}
+   ${pay==='card'?`<div class="sp-pay" style="margin-top:12px"><span>ArCa</span><span>VISA</span><span>Mastercard</span></div>`:''}</div>
+  <div class="sp-card co-s"><h3><i>4</i>${ct('c4')}</h3><textarea name="cmt" placeholder="${ct('cmt')}">${co.cmt||''}</textarea>
+   <label class="co-chk"><input type="checkbox" name="call"${co.call!==false?' checked':''}>${ct('call')}</label></div>
+ </div>
+ <aside class="sp-card sp-side"><h3 style="display:flex;justify-content:space-between">${ct('items')} <a href="/cart.html" style="font-size:13.5px;color:var(--blue-600)">${ct('edit')}</a></h3>
+  <div class="co-its">${v.map(x=>`<div><span class="im"><img src="${x.img}" alt=""><i>${x.q}</i></span><span class="t">${x.t}</span><b>${fmt(x.p*x.q)}</b></div>`).join('')}</div>
+  <div class="sp-ln"><span>${T.goods} (${n})</span><b>${fmt(old)}</b></div>
+  ${old>goods?`<div class="sp-ln disc"><span>−%</span><b>−${fmt(old-goods)}</b></div>`:''}
+  ${d?`<div class="sp-ln disc"><span>${T.disc} LED5</span><b>−${fmt(d)}</b></div>`:''}
+  <div class="sp-ln"><span>${T.ship}</span><b>${fee?fmt(fee):T.free}</b></div>
+  <div class="sp-tot"><span>${T.total}</span><b>${fmt(tot)}</b></div>
+  ${pay==='inst'?`<div class="sp-mo"><span>${ct('inst')} ${m} ${ct('mon')}</span><b>${fmt(tot/m)}${T.mo}</b></div>`:''}
+  <label class="co-chk"><input type="checkbox" name="agree"${co.agree?' checked':''}><span>${ct('agree')} <a href="/exchange.html" target="_blank">${ct('terms')}</a></span></label>
+  <button class="sp-b p big" type="submit">${ct('place')}</button><small class="co-err" id="coErr"></small>
+  <div class="sp-safe">${ic('sp-shield')}${T.safe}</div>
+ </aside></form>`;
+}
+root.addEventListener('input',e=>{if(page!=='checkout'||!e.target.name)return;const t=e.target;co[t.name]=t.type==='checkbox'?t.checked:t.value;t.classList.remove('bad');coSave()});
+root.addEventListener('change',e=>{if(page!=='checkout'||!e.target.name)return;const t=e.target;co[t.name]=t.type==='checkbox'?t.checked:t.value;coSave();
+ if(['who','ship','pay','m'].includes(t.name)){if(t.name==='who'&&t.value==='per'&&co.pay==='bank')co.pay='cash';render()}});
+root.addEventListener('click',e=>{if(page!=='checkout')return;const b=e.target.closest('[data-adr]');if(!b)return;
+ const a=JSON.parse(localStorage.getItem('led-adr'))[+b.dataset.adr];co.adr=a.a;co.city=a.city;coSave();render()});
+window.addEventListener('submit',e=>{if(page!=='checkout'||e.target.id!=='coForm')return;e.preventDefault();e.stopImmediatePropagation();const f=e.target;let ok=true;
+ f.querySelectorAll('[required]').forEach(x=>{const bad=!x.value.trim()||(x.minLength>0&&x.value.trim().length<x.minLength)||(x.type==='email'&&!/^\S+@\S+\.\S+$/.test(x.value))||(x.type==='tel'&&x.value.replace(/\D/g,'').length<11);x.classList.toggle('bad',bad);if(bad)ok=false});
+ const er=document.getElementById('coErr');const ag=f.querySelector('[name=agree]');ag.parentNode.classList.toggle('bad',!ag.checked);
+ if(!ok||!ag.checked){er.textContent=ok?ct('agreeReq'):ct('req');const first=f.querySelector('.bad');first&&first.scrollIntoView({behavior:'smooth',block:'center'});return}
+ const v=S.get('cart').map(item),goods=v.reduce((s,x)=>s+x.p*x.q,0),d=co.promo?Math.round(goods*.05):0,ship=co.ship||'pick',fee={pick:0,cour:goods>=FREE?0:1000,reg:2500}[ship];
+ const o={n:'LED-'+(105000+Math.floor(Math.random()*900)),d:new Date().toISOString().slice(0,10),s:0,step:0,pay:{cash:0,card:1,inst:2,idram:1,bank:1}[co.pay||'cash'],dl:ship==='pick'?0:1,
+  it:v.map(x=>[x.t,x.img,x.q,x.p]),tot:goods-d+fee,email:co.email};
+ try{const L2=JSON.parse(localStorage.getItem('led-orders'))||[];L2.unshift(o);localStorage.setItem('led-orders',JSON.stringify(L2.slice(0,20)))}catch(_){}
+ coDone=o;sessionStorage.removeItem(CO_K);co={};S.set('cart',[]);scrollTo({top:0,behavior:'smooth'})},true);
 
 /* ---------- FAVOURITES ---------- */
 let fsort=0;
@@ -277,7 +424,7 @@ root.addEventListener('click',e=>{if(page!=='compare')return;
  if(e.target.closest('.add')){e.preventDefault();if(!S.has('cart',id)){const x=item({id});S.add('cart',{id,t:x.t,img:x.img,p:x.p,spec:x.spec})}else location.href=S.URL.cart}});
 root.addEventListener('change',e=>{if(e.target.id==='spOnly'){only=e.target.checked;root.querySelector('.sp-ct').classList.toggle('only',only)}});
 
-const R={cart,favorites:fav,compare:cmp};
+const R={cart,favorites:fav,compare:cmp,checkout};
 function render(){R[page]()}
 S.subscribe(()=>render());
 document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(render)));

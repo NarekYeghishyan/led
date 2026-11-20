@@ -13,7 +13,7 @@ tail = re.sub(r"<script>\s*\(function\(\)\{\s*const vb=.*?</script>", "", tail, 
 tail = re.sub(r"<!--dual-range-->.*?<!--/dual-range-->", "", tail, flags=re.S)
 assert "getElementById('tree')" not in tail and "cgrid3" not in tail
 
-TITLES = {"cart": "Զամբյուղ — LED Computers", "favorites": "Ընտրյալներ — LED Computers", "compare": "Համեմատել — LED Computers"}
+TITLES = {"cart": "Զամբյուղ — LED Computers", "favorites": "Ընտրյալներ — LED Computers", "compare": "Համեմատել — LED Computers", "checkout": "Պատվերի ձևակերպում — LED Computers"}
 for page, title in TITLES.items():
     h = head.replace("<title>LED.AM Category Page</title>", f"<title>{title}</title>")
     html = (h + f'<main class="wrap shop" id="shop" data-page="{page}"><div id="spRoot"></div>\n' + stubs
@@ -64,7 +64,7 @@ for key, langs in blocks.items():
     (site / f"{INFO[key]}.html").write_text(html, encoding="utf-8")
     print("info", INFO[key], len(html))
 info_js = (pathlib.Path(__file__).parent / "info_shared.html").read_text(encoding="utf-8")
-for name in ["index.html", "category.html", "product.html", "cart.html", "favorites.html", "compare.html", "assembly.html"] + [f"{v}.html" for v in INFO.values()]:
+for name in ["index.html", "category.html", "product.html", "cart.html", "favorites.html", "compare.html", "checkout.html", "assembly.html"] + [f"{v}.html" for v in INFO.values()]:
     p = site / name
     t = p.read_text(encoding="utf-8").replace("https://www.led.am/ru/assembly.html", "/assembly.html")
     t = re.sub(r"<!--asm-link-->.*?<!--/asm-link-->", "", t, flags=re.S)

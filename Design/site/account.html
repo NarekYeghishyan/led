@@ -757,7 +757,9 @@ document.addEventListener('DOMContentLoaded',function(){
     {n:'LED-103977',d:'2026-09-03',s:2,step:3,pay:0,dl:1,it:[['ASUS VivoBook 16','img/p1.webp',1,329000],['HyperX Cloud II','img/p4.webp',1,39000],['Kingston FURY 16 GB DDR5','img/p6.webp',2,26000]]},
     {n:'LED-103402',d:'2026-07-19',s:3,step:0,pay:1,dl:1,it:[['HP Pavilion 15','img/p2.webp',1,355000]]},
     {n:'LED-104901',d:'2026-11-19',s:0,step:0,pay:1,dl:0,it:[['Xiaomi Redmi Pad SE','img/p1.webp',1,99000]]}
-  ].sort((a,b)=>b.d.localeCompare(a.d));
+  ];
+  try{(JSON.parse(localStorage.getItem('led-orders'))||[]).forEach(o=>ORD.push(o))}catch(e){}
+  ORD.sort((a,b)=>b.d.localeCompare(a.d));
   const sum=o=>o.it.reduce((s,x)=>s+x[2]*x[3],0), cnt=o=>o.it.reduce((s,x)=>s+x[2],0);
   const dfmt=d=>new Date(d).toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{day:'numeric',month:'long',year:'numeric'});
   let sec=(location.hash||'#ov').slice(1), flt=-1, adrEdit=null;
@@ -1282,6 +1284,45 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 .mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
 </style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
 ['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
 
 
 

@@ -227,3 +227,10 @@ stock and prices from the Access sync. Until then the templates are design refer
   cart, invoice = print), profile edit (saved), addresses (add/edit/delete/make default), password change (match check), logout. Header
   "Кабинет" → account when logged in, else login. Shared form validation is now `window.LEDInfoForm(form)` and fires an `ok` event with the
   form data. Source `site-src/account_content.html` (CSS + JS in the HY block). Backup `led-static-backup-20261120zu.tgz`. Published.
+- 2026-11-20 — New page `checkout.html` (Պատվերի ձևակերպում), 4th shop page in `shop_pages.html` (`checkout()`), HY/RU/EN. Cart "Оформить
+  заказ" opens it and carries delivery choice + LED5 promo (sessionStorage `led-co`, form values kept there too). Steps: 1 contacts (private /
+  company → name + 8-digit TIN; prefilled from `led-user`, "log in" link), 2 delivery (pick-up showroom card / courier with address, date,
+  time slot / Armenia with province + city; saved addresses from `led-adr` as chips), 3 payment (cash, card, Idram/TelCell, instalments with
+  6/12/24/36-month monthly amount, bank transfer for companies), 4 comment + "call me". Sticky summary with items, totals, terms checkbox.
+  Validation marks every missing field (runs before the phone mask). Success screen: order number, next steps, items; order saved to
+  localStorage `led-orders` and shown in the account's orders; cart emptied. Demo — nothing is sent. Backup `led-static-backup-20261120zv.tgz`. Published.
