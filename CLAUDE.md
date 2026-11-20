@@ -306,3 +306,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   Backup `led-static-backup-20261121r.tgz`. Published.
 - 2026-11-21 — Compare on phones: long Armenian labels ("գնահատական") ran past the label column. Label column 112px, labels 12px with word
   wrapping, section headings on one line over the row. Checked at 375px in HY. Backup `led-static-backup-20261121s.tgz`. Published.
+- 2026-11-21 — Product page phones (≤560px): the 4 key-spec cards are a 2×2 grid (icon above text) instead of 4 stacked rows; description
+  highlights (battery/weight/thickness) 3 in a row; spec labels top-aligned; "Similar products" heading and its link wrap cleanly.
+  Backup `led-static-backup-20261121t.tgz`. Published.
