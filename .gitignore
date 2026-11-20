@@ -19,3 +19,6 @@ agent/config.ini
 agent/state.sqlite
 agent/logs/
 __pycache__/
+
+# stray root file
+/logo.png
