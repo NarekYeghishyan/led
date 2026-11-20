@@ -169,3 +169,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Product section tabs (`.ptabs`): underline grows + soft spotlight + lift, count badge turns blue; home tab pills lift/glow.
   Top menu items all the same height on hover (stretch). Fix: banner border glow was offset on `.credit` (its `>*{grid-column:1}` shrank the
   effect layers) — effect layers now `grid-area:auto`. Backup `led-static-backup-20261120ze.tgz`. Published.
+- 2026-11-20 — Product spec table: each group (`.sg`) gets the cursor spotlight + heading icon spring; rows fill with a blue wash from the
+  left, slide 6px, a blue dot appears before the name. Backup `led-static-backup-20261120zf.tgz`. Published.

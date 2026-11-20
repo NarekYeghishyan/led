@@ -1088,6 +1088,11 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1343,9 +1348,23 @@ nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
 .tabs span:not(.on):hover{border-color:var(--blue-600);color:var(--blue-700);translate:0 -2px;box-shadow:0 6px 14px rgba(20,104,220,.14);
  background:radial-gradient(60px circle at 50% 50%,rgba(47,127,234,.12),transparent 70%),var(--surface)}
 @media (prefers-reduced-motion:reduce){.ptabs a:hover,.tabs span:hover{translate:none}}
+/* ---- product spec table ---- */
+.sg.pc{border-radius:12px}.sg.pc>.pc-b,.sg.pc>.pc-sh{display:none}
+.sg dl div{border-radius:8px;transition:background-size .35s cubic-bezier(.2,.8,.2,1),padding .25s,translate .25s;
+ background:linear-gradient(90deg,var(--blue-50),rgba(232,240,252,0)) no-repeat 0 0/0 100%}
+.sg dl div:hover{background-size:100% 100%;translate:6px 0}
+.sg dl div:hover dt{color:var(--blue-700)}
+.sg dl div:hover dd{color:var(--ink)}
+.sg dt,.sg dd{transition:color .2s}
+.sg dl div:hover dt:before{opacity:1;transform:none}
+.sg dt:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--blue-600);align-self:center;opacity:0;transform:scale(0);transition:.25s;flex:none;margin-right:2px}
+.sg.pc h3 svg.i{transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+.sg.pc:hover h3 svg.i{transform:scale(1.15) rotate(-8deg)}
+.sg.pc:hover h3{color:var(--blue-700)}.sg h3{transition:color .2s}
+@media (prefers-reduced-motion:reduce){.sg dl div:hover{translate:none}}
 </style><script>
 (function(){
-const CARD='.prod,.sp-f,.sp-pc',TILE='#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p',ALL=[CARD,TILE,BAN].join(',');
+const CARD='.prod,.sp-f,.sp-pc',TILE='.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p',ALL=[CARD,TILE,BAN].join(',');
 function prep(c){if(c.closest('#stubs'))return;if(c._pc){if(!c.querySelector(':scope>.pc-g'))c._pc=0;else return}c._pc=1;
  const kind=c.matches(CARD)?'card':c.matches(BAN)?'ban':'tile';
  if(getComputedStyle(c).position==='static')c.style.position='relative';
