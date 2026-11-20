@@ -133,3 +133,7 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Phone mask on every phone field (`input[inputmode=tel]`/`[type=tel]`, also ones added later): `+374 XX XXX XXX`, accepts
   pasted 0XX…/374…/+374…, a form won't submit until 8 digits are entered (red ring). Source `site-src/phone_mask.html`, added to all 7 pages
   by `build_shop.py` (which now also strips category's `<!--dual-range-->` block from generated pages). Backup `led-static-backup-20261120t.tgz`. Published.
+- 2026-11-20 — Button hover system on all 7 pages (`site-src/btn_fx.html`, added by `build_shop.py`): primary blue buttons (`.btn.p`, `.addc`,
+  `.sp-b.p`, `.asm-b.p`, card cart, "Подробнее"…) get the catalog-button look — gradient wake + light sweep + glow + lift, plus a cursor
+  spotlight, slight magnetic pull and click ripple; secondary buttons a light blue version; header icons bounce. JS adds `.fx` and
+  `span.fx-g/.fx-sh` on first hover. Honors reduced-motion. Backup `led-static-backup-20261120u.tgz`. Published.
