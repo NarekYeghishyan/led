@@ -75,3 +75,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   **Edit `Design/site/index.html` from now on, not the concept files.**
 - 2026-11-20 — `category.html` uses the same top menu as home: logo → `/`, menu and catalog-menu links open
   `/category.html` (overrides the led.am link map for menu links). Keep the header block identical on both pages.
+- 2026-11-20 — Container: 1280px, and 1530px on screens ≥1600px (`@media (min-width:1600px)` rule), on both pages.
+  Client confirmed it. Keep this rule.
