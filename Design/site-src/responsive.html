@@ -88,6 +88,24 @@ img,video{max-width:100%}
   .fgrid>*:first-child{grid-column:1/-1}
   .fgrid>*:first-child p{max-width:none}
 }
+
+/* phone pass 2 */
+@media (max-width:1000px){.ip>.ip-nav:not(.ac-nav){order:2}}
+@media (max-width:600px){
+ .ip-hero{flex-direction:row!important;align-items:center!important;gap:14px!important;padding:18px 18px!important}
+ .ip-hero .ic{width:48px!important;height:48px!important;border-radius:14px!important}.ip-hero .ic svg{width:24px!important;height:24px!important}
+ .ip-hero h1{font-size:21px!important;margin:0 0 4px!important}.ip-hero p{font-size:13.5px!important}
+ .ip-card{padding:18px 16px!important}.ip-card h2{font-size:18px}
+ .asm-row{grid-template-columns:40px minmax(0,1fr) auto 28px!important;grid-template-areas:"ic t pr x" "sel sel q q";gap:10px!important;padding:12px 14px!important}
+ .asm-row>.ic{grid-area:ic;width:40px;height:40px}.asm-row>b{grid-area:t}.asm-row>.pr{grid-area:pr}.asm-row>.x,.asm-row>span:nth-child(6){grid-area:x}
+ .asm-row>select{grid-area:sel}.asm-row>.asm-q{grid-area:q;justify-self:end}
+ .asm-row:not(.on)>.asm-q,.asm-row:not(.on)>.pr,.asm-row:not(.on)>span:nth-child(6){display:none}
+ .asm-row:not(.on){grid-template-areas:"ic t t t" "sel sel sel sel"}
+ .asm-row>.asm-warn{grid-column:1/-1}
+ .sg dl div{grid-template-columns:minmax(0,42%) minmax(0,1fr)!important;gap:10px!important;font-size:13.5px}
+ .sp-ct col.lab{width:96px!important}.sp-ct th,.sp-ct td{font-size:13px}
+ footer a[href^="tel"]{white-space:nowrap}
+}
 </style>
 <script>(function(){const h=document.querySelector('header');if(!h)return;const set=()=>document.documentElement.style.setProperty('--hdr',(getComputedStyle(h).position==='sticky'||getComputedStyle(h).position==='fixed'?h.offsetHeight:0)+'px');set();addEventListener('resize',set);addEventListener('load',set);})();</script>
 

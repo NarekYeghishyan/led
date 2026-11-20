@@ -294,3 +294,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   hero, big full-width "Log in"/"Register" buttons, 16px inputs on all info forms (no iOS zoom). Backup `led-static-backup-20261121n.tgz`. Published.
 - 2026-11-21 — Registration phones: help sidebar below the form (≤1000px), compact hero, section headings separated by lines, bigger
   inputs, full-width "Register" button first in its row. Backup `led-static-backup-20261121o.tgz`. Published.
+- 2026-11-21 — Phone pass 2 (`responsive.html`, all pages): info pages (help pages, contacts, credit, track order, forgot password…) show
+  the content first and the help sidebar under it (≤1000px; not on account — its menu has `.ac-nav`); compact hero on phones. Assembly rows
+  on phones: icon + name (+ price, ×) on top, select + qty under it; empty rows hide qty/price. Product specs: name | value in two columns.
+  Compare label column narrower. Checked at 390px with headless Chrome. Backup `led-static-backup-20261121p.tgz`. Published.
