@@ -35,8 +35,18 @@ button { background: var(--accent); color: var(--accent-ink); border: 0; border-
 button:disabled { opacity: .5; cursor: default; }
 button.link { background: none; color: var(--side-text); padding: 0; }
 
-.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
-.login form { width: 100%; max-width: 360px; display: grid; gap: 12px; }
+.login {
+  min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 16px;
+  background:
+    radial-gradient(700px circle at 15% 10%, rgba(47,127,234,.45), transparent 60%),
+    radial-gradient(600px circle at 90% 95%, rgba(20,104,220,.35), transparent 60%),
+    var(--side);
+}
+.login form { width: 100%; max-width: 380px; display: grid; gap: 14px; padding: 28px; border: 0; border-radius: 16px; box-shadow: 0 24px 60px rgba(4,10,22,.45); }
+.login input { padding: 10px 12px; border-radius: 8px; transition: border-color .15s, box-shadow .15s; }
+.login input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20,104,220,.2); }
+.login form > button { padding: 11px 14px; border-radius: 8px; font-weight: 600; margin-top: 4px; transition: background .15s; }
+.login form > button:hover:not(:disabled) { background: #1150b5; }
 .login label { display: grid; gap: 4px; color: var(--muted); }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
 

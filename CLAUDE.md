@@ -83,3 +83,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   same as the top-category hover). A click after a hover keeps it open. Both pages. Backup `led-static-backup-20261120c.tgz`. Published.
 - 2026-11-20 — Admin sidebar uses the site palette: navy `#0E1A2E` with a soft blue glow, brand blue `#1468DC` accent and
   active menu item. Logo sits on a white card and links to the dashboard; the "Computers" text next to it is gone.
+- 2026-11-20 — Admin login page: same navy + blue glows background, white form card, blue focus ring and button. Deployed.
