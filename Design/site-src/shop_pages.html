@@ -1,4 +1,31 @@
 <style>
+/* brands */
+.br-lg{display:grid;place-items:center;color:var(--bc);flex:none}
+.br-lg svg{width:100%;height:100%;fill:currentColor}
+.br-wm{font-weight:800;letter-spacing:-.02em;font-size:20px}
+.br-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.br-grid.sm{grid-template-columns:repeat(8,minmax(0,1fr))}
+.br-t{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 12px;text-decoration:none;color:inherit;text-align:center;transition:transform .25s,box-shadow .25s,border-color .25s}
+.br-t:hover{transform:translateY(-4px);border-color:#BFD5F5;box-shadow:0 14px 28px rgba(20,104,220,.12)}
+.br-t .br-lg{width:72px;height:44px;filter:grayscale(1);opacity:.75;transition:filter .3s,opacity .3s}.br-t:hover .br-lg{filter:none;opacity:1}
+.br-t b{font-size:15px}.br-t small{color:var(--muted);font-size:12.5px}
+.br-t[hidden]{display:none}
+.br-grid.sm .br-t{padding:14px 8px}.br-grid.sm .br-lg{width:56px;height:32px}.br-grid.sm b{font-size:13px}
+.br-az{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.br-az button{font:inherit;font-weight:600;font-size:13.5px;min-width:36px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;transition:all .2s}
+.br-az button:hover{border-color:var(--blue-600);color:var(--blue-700)}.br-az button.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
+.br-q{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:220px;outline:none}.br-q:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(20,104,220,.14)}
+.br-hero{display:flex;gap:30px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow);padding:28px 32px;margin:6px 0 18px;position:relative;overflow:hidden}
+.br-hero::after{content:"";position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(20,104,220,.10),transparent 65%)}
+.br-hero>.br-lg{width:190px;height:110px;border-radius:18px;background:var(--bg);padding:20px;box-sizing:border-box}
+.br-hero>.br-wm{font-size:40px}
+.br-hi{flex:1;min-width:0}.br-hi h1{margin:6px 0 6px;font-size:34px;letter-spacing:-.02em}.br-hi p{margin:0;color:#4A5870;max-width:720px}
+.br-off{display:inline-flex;align-items:center;gap:6px;background:#E6F6EC;color:#1C7C43;border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:700}.br-off svg{width:14px;height:14px}
+.br-facts{display:flex;gap:28px;flex-wrap:wrap;margin-top:16px}.br-facts small{display:block;color:var(--muted);font-size:12.5px}.br-facts b{font-size:17px}
+.br-svc{display:flex;align-items:center;gap:6px;margin-top:12px;color:var(--muted)}.br-svc svg{width:15px;height:15px}
+@media (max-width:1000px){.br-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.br-grid.sm{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:760px){.br-hero{flex-direction:column;align-items:flex-start;padding:20px;gap:16px}.br-hero>.br-lg{width:140px;height:80px}.br-hi h1{font-size:26px}
+ .br-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.br-grid.sm{grid-template-columns:repeat(3,minmax(0,1fr))}.br-q{min-width:0;width:100%}}
 /* search results */
 .sr{display:grid;grid-template-columns:250px minmax(0,1fr);gap:22px;align-items:start}
 .sr-f{position:sticky;top:calc(var(--hdr,84px) + 12px);padding:16px 18px}
@@ -435,6 +462,9 @@ function search(){const X=window.LEDSearch;if(!X){root.innerHTML='';addEventList
    ${s?`<p class="sr-dym">${st_('dym')}: <a href="/search.html?q=${encodeURIComponent(s)}">${X.esc(s)}</a></p>`:''}
    <h3 style="margin:18px 0 8px;font-size:15px">${st_('pop')}</h3><div class="sr-pop">${X.POP.map(p=>`<a href="/search.html?q=${encodeURIComponent(p)}">${X.esc(p)}</a>`).join('')}</div></div>
   <section class="sp-up"><h3>${st_('hits')}</h3><div class="pgrid sr-grid">${hits.map(x=>srCard(x,'')).join('')}</div></section>`;return}
+ srResults(all,q,cat,sort,v=>crumbs(st_('h'))+`<div class="sp-head"><div><h1><span class="ic">${ic('ix-help')}</span>«${X.esc(q)}»</h1><p>${st_('found')} ${v.length} ${st_('goods')}</p></div>`);
+}
+function srResults(all,q,cat,sort,headF){const X=window.LEDSearch;
  const inCat=cat?all.filter(x=>x.cat===cat):all;
  const brands=[...new Set(inCat.map(x=>x.brand))].sort();
  sf.brands=sf.brands.filter(b=>brands.includes(b));
@@ -442,7 +472,7 @@ function search(){const X=window.LEDSearch;if(!X){root.innerHTML='';addEventList
  if(sort===1)v.sort((a,b)=>a.p-b.p);else if(sort===2)v.sort((a,b)=>b.p-a.p);else if(sort===3)v.sort((a,b)=>(b.o?1-b.p/b.o:0)-(a.o?1-a.p/a.o:0));
  const cats=[...new Set(all.map(x=>x.cat))];const nF=sf.brands.length+(sf.min?1:0)+(sf.max?1:0)+sf.stock+sf.sale;
  const url=(o)=>{const u=new URLSearchParams(location.search);Object.entries(o).forEach(([k,val])=>val===''||val===0?u.delete(k):u.set(k,val));return '?'+u};
- root.innerHTML=crumbs(st_('h'))+`<div class="sp-head"><div><h1><span class="ic">${ic('ix-help')}</span>«${X.esc(q)}»</h1><p>${st_('found')} ${v.length} ${st_('goods')}</p></div>
+ root.innerHTML=headF(v)+`
   <div class="sp-tools"><label class="sr-sort">${st_('sort')}<select id="srSort">${ST.sorts.map((s,i)=>`<option value="${i}"${i===sort?' selected':''}>${s[L()]}</option>`).join('')}</select></label></div></div>
  <div class="sr-cats"><a href="${url({cat:''})}" class="${cat?'':'on'}">${st_('all')} <i>${all.length}</i></a>${cats.map(c=>`<a href="${url({cat:c})}" class="${cat===c?'on':''}">${X.CATS[c][L()]} <i>${all.filter(x=>x.cat===c).length}</i></a>`).join('')}</div>
  <div class="sr${sf.open?' fo':''}"><aside class="sp-card sr-f"><button class="sr-ft" type="button">${ic('filter')}${st_('flt')}${nF?` <i>${nF}</i>`:''}</button><div class="sr-fb">
@@ -452,7 +482,7 @@ function search(){const X=window.LEDSearch;if(!X){root.innerHTML='';addEventList
   ${nF?`<button class="sr-rs" type="button" id="srReset">${st_('reset')}</button>`:''}</div></aside>
   <div>${v.length?`<div class="pgrid sr-grid">${v.map(x=>srCard(x,q)).join('')}</div>`:`<div class="sp-card sp-empty"><div class="art">${ic('filter')}</div><h2>${st_('noF')}</h2><button class="sp-b p" type="button" id="srReset">${st_('reset')}</button></div>`}</div></div>`;
 }
-root.addEventListener('click',e=>{if(page!=='search')return;
+root.addEventListener('click',e=>{if(page!=='search'&&page!=='brand')return;
  if(e.target.closest('#srReset')){sf={...sf,brands:[],min:'',max:'',stock:false,sale:false};render();return}
  if(e.target.closest('.sr-ft')){sf.open=!sf.open;render();return}
  const c=e.target.closest('.prod');if(!c)return;const X=window.LEDSearch,x=X.I.find(y=>y.id===c.dataset.id);if(!x)return;
@@ -461,12 +491,54 @@ root.addEventListener('click',e=>{if(page!=='search')return;
  if(e.target.closest('.fav')){e.stopPropagation();const on=S.toggle('fav',it);S.toast(st_(on?'fav':'unfav'),on?st_('go'):'',()=>location.href=S.URL.fav);return}
  if(e.target.closest('.sr-cmp')){e.stopPropagation();const on=S.toggle('cmp',it);S.toast(st_(on?'cmp':'uncmp'),on?st_('go'):'',()=>location.href=S.URL.cmp);return}
  window.LEDSearch.remember(SQ().q);},true);
-root.addEventListener('change',e=>{if(page!=='search')return;const t=e.target;
+root.addEventListener('change',e=>{if(page!=='search'&&page!=='brand')return;const t=e.target;
  if(t.id==='srSort'){const u=new URLSearchParams(location.search);+t.value?u.set('sort',t.value):u.delete('sort');history.replaceState(null,'','?'+u);render();return}
  if(t.dataset.b!==undefined){sf.brands=t.checked?[...sf.brands,t.dataset.b]:sf.brands.filter(b=>b!==t.dataset.b);render();return}
  if(t.id==='srStock'){sf.stock=t.checked;render();return}if(t.id==='srSale'){sf.sale=t.checked;render();return}
  if(t.id==='srMin'||t.id==='srMax'){sf[t.id==='srMin'?'min':'max']=t.value.replace(/\D/g,'');render();}});
-root.addEventListener('keydown',e=>{if(page==='search'&&(e.target.id==='srMin'||e.target.id==='srMax')&&e.key==='Enter')e.target.dispatchEvent(new Event('change',{bubbles:true}))});
+root.addEventListener('keydown',e=>{if((page==='search'||page==='brand')&&(e.target.id==='srMin'||e.target.id==='srMax')&&e.key==='Enter')e.target.dispatchEvent(new Event('change',{bubbles:true}))});
+
+/* ---------- BRAND ---------- */
+const BT={brands:['Бренды','Բրենդներ','Brands'],brandsP:['Официальная техника мировых производителей с гарантией LED Computers.','Համաշխարհային արտադրողների պաշտոնական տեխնիկա՝ LED Computers-ի երաշխիքով։','Official gear from the world’s makers, with LED Computers warranty.'],
+ all:['Все','Բոլորը','All'],prods:['товаров','ապրանք','products'],country:['Страна','Երկիր','Country'],since:['Основан','Հիմնադրվել է','Founded'],
+ war:['Гарантия','Երաշխիք','Warranty'],mo:['мес.','ամիս','mo.'],inSt:['В наличии','Առկա է','In stock'],cats:['Категорий','Կատեգորիա','Categories'],
+ off:['Официальный партнёр','Պաշտոնական գործընկեր','Official partner'],
+ about:['— официальная техника в LED Computers: гарантия производителя, сервис в Ереване, доставка по всей Армении и рассрочка без переплат.','— պաշտոնական տեխնիկա LED Computers-ում՝ արտադրողի երաշխիք, սպասարկում Երևանում, առաքում ամբողջ Հայաստանում և ապառիկ առանց գերավճարի։','— official products at LED Computers: manufacturer warranty, service in Yerevan, delivery across Armenia and interest-free instalments.'],
+ svc:['Сервис-центр: Комитаса 23/2','Սպասարկման կենտրոն՝ Կոմիտասի 23/2','Service centre: Komitas 23/2'],other:['Другие бренды','Այլ բրենդներ','Other brands'],
+ nf:['Бренд не найден','Բրենդը չի գտնվել','Brand not found'],search:['Найти бренд','Գտնել բրենդ','Find a brand'],
+ C:{cn:['Китай','Չինաստան','China'],us:['США','ԱՄՆ','USA'],tw:['Тайвань','Թայվան','Taiwan'],kr:['Южная Корея','Հարավային Կորեա','South Korea'],ch:['Швейцария','Շվեյցարիա','Switzerland'],am:['Армения','Հայաստան','Armenia'],lv:['Латвия','Լատվիա','Latvia']}};
+const bt=k=>BT[k][L()];
+/* name: [country, founded, warranty months] */
+const BI={Lenovo:['cn',1984,24],HP:['us',1939,12],ASUS:['tw',1989,24],Dell:['us',1984,12],Acer:['tw',1976,24],MSI:['tw',1986,24],Apple:['us',1976,12],Samsung:['kr',1938,24],LG:['kr',1958,24],
+ Logitech:['ch',1981,24],Kingston:['us',1987,36],AMD:['us',1969,36],Intel:['us',1968,36],NVIDIA:['us',1993,36],'TP-Link':['cn',1996,36],MikroTik:['lv',1996,12],Xiaomi:['cn',2010,12],HyperX:['us',2002,24],Ugreen:['cn',2012,18],LED:['am',2003,36]};
+const bslug=n=>n.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+const logo=(n,big)=>{const g=(window.LEDBrandLogos||{})[n.replace('-','‑')]||(window.LEDBrandLogos||{})[n];
+ return g?`<span class="br-lg" style="--bc:${g.c}">${g.svg}</span>`:`<span class="br-lg br-wm" style="--bc:#1468DC">${window.LEDSearch.esc(n)}</span>`};
+function brand(){const X=window.LEDSearch;if(!X){root.innerHTML='';addEventListener('DOMContentLoaded',render,{once:true});return}
+ const u=new URLSearchParams(location.search),b=(u.get('b')||'').toLowerCase(),cat=u.get('cat')||'',sort=+(u.get('sort')||0);
+ const names=[...new Set(X.I.map(x=>x.brand).concat(Object.keys(BI)))].sort((a,c)=>a.localeCompare(c));
+ const name=names.find(n=>bslug(n)===b);
+ const tile=n=>{const v=X.I.filter(x=>x.brand===n);return `<a class="sp-card br-t" href="/brand.html?b=${bslug(n)}">${logo(n)}<b>${X.esc(n)}</b><small>${v.length} ${bt('prods')}</small></a>`};
+ if(!name){document.title=bt('brands')+' — LED Computers';const L0=[...new Set(names.map(n=>n[0].toUpperCase()))];
+  root.innerHTML=crumbs(bt('brands'))+`<div class="sp-head"><div><h1><span class="ic">${ic('store')}</span>${bt('brands')}</h1><p>${b?bt('nf')+' · ':''}${bt('brandsP')}</p></div>
+   <div class="sp-tools"><input class="br-q" placeholder="${bt('search')}" aria-label="${bt('search')}"></div></div>
+   <div class="br-az"><button class="on" data-l="">${bt('all')}</button>${L0.map(l=>`<button data-l="${l}">${l}</button>`).join('')}</div>
+   <div class="br-grid">${names.map(n=>tile(n).replace('class="sp-card br-t"',`class="sp-card br-t" data-n="${X.esc(n.toLowerCase())}"`)).join('')}</div>`;return}
+ const all=X.I.filter(x=>x.brand===name).map(x=>({...x,score:0})),info=BI[name]||['us',0,12],cs=[...new Set(all.map(x=>x.cat))];
+ document.title=`${name} — LED Computers`;
+ srResults(all,'',cat,sort,v=>`<nav class="crumbs"><a href="/">${T.home}</a><span>/</span><a href="/brand.html">${bt('brands')}</a><span>/</span><b>${X.esc(name)}</b></nav>
+  <div class="br-hero">${logo(name,1)}<div class="br-hi"><span class="br-off">${ic('shield')}${bt('off')}</span><h1>${X.esc(name)}</h1><p>${X.esc(name)} ${bt('about')}</p>
+   <div class="br-facts"><div><small>${bt('country')}</small><b>${tt_(BT.C[info[0]])}</b></div>${info[1]?`<div><small>${bt('since')}</small><b>${info[1]}</b></div>`:''}<div><small>${bt('war')}</small><b>${info[2]} ${bt('mo')}</b></div><div><small>${bt('inSt')}</small><b>${all.filter(x=>x.stock).length} / ${all.length}</b></div></div>
+   <small class="br-svc">${ic('tool')}${bt('svc')}</small></div></div>
+  <div class="sp-head"><div><p>${v.length} ${bt('prods')}</p></div>`);
+ const others=names.filter(n=>n!==name&&X.I.some(x=>x.brand===n)).slice(0,8);
+ root.insertAdjacentHTML('beforeend',`<section class="sp-up"><h3>${bt('other')}</h3><div class="br-grid sm">${others.map(tile).join('')}</div></section>`);
+}
+const tt_=a=>a[L()];
+root.addEventListener('input',e=>{if(page!=='brand'||!e.target.classList.contains('br-q'))return;const q=e.target.value.trim().toLowerCase();
+ root.querySelectorAll('.br-t[data-n]').forEach(t=>t.hidden=q&&!t.dataset.n.includes(q))});
+root.addEventListener('click',e=>{if(page!=='brand')return;const z=e.target.closest('.br-az button');if(!z)return;
+ root.querySelectorAll('.br-az button').forEach(x=>x.classList.toggle('on',x===z));root.querySelectorAll('.br-t[data-n]').forEach(t=>t.hidden=z.dataset.l&&t.dataset.n[0].toUpperCase()!==z.dataset.l)});
 
 /* ---------- FAVOURITES ---------- */
 let fsort=0;
@@ -516,7 +588,7 @@ root.addEventListener('click',e=>{if(page!=='compare')return;
  if(e.target.closest('.add')){e.preventDefault();if(!S.has('cart',id)){const x=item({id});S.add('cart',{id,t:x.t,img:x.img,p:x.p,spec:x.spec})}else location.href=S.URL.cart}});
 root.addEventListener('change',e=>{if(e.target.id==='spOnly'){only=e.target.checked;root.querySelector('.sp-ct').classList.toggle('only',only)}});
 
-const R={cart,favorites:fav,compare:cmp,checkout,search};
+const R={cart,favorites:fav,compare:cmp,checkout,search,brand};
 function render(){R[page]()}
 S.subscribe(()=>render());
 document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(render)));

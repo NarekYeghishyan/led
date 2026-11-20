@@ -266,3 +266,10 @@ stock and prices from the Access sync. Until then the templates are design refer
   (relevance/cheap/expensive/discount, `&sort=`), product cards like category (cart/♡/compare work, card opens product), nothing-found state
   with suggestion, popular queries and bestsellers. `.search` no longer `overflow:hidden` (clipped the dropdown). Class `.t` must not be used
   inside new widgets (trust-tile effect) — used `.nm`. Account demo orders: `p6.webp` doesn't exist → `p5`. Backup `led-static-backup-20261121a.tgz`. Published.
+- 2026-11-21 — New page `brand.html` (shop page `brand()` in shop_pages.html), HY/RU/EN. `?b=lenovo` → brand hero (logo, "official
+  partner", text, country/founded/warranty/in-stock facts, service centre), then the same results block as search (`srResults()`: category
+  chips, brand/price/stock/sale filters, sort, cards) and "Other brands". No `?b` → all brands A–Z (letter filter, find box, tiles with logo
+  and product count). Brand facts in `BI` (shop_pages). Logos: `build_shop.py` copies the 12 SVG logos from index.html's `.brands` tiles into
+  `window.LEDBrandLogos` on brand.html; others get a text logo. Home brand tiles, catalog-menu brand tiles and the product page brand chip open
+  the brand page (`search_box.html`). Fix: order tracking progress line now runs from the first to the last dot centre and sits under the
+  dots (was drawn over the current dot and misaligned). Backup `led-static-backup-20261121b.tgz`. Published.

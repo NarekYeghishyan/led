@@ -1,5 +1,6 @@
 <!--search-box-->
 <style>
+.pdp .brand{cursor:pointer}
 .search{position:relative;overflow:visible!important}
 .search>input{border-radius:var(--r-sm) 0 0 var(--r-sm);min-width:0}
 .search>button{border-radius:0 calc(var(--r-sm) - 2px) calc(var(--r-sm) - 2px) 0}
@@ -82,6 +83,10 @@
   const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' ֏';
   const RK='led-recent',recent=()=>{try{return JSON.parse(localStorage.getItem(RK))||[]}catch(e){return[]}};
   const remember=q=>{q=q.trim();if(!q)return;const v=recent().filter(x=>norm(x)!==norm(q));v.unshift(q);localStorage.setItem(RK,JSON.stringify(v.slice(0,6)))};
+  /* brand tiles / chips → brand page */
+  document.addEventListener('click',e=>{const a=e.target.closest('.brands a,#megaBr a,.pdp .brand,.mega-br a');if(!a)return;
+    const n=(a.querySelector('svg[aria-label]')?.getAttribute('aria-label')||a.getAttribute('title')||a.textContent).trim().replace(/‑/g,'-');if(!n)return;
+    e.preventDefault();location.href='/brand.html?b='+n.toLowerCase().replace(/[^a-z0-9]+/g,'-');},true);
   window.LEDSearch={I,CATS,POP,search,suggest,hl,norm,remember,recent,esc};
 
   /* header search: Enter / button → /search.html?q=…, live suggestions */

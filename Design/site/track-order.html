@@ -683,11 +683,11 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
 .tr-st.s0{background:#FFF4E0;color:#A86200}.tr-st.s1{background:var(--blue-50);color:var(--blue-700)}.tr-st.s2{background:#E6F6EC;color:#1C7C43}.tr-st.s3{background:#F1F3F6;color:#5B6678}
 .tr-eta{display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px 18px;border-radius:14px;background:linear-gradient(120deg,#1257C4,#2F7FEA 60%,#6AA8F7);color:#fff}
 .tr-eta svg{width:30px;height:30px;flex:none}.tr-eta small{opacity:.85;display:block}.tr-eta b{font-size:19px}
-.tr-bar{position:relative;height:6px;border-radius:9px;background:var(--line);margin:26px 8px 0}
+.tr-bar{position:relative;height:4px;border-radius:9px;background:var(--line);margin:30px 10% 0;z-index:0}
 .tr-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:9px;background:linear-gradient(90deg,var(--blue-600),#6AA8F7);transition:width .8s cubic-bezier(.3,.9,.3,1)}
-.tr-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:-15px;text-align:center;font-size:12.5px}
+.tr-steps{position:relative;z-index:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:-14px;text-align:center;font-size:12.5px;padding-bottom:4px}
 .tr-steps div{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted)}
-.tr-steps .dot{width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center}
+.tr-steps .dot{box-sizing:border-box;width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center}
 .tr-steps .dot svg{width:13px;height:13px}
 .tr-steps .dn{color:var(--ink)}.tr-steps .dn .dot{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
 .tr-steps .cur .dot{box-shadow:0 0 0 6px rgba(20,104,220,.18);animation:trP 1.6s infinite}
@@ -1624,6 +1624,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2455,6 +2470,7 @@ body.oc-lock{overflow:hidden}
 <!--/one-click-->
 <!--search-box-->
 <style>
+.pdp .brand{cursor:pointer}
 .search{position:relative;overflow:visible!important}
 .search>input{border-radius:var(--r-sm) 0 0 var(--r-sm);min-width:0}
 .search>button{border-radius:0 calc(var(--r-sm) - 2px) calc(var(--r-sm) - 2px) 0}
@@ -2537,6 +2553,10 @@ body.oc-lock{overflow:hidden}
   const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' ֏';
   const RK='led-recent',recent=()=>{try{return JSON.parse(localStorage.getItem(RK))||[]}catch(e){return[]}};
   const remember=q=>{q=q.trim();if(!q)return;const v=recent().filter(x=>norm(x)!==norm(q));v.unshift(q);localStorage.setItem(RK,JSON.stringify(v.slice(0,6)))};
+  /* brand tiles / chips → brand page */
+  document.addEventListener('click',e=>{const a=e.target.closest('.brands a,#megaBr a,.pdp .brand,.mega-br a');if(!a)return;
+    const n=(a.querySelector('svg[aria-label]')?.getAttribute('aria-label')||a.getAttribute('title')||a.textContent).trim().replace(/‑/g,'-');if(!n)return;
+    e.preventDefault();location.href='/brand.html?b='+n.toLowerCase().replace(/[^a-z0-9]+/g,'-');},true);
   window.LEDSearch={I,CATS,POP,search,suggest,hl,norm,remember,recent,esc};
 
   /* header search: Enter / button → /search.html?q=…, live suggestions */

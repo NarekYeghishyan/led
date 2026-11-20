@@ -13,11 +13,19 @@ tail = re.sub(r"<script>\s*\(function\(\)\{\s*const vb=.*?</script>", "", tail, 
 tail = re.sub(r"<!--dual-range-->.*?<!--/dual-range-->", "", tail, flags=re.S)
 assert "getElementById('tree')" not in tail and "cgrid3" not in tail
 
-TITLES = {"cart": "Զամբյուղ — LED Computers", "favorites": "Ընտրյալներ — LED Computers", "compare": "Համեմատել — LED Computers", "checkout": "Պատվերի ձևակերպում — LED Computers", "search": "Որոնում — LED Computers"}
+# brand logos (SVG) from the home page's brand tiles, for brand.html
+import json
+_ix = (site / "index.html").read_text(encoding="utf-8")
+_bi = _ix.index('<div class="brands">'); _bb = _ix[_bi:_ix.index('</div>', _bi)]
+LOGOS = {m.group(3): {"c": m.group(1), "svg": m.group(2)} for m in re.finditer(r'<a href="[^"]*" style="--bc:([^"]+)">(<svg[^>]*aria-label="([^"]+)".*?</svg>)', _bb, flags=re.S)}
+assert len(LOGOS) >= 10, len(LOGOS)
+logos_js = "<script>window.LEDBrandLogos=" + json.dumps(LOGOS, ensure_ascii=False) + ";</script>\n"
+TITLES = {"cart": "Զամբյուղ — LED Computers", "favorites": "Ընտրյալներ — LED Computers", "compare": "Համեմատել — LED Computers", "checkout": "Պատվերի ձևակերպում — LED Computers", "search": "Որոնում — LED Computers", "brand": "Բրենդներ — LED Computers"}
 for page, title in TITLES.items():
     h = head.replace("<title>LED.AM Category Page</title>", f"<title>{title}</title>")
+    extra = logos_js if page == "brand" else ""
     html = (h + f'<main class="wrap shop" id="shop" data-page="{page}"><div id="spRoot"></div>\n' + stubs
-            + "</main>" + tail.replace("</body>", shared + pages_js + "</body>"))
+            + "</main>" + tail.replace("</body>", extra + shared + pages_js + "</body>"))
     (site / f"{page}.html").write_text(html, encoding="utf-8")
     print(page, len(html))
 
@@ -66,7 +74,7 @@ for key, langs in blocks.items():
     (site / f"{INFO[key]}.html").write_text(html, encoding="utf-8")
     print("info", INFO[key], len(html))
 info_js = (pathlib.Path(__file__).parent / "info_shared.html").read_text(encoding="utf-8")
-for name in ["index.html", "category.html", "product.html", "cart.html", "favorites.html", "compare.html", "checkout.html", "search.html", "assembly.html"] + [f"{v}.html" for v in INFO.values()]:
+for name in ["index.html", "category.html", "product.html", "cart.html", "favorites.html", "compare.html", "checkout.html", "search.html", "brand.html", "assembly.html"] + [f"{v}.html" for v in INFO.values()]:
     p = site / name
     t = p.read_text(encoding="utf-8").replace("https://www.led.am/ru/assembly.html", "/assembly.html")
     t = re.sub(r"<!--asm-link-->.*?<!--/asm-link-->", "", t, flags=re.S)
