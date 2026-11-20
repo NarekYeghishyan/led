@@ -156,3 +156,7 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Favourites/compare hover effects: favourite cards (`.sp-f`) and compare column heads (`.sp-pc`) use the product-card effect
   (spotlight, border glow, photo sweep/zoom/parallax, title blue, price-drop badge wiggle); "add product" slot lifts and glows; ♡/compare/×
   buttons get the button effect. Backup `led-static-backup-20261120zb.tgz`. Published.
+- 2026-11-20 — Header/footer hover effects (CSS in `site-src/card_fx.html`): search box glow on focus, "Найти" gets the primary button effect,
+  top-menu icons spring + blue underline grows + soft spotlight ("Акции" flame flickers), header icons tint blue, logo tilt + glow, top-bar
+  links underline. Footer: links slide right with blue underline, contact icons spring, social buttons lift in brand colours
+  (fb/ig/tg/wa/vb), payment chips lift, newsletter input glow. Backup `led-static-backup-20261120zc.tgz`. Published.

@@ -1067,6 +1067,11 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1179,7 +1184,7 @@ document.addEventListener('submit',e=>{const bad=[...e.target.querySelectorAll(s
 .stage .nav.fx:hover svg.i{transform:none}
 </style><script>
 (function(){
-const P='.btn.p,.addc,.sp-b.p,.asm-b.p,.add,.prod .cart,.loadmore,#sAdd,.mi-act .det';
+const P='.search button,.btn.p,.addc,.sp-b.p,.asm-b.p,.add,.prod .cart,.loadmore,#sAdd,.mi-act .det';
 const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec-act button,.sb,.sl-arr,.sp-seg button:not(.on),.stage .nav,.sp-qty button,.asm-q button,.asm-row .x,.sp-f .ht,.sp-f .cb,.sp-pc .x,.sp-promo button,.view button:not(.on),.fbtn,.tf,.rm';
 const skip=el=>el.closest('#stubs,.catbtn,.fab,.lang')||el.classList.contains('catbtn');
 function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pri&&!el.matches(S))return null;el._fx=1;
@@ -1244,6 +1249,46 @@ document.addEventListener('pointerdown',e=>{const el=e.target.closest&&(e.target
 .sp-f.pc:hover .drop{animation:pcWig .5s ease}
 .sp-pc.pc{border-radius:14px;transition:translate .25s}.sp-pc.pc:hover{translate:0 -3px}
 .sp-slot.pc:hover{translate:0 -2px;transition:translate .25s,border-color .2s,color .2s}
+/* ---- header ---- */
+.search{transition:border-color .25s,box-shadow .3s,background .25s}
+.search:hover{border-color:#B9C7DB}
+.search:focus-within{border-color:var(--blue-600);background:#fff;box-shadow:0 0 0 4px rgba(20,104,220,.12),0 10px 26px rgba(20,104,220,.12)}
+nav.cats a{background-image:linear-gradient(var(--blue-600),var(--blue-600)),radial-gradient(60px circle at 50% 60%,rgba(47,127,234,.12),transparent 70%);
+ background-repeat:no-repeat;background-size:0 2px,0 0;background-position:50% 100%,50% 50%;transition:background-size .3s cubic-bezier(.2,.8,.2,1),color .2s}
+nav.cats a:hover{background-size:60% 2px,100% 100%;color:var(--blue-600)}
+nav.cats a svg.i{transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+nav.cats a:hover svg.i{transform:translateY(-3px) scale(1.15) rotate(-6deg)}
+nav.cats a.hot:hover svg.i{animation:pcFlame .6s ease-in-out infinite alternate}
+@keyframes pcFlame{from{transform:translateY(-2px) scale(1.1) rotate(-6deg)}to{transform:translateY(-3px) scale(1.2) rotate(6deg)}}
+.acts .act{transition:background .25s,color .25s,box-shadow .3s}
+.acts .act:hover{background:radial-gradient(50px circle at 50% 40%,rgba(47,127,234,.14),transparent 75%),var(--bg);color:var(--blue-700)}
+.acts .act:hover svg.i{color:var(--blue-600)}
+header .logo img{transition:transform .4s cubic-bezier(.3,1.6,.5,1),filter .3s}
+header .logo:hover img{transform:scale(1.05) rotate(-1.5deg);filter:drop-shadow(0 6px 12px rgba(20,104,220,.25))}
+.top a:not(.ph){background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px;transition:background-size .3s}
+.top a:not(.ph):hover{background-size:100% 1px}
+/* ---- footer ---- */
+footer .fgrid li{transition:transform .25s cubic-bezier(.2,.8,.2,1),color .2s;cursor:pointer;width:fit-content;
+ background:linear-gradient(90deg,#4F8EF7,#6AA8F7) no-repeat 0 100%/0 1px}
+footer .fgrid li:not(.ci):hover{transform:translateX(5px);color:#fff;background-size:100% 1px}
+footer .fgrid li.ci:hover{color:#fff}
+footer .ci svg.i{transition:transform .4s cubic-bezier(.3,1.6,.5,1),color .2s}
+footer .ci:hover svg.i{transform:scale(1.2) rotate(-8deg);color:#6AA8F7}
+footer .soc span{cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),background .25s,box-shadow .3s}
+footer .soc span:hover{transform:translateY(-4px) scale(1.06)}
+footer .soc span:nth-child(1):hover{background:#1877F2;box-shadow:0 8px 20px rgba(24,119,242,.45)}
+footer .soc span:nth-child(2):hover{background:linear-gradient(45deg,#F58529,#DD2A7B,#8134AF);box-shadow:0 8px 20px rgba(221,42,123,.45)}
+footer .soc span:nth-child(3):hover{background:#229ED9;box-shadow:0 8px 20px rgba(34,158,217,.45)}
+footer .soc span:nth-child(4):hover{background:#25D366;box-shadow:0 8px 20px rgba(37,211,102,.45)}
+footer .soc span:nth-child(5):hover{background:#7360F2;box-shadow:0 8px 20px rgba(115,96,242,.45)}
+footer .pay span{transition:transform .25s,background .25s}
+footer .pay span:hover{transform:translateY(-2px);background:rgba(255,255,255,.2)}
+footer .news input{transition:border-color .25s,box-shadow .3s,background .25s}
+footer .news input:hover{border-color:rgba(255,255,255,.3)}
+footer .news input:focus{outline:0;border-color:#4F8EF7;background:rgba(255,255,255,.1);box-shadow:0 0 0 4px rgba(79,142,247,.2)}
+footer .logo img{transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+footer .logo:hover img{transform:scale(1.05) rotate(-1.5deg)}
+@media (prefers-reduced-motion:reduce){nav.cats a:hover svg.i,nav.cats a.hot:hover svg.i,header .logo:hover img,footer .logo:hover img,footer .fgrid li:hover,footer .soc span:hover,footer .ci:hover svg.i{transform:none;animation:none}}
 </style><script>
 (function(){
 const CARD='.prod,.sp-f,.sp-pc',TILE='.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog',ALL=[CARD,TILE,BAN].join(',');
