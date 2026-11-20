@@ -1113,6 +1113,11 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1411,6 +1416,20 @@ nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
 /* section heading links ("Все … →") */
 .sh>a{display:inline-block;transition:translate .25s cubic-bezier(.2,.8,.2,1),color .2s;background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px;transition-property:translate,color,background-size}
 .sh>a:hover{translate:4px 0;background-size:100% 1px;color:var(--blue-700)}
+/* ---- category tree ---- */
+.tree .tg-h{transition:background .25s,color .2s,translate .25s cubic-bezier(.2,.8,.2,1)!important}
+.tree .tg-h:hover{translate:3px 0;color:var(--blue-700);background:radial-gradient(120px circle at 20% 50%,rgba(47,127,234,.13),transparent 70%),var(--bg)!important}
+.tree .tg-h:hover i{color:var(--blue-600)}
+.tree .grp:not(.open) .tg-h:hover i{transform:translateX(3px)}
+.tree ul{transition:border-color .3s}
+.tree .grp:hover ul{border-left-color:#B9CDF0}
+.tree li a{transition:background .2s,color .2s,translate .25s cubic-bezier(.2,.8,.2,1),box-shadow .3s!important}
+.tree li a:not(.on):hover{translate:4px 0;background:linear-gradient(90deg,var(--blue-50),rgba(232,240,252,.4))}
+.tree li a em{transition:background .2s,color .2s,opacity .2s;border-radius:999px;padding:0 6px}
+.tree li a:not(.on):hover em{background:var(--blue-600);color:#fff;opacity:1}
+.tree li a.on{background:linear-gradient(110deg,var(--blue-600),#4F8EF7);box-shadow:0 6px 16px rgba(20,104,220,.3)}
+.tree li a.on:hover{box-shadow:0 8px 22px rgba(20,104,220,.42)}
+@media (prefers-reduced-motion:reduce){.tree .tg-h:hover,.tree li a:hover{translate:none}}
 </style><script>
 (function(){
 const CARD='.prod,.sp-f,.sp-pc',TILE='.bi,.rv,.rv-top .big,.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p,.bsum',ALL=[CARD,TILE,BAN].join(',');

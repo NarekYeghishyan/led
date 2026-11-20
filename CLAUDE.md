@@ -179,3 +179,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   underline on all pages. Published.
 - 2026-11-20 — Mega menu group headings: hover no longer widens letter-spacing (made the last word wrap); now slide 4px + underline. **Hover
   effects must not change text size/spacing — use translate/colour/underline only.** Published.
+- 2026-11-20 — Category tree hover: group headers spotlight + slide + arrow nudge, branch line turns blue, items slide with a blue wash and
+  their count becomes a blue pill; active item gradient + glow. CSS only (tree re-renders). Backup `led-static-backup-20261120zi.tgz`. Published.
