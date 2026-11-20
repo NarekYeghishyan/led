@@ -42,7 +42,7 @@ header.h{background:var(--surface);border-bottom:1px solid var(--line);position:
 .logo b{font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--navy-900)}
 .logo b i{font-style:normal;color:var(--blue-600)}
 .logo small{font-size:9px;letter-spacing:4.5px;color:var(--muted);margin-top:4px;font-weight:600}
-.catbtn{display:flex;align-items:center;gap:10px;background:var(--navy-900);color:#fff;border-radius:var(--r-sm);height:46px;padding:0 18px;font-weight:600;white-space:nowrap}
+.catbtn{display:flex;align-items:center;gap:10px;background:var(--blue-600);color:#fff;border-radius:var(--r-sm);height:46px;padding:0 18px;font-weight:600;white-space:nowrap}
 .search{flex:1;display:flex;height:46px;border:1.5px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--bg)}
 .search input{flex:1;border:0;background:transparent;padding:0 16px;font:inherit;outline:0}
 .search button{border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:0 22px;cursor:pointer}
@@ -60,7 +60,7 @@ nav.cats .sp{flex:1}
 /* hero */
 .hero>*,.band>*,.b2b>*{min-width:0}
 .hero{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-top:24px}
-.hmain{position:relative;overflow:hidden;border-radius:var(--r-lg);background:linear-gradient(120deg,var(--navy-900) 0%,var(--navy-700) 55%,var(--slate-500) 100%);color:#fff;padding:52px 48px;min-height:400px;display:flex;flex-direction:column;justify-content:center}
+.hmain{position:relative;overflow:hidden;border-radius:var(--r-lg);background:linear-gradient(120deg,#1257C4 0%,#2F7FEA 55%,#6AA8F7 100%);color:#fff;padding:52px 48px;min-height:400px;display:flex;flex-direction:column;justify-content:center}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#8DB8FF}
 .hmain h1{font-size:46px;line-height:1.08;font-weight:800;letter-spacing:-1px;margin:14px 0 16px;max-width:520px}
 .hmain p{color:#C6D2E4;max-width:440px;font-size:16px}
@@ -100,7 +100,7 @@ section{margin-top:56px}
 .sh a{color:var(--blue-600);font-weight:600;font-size:14px;white-space:nowrap}
 .tabs{display:flex;gap:6px}
 .tabs span{padding:7px 14px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line)}
-.tabs span.on{background:var(--navy-900);color:#fff;border-color:var(--navy-900)}
+.tabs span.on{background:var(--blue-600);color:#fff;border-color:var(--blue-600)}
 
 .cgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
 .c{background:var(--surface);border-radius:var(--r-md);padding:22px 16px;text-align:center;box-shadow:var(--shadow);transition:transform .15s}
@@ -960,6 +960,9 @@ document.querySelectorAll('nav.cats a[data-m]').forEach(a=>{const mi=+a.dataset.
  a.addEventListener('mouseenter',()=>{clearTimeout(t);t=setTimeout(()=>{if(mega.hidden){hov=true;megaToggle(true)}megaShow(mi);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.toggle('act',x===a))},120)});
  a.addEventListener('mouseleave',()=>clearTimeout(t))});
 document.addEventListener('mousemove',e=>{if(!hov)return;if(e.target.closest('.mega,nav.cats,#catBtn'))return;clearTimeout(t);hov=false;megaToggle(false);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.remove('act'))});
+cb.addEventListener('mouseenter',()=>{clearTimeout(t);t=setTimeout(()=>{if(mega.hidden){hov=true;megaToggle(true)}},120)});
+cb.addEventListener('mouseleave',()=>{if(!hov)clearTimeout(t)});
+cb.onclick=e=>{e.preventDefault();clearTimeout(t);if(hov){hov=false;return}megaToggle(mega.hidden)};
 cb.addEventListener('click',()=>{hov=false});})();
 const HOT=[[['LED Gamer i5 / RTX 5060','LED Gamer i5 / RTX 5060','LED Gamer i5 / RTX 5060','429 900','tower'],['Lenovo Yoga 7 14″','Lenovo Yoga 7 14″','Lenovo Yoga 7 14″','398 000','laptop'],['HP ProDesk 400 G9','HP ProDesk 400 G9','HP ProDesk 400 G9','289 000','pc']],
  [['iPad 10.9″ Wi‑Fi 64GB','iPad 10.9″ Wi‑Fi 64GB','iPad 10.9″ Wi‑Fi 64GB','189 000','phone'],['Samsung Galaxy Tab S9 FE','Samsung Galaxy Tab S9 FE','Samsung Galaxy Tab S9 FE','169 000','phone'],['Xiaomi Smart Band 9','Xiaomi Smart Band 9','Xiaomi Smart Band 9','19 900','phone']],

@@ -43,7 +43,7 @@ header.h{background:var(--surface);border-bottom:1px solid var(--line);position:
 .logo b{font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--navy-900)}
 .logo b i{font-style:normal;color:var(--blue-600)}
 .logo small{font-size:9px;letter-spacing:4.5px;color:var(--muted);margin-top:4px;font-weight:600}
-.catbtn{display:flex;align-items:center;gap:10px;background:var(--navy-900);color:#fff;border-radius:var(--r-sm);height:46px;padding:0 18px;font-weight:600;white-space:nowrap}
+.catbtn{display:flex;align-items:center;gap:10px;background:var(--blue-600);color:#fff;border-radius:var(--r-sm);height:46px;padding:0 18px;font-weight:600;white-space:nowrap}
 .search{flex:1;display:flex;height:46px;border:1.5px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--bg)}
 .search input{flex:1;border:0;background:transparent;padding:0 16px;font:inherit;outline:0}
 .search button{border:0;background:var(--blue-600);color:#fff;font:inherit;font-weight:600;padding:0 22px;cursor:pointer}
@@ -101,7 +101,7 @@ section{margin-top:56px}
 .sh a{color:var(--blue-600);font-weight:600;font-size:14px;white-space:nowrap}
 .tabs{display:flex;gap:6px}
 .tabs span{padding:7px 14px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line)}
-.tabs span.on{background:var(--navy-900);color:#fff;border-color:var(--navy-900)}
+.tabs span.on{background:var(--blue-600);color:#fff;border-color:var(--blue-600)}
 
 .cgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
 .c{background:var(--surface);border-radius:var(--r-md);padding:22px 16px;text-align:center;box-shadow:var(--shadow);transition:transform .15s}
@@ -527,7 +527,7 @@ header.h{z-index:5;position:sticky;top:0}
 .subcats{display:flex;gap:8px;flex-wrap:wrap}
 .subcats a{padding:8px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:500;transition:.2s}
 .subcats a:hover{border-color:var(--blue-600);color:var(--blue-600)}
-.subcats a.on{background:var(--navy-900);color:#fff;border-color:var(--navy-900)}
+.subcats a.on{background:var(--blue-600);color:#fff;border-color:var(--blue-600)}
 .cat-body{display:grid;grid-template-columns:270px 1fr;gap:24px;align-items:start}
 .filters{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:18px;}
 .fh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.fh b{font-size:17px}.fh a{font-size:13px;color:var(--blue-600);font-weight:600}
@@ -553,7 +553,7 @@ header.h{z-index:5;position:sticky;top:0}
 .sort select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:10px;height:38px;padding:0 10px;background:var(--surface)}
 .view{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px}
 .view button{all:unset;cursor:pointer;width:32px;height:30px;display:grid;place-items:center;border-radius:8px;color:var(--muted)}
-.view button.on{background:var(--navy-900);color:#fff}.view svg.i{width:16px;height:16px}
+.view button.on{background:var(--blue-600);color:#fff}.view svg.i{width:16px;height:16px}
 .cgrid3{grid-template-columns:repeat(3,1fr)!important}
 .cgrid3 .prod .img{aspect-ratio:4/3}
 .cgrid3 .prod h4{min-height:0}
@@ -868,6 +868,9 @@ document.querySelectorAll('nav.cats a[data-m]').forEach((a,i)=>{const mi=+a.data
  a.addEventListener('mouseenter',()=>{clearTimeout(t);t=setTimeout(()=>{if(mega.hidden){hov=true;megaToggle(true)}megaShow(mi);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.toggle('act',x===a))},120)});
  a.addEventListener('mouseleave',()=>clearTimeout(t))});
 document.addEventListener('mousemove',e=>{if(!hov)return;if(e.target.closest('.mega,nav.cats,#catBtn'))return;clearTimeout(t);hov=false;megaToggle(false);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.remove('act'))});
+cb.addEventListener('mouseenter',()=>{clearTimeout(t);t=setTimeout(()=>{if(mega.hidden){hov=true;megaToggle(true)}},120)});
+cb.addEventListener('mouseleave',()=>{if(!hov)clearTimeout(t)});
+cb.onclick=e=>{e.preventDefault();clearTimeout(t);if(hov){hov=false;return}megaToggle(mega.hidden)};
 cb.addEventListener('click',()=>{hov=false});})();
 /* credit calculator */
 const R=document.getElementById('termR'),price=429900;

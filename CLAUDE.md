@@ -77,3 +77,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   `/category.html` (overrides the led.am link map for menu links). Keep the header block identical on both pages.
 - 2026-11-20 — Container: 1280px, and 1530px on screens ≥1600px (`@media (min-width:1600px)` rule), on both pages.
   Client confirmed it. Keep this rule.
+- 2026-11-20 — Less dark navy: "Կատալոգ" button is brand blue (`--blue-600`) on both pages; home hero slider background is a
+  blue gradient (`#1257C4 → #2F7FEA → #6AA8F7`) instead of navy. Active tab buttons (home tabs, catalog subcategories and view toggle) are brand blue too. Published.
+- 2026-11-20 — "Կատալոգ" button opens the mega menu on hover (120 ms delay; closes when the mouse leaves the menu/button area,
+  same as the top-category hover). A click after a hover keeps it open. Both pages. Backup `led-static-backup-20261120c.tgz`. Published.
