@@ -61,7 +61,7 @@ function Layout() {
   }, [open]);
 
   if (!auth.token) return <Navigate to="/login" replace />;
-  const brand = <div className="brand"><img src="/admin/logo.png" alt="LED Computers" /><span>{t('brand.sub')}</span></div>;
+  const brand = <NavLink to="/" end className="brand" aria-label="LED Computers"><img src="/admin/logo.png" alt="LED Computers" /></NavLink>;
   return (
     <div className={`layout${open ? ' menu-open' : ''}`}>
       <header className="topbar">

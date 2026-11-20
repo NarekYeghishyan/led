@@ -4,7 +4,6 @@ export type Lang = 'ru' | 'en';
 const KEY = 'led_admin_lang';
 
 const ru = {
-  'brand.sub': 'Computers',
   'nav.dashboard': 'Обзор',
   'nav.products': 'Товары',
   'nav.categories': 'Категории',
@@ -169,7 +168,6 @@ const ru = {
 };
 
 const en: Record<keyof typeof ru, string> = {
-  'brand.sub': 'Computers',
   'nav.dashboard': 'Dashboard',
   'nav.products': 'Products',
   'nav.categories': 'Categories',
