@@ -100,3 +100,18 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Category: whole product card opens `/product.html`, same as home (cart, heart, compare and checkbox keep
   their own action). Backup `led-static-backup-20261120g.tgz`.
 - 2026-11-20 — Product page: removed the "Нужна консультация?" phone block (`.mgr`) under the buy-box perks. Backup `led-static-backup-20261120h.tgz`. Published.
+- 2026-11-20 — Product page: description block (text, highlights, "Կոմպլեկտ" list) translated to Armenian. Backup `led-static-backup-20261120i.tgz`. Published.
+- 2026-11-20 — Product page sidebar: delivery card values in Armenian; "Для бизнеса" (invoice) card removed. Backup `led-static-backup-20261120j.tgz`. Published.
+- 2026-11-20 — Product page: store stock list (addresses, "հատ") in Armenian. Backup `led-static-backup-20261120k.tgz`. Published.
+- 2026-11-20 — Product page: spec search + "copy list" hidden (`.spec-tools` display:none — kept in DOM, the script uses `#sq`/`#sCopy`). Backup `led-static-backup-20261120l.tgz`. Published.
+- 2026-11-20 — New pages `cart.html` (Զամբյուղ), `favorites.html` (Ընտրյալներ), `compare.html` (Համեմատել), built from category.html's
+  header/footer/`#stubs`. A shared store (localStorage `led-cart`/`led-fav`/`led-cmp`, demo seed data) is in all 6 pages: header icons link to
+  the pages and show live counts, and card cart/♡/compare buttons on home/category save items. Cart: qty, remove+undo, free-delivery bar,
+  delivery options, promo `LED5` (−5%), instalment line, upsell. Favourites: sort, add all to cart, share link (`?ids=`), price-drop badge.
+  Compare: up to 4, sticky header, best value ★, "differences only" switch. Generator: `Design/site-src/build_shop.py` (rerun after editing
+  category.html's header, then republish). Backup `led-static-backup-20261120m.tgz`. Published.
+- 2026-11-20 — Product page "В корзину" buttons (buy box `#addc` and bottom bar `#sAdd`) now add the product to the shared cart with the chosen
+  quantity and the current `#price` (follows options); header count updates, message links to `/cart.html`. Backup `led-static-backup-20261120n.tgz`. Published.
+- 2026-11-20 — Product page "В избранное" / "Сравнить" (`.sec-act .fv/.cp`) toggle the shared favourites/compare store (state shown on load,
+  header counts, compare bar links to `/compare.html`). Script `<!--pdp-store-->` runs on DOMContentLoaded because build_shop.py puts the
+  shared store after it. Cart upsell heading → "Միասին հաճախ գնում են". Backup `led-static-backup-20261120o.tgz`. Published.
