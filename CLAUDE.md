@@ -95,3 +95,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   it leaves both (was closing on the way from the button to the menu). All three pages. product.html now has the hidden
   `#stubs` block like category.html: the shared script needs those elements, without them the catalog menu never started.
   **Any new page built from category.html must keep `#stubs`.** Backup `led-static-backup-20261120e.tgz`.
+- 2026-11-20 — Home: clicking any product card (`.prod`) opens `/product.html` (Ctrl/middle-click → new tab); cart and
+  heart buttons keep their own action. Card title turns blue on hover. Backup `led-static-backup-20261120f.tgz`.
