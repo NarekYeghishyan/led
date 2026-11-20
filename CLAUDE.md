@@ -282,3 +282,7 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Product page: compare bar lifts above the sticky buy bar on all widths (was phones only; on desktop the buy bar covered it). Backup `led-static-backup-20261121i.tgz`. Published.
 - 2026-11-21 — Track order: "Print" button removed. Backup `led-static-backup-20261121j.tgz`. Published.
 - 2026-11-21 — Sticky side columns (info/account sidebar `.ip-nav`, cart/checkout summary `.sp-side`) now stick at real header height + 16px (`--hdr`); they slid under the taller header. Backup `led-static-backup-20261121k.tgz`. Published.
+- 2026-11-21 — Account page mobile (≤1000px): side menu becomes a compact card — avatar/name row, section tabs as a swipeable pill row
+  (`.ac-tabs`), favourites/compare/cart/logout as 4 small icon buttons. Phones (≤600px): tighter cards, stats with icon + number in a row,
+  status filters scroll sideways, order header = number/date left, status + sum right (was wrapping), item rows stack the sum, order buttons
+  full width. CSS in `site-src/account_content.html`. Backup `led-static-backup-20261121l.tgz`. Published.

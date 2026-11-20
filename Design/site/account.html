@@ -717,7 +717,46 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
 .ac-sec>.ip-card+.ip-card{margin-top:18px}
 .ac-empty{color:var(--muted);padding:18px 0}
 @media (max-width:1000px){.ac-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:600px){.ac-adr{grid-template-columns:1fr}.ac-oh{grid-template-columns:minmax(0,1fr) auto 20px}.ac-oh>.d,.ac-oh>.sm{display:none}}
+.ac-tabs{display:contents}
+@media (max-width:1000px){
+  .ac-nav .ip-menu{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px}
+  .ac-nav .ac-who{flex:1 1 100%;margin:0 0 4px;padding:2px 4px 10px}
+  .ac-nav .ac-tabs{display:flex;flex:1 1 100%;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;margin:0 -10px;padding:2px 10px 4px}
+  .ac-nav .ac-tabs::-webkit-scrollbar{display:none}
+  .ac-nav .ac-tabs a{flex:none;scroll-snap-align:start;white-space:nowrap;padding:9px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px}
+  .ac-nav .ac-tabs a.on{border-color:transparent}
+  .ac-nav .ip-menu a:hover{transform:none}
+  .ac-nav .ip-menu hr{display:none}
+  .ac-nav .ip-menu>a{flex:1 1 0;min-width:0;justify-content:center;flex-direction:column;gap:4px;padding:8px 4px;font-size:12px;text-align:center;border-radius:10px;background:#F6F9FC}
+  .ac-nav .ip-menu>a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .ac-nav .ip-menu>a.ac-out{background:#FDF1F1}
+}
+@media (max-width:600px){
+  .ac-sec .ip-card{padding:18px 16px}
+  .ac-sec .ip-card h2{font-size:18px;gap:10px}
+  .ac-sec .ip-card h2 .ic{width:34px;height:34px}
+  .ac-stats{gap:10px}
+  .ac-stats a{padding:12px 14px;flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:10px}
+  .ac-stats .ic{width:34px;height:34px;margin:0}
+  .ac-stats b{font-size:20px}
+  .ac-stats small{flex:1 1 100%;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ac-flt{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px 4px;padding:0 16px 4px}
+  .ac-flt::-webkit-scrollbar{display:none}
+  .ac-flt button{flex:none;white-space:nowrap}
+  .ac-oh{grid-template-columns:minmax(0,1fr) auto 20px;grid-template-areas:"n st c" "n sum c";gap:4px 10px;padding:12px}
+  .ac-oh>div:first-child{grid-area:n}.ac-oh>.sm{display:none}.ac-oh>.ac-st{grid-area:st;justify-self:end;font-size:11.5px;padding:3px 9px}
+  .ac-oh>b{grid-area:sum;justify-self:end;white-space:nowrap}.ac-oh>.chv{grid-area:c}
+  .ac-ob{padding:10px 12px}
+  .ac-it{grid-template-columns:40px minmax(0,1fr);gap:10px;font-size:14px}
+  .ac-it img{width:40px;height:40px}
+  .ac-it>b{grid-column:2;font-size:14px}
+  .ac-tl{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .ac-tl span{flex:none;white-space:nowrap}
+  .ac-oa .btn{flex:1 1 0;justify-content:center;text-align:center}
+  .ac-adr{grid-template-columns:1fr}
+  .ac-adr .acts{flex-wrap:wrap;gap:8px 14px}
+  .ac-gate{padding:28px 16px}
+}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
@@ -781,8 +820,9 @@ document.addEventListener('DOMContentLoaded',function(){
       const ini=(u.fname||u.login||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
       const ti=['consumer','dealer','corporate'].indexOf(u.type);
       const M=[['ov','grid'],['orders','ix-box'],['profile','user'],['adr','pin'],['pwd','shield']];
+      nav.classList.add('ac-nav');
       nav.innerHTML=`<div class="ip-menu"><div class="ac-who"><span class="ac-av">${ini}</span><div><b>${u.fname||u.login}</b><small>${u.email||''}</small>${ti>0?`<br><span class="ac-tag">${tt(T.types[ti])}</span>`:''}</div></div>`+
-        M.map(([k,i])=>`<a href="#${k}" data-s="${k}"${k===sec?' class="on"':''}>${ic(i)}<span>${t(k)}</span></a>`).join('')+
+        `<div class="ac-tabs">`+M.map(([k,i])=>`<a href="#${k}" data-s="${k}"${k===sec?' class="on"':''}>${ic(i)}<span>${t(k)}</span></a>`).join('')+`</div>`+
         `<hr><a href="/favorites.html">${ic('heart')}<span>${t('fav')}</span></a><a href="/compare.html">${ic('cmp')}<span>${t('cmp')}</span></a><a href="/cart.html">${ic('cart')}<span>${t('cart')}</span></a>`+
         `<hr><a href="#" class="ac-out">${ic('arrow')}<span>${t('out')}</span></a></div>`;
       const S=window.LEDStore, c=k=>S?S.count(k):0;
@@ -1630,6 +1670,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 .mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
 </style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
 ['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
 
 
 
