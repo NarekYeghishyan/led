@@ -199,3 +199,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   help/contacts links point to the new pages. Sidebar menu + breadcrumb built by JS. Sources `site-src/info_content.html` (bodies, one
   `<!--@key|title|icon|h1|lead-->` block per page) and `site-src/info_shared.html` (CSS/JS, HY/RU/EN for chrome only; page bodies are HY).
   Built by `build_shop.py`. Old-site client/partner logos are 404 on led.am, so not used. Backup `led-static-backup-20261120zo.tgz`. Published.
+- 2026-11-20 — Info pages now in HY/RU/EN: page bodies switch with the language buttons (`.ipl[data-l]` blocks, page title follows).
+  RU/EN text from old led.am/ru and /en, in `site-src/info_content_i18n.html` (block key `<page>.ru` / `<page>.en`); build asserts all 3 exist.
+  Backup `led-static-backup-20261120zp.tgz`. Published.
