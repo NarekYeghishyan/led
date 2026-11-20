@@ -99,3 +99,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   heart buttons keep their own action. Card title turns blue on hover. Backup `led-static-backup-20261120f.tgz`.
 - 2026-11-20 — Category: whole product card opens `/product.html`, same as home (cart, heart, compare and checkbox keep
   their own action). Backup `led-static-backup-20261120g.tgz`.
+- 2026-11-20 — Product page: removed the "Нужна консультация?" phone block (`.mgr`) under the buy-box perks. Backup `led-static-backup-20261120h.tgz`. Published.
