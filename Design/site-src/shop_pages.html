@@ -92,7 +92,7 @@
 .co-next{text-align:left;margin:22px 0}.co-next h3{margin:0 0 10px}.co-next ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
 .co-next li{display:flex;gap:12px;align-items:center}.co-next li svg{width:20px;height:20px;color:var(--blue-600);flex:none}
 .co-sum2{text-align:left;border-top:1px solid var(--line);padding-top:12px;font-size:14px}.co-sum2>div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
-.co-sum2 .t{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-size:17px}
+.co-sum2 .tt{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;font-size:17px}
 .co-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}.co-demo{display:block;color:var(--muted);margin-top:14px}
 @media (max-width:600px){.co-g,.co-pay{grid-template-columns:minmax(0,1fr)}.co-s{padding:16px}.co-done{padding:24px 16px}}
 .shop{padding-bottom:56px}
@@ -313,7 +313,6 @@ function cart(){const v=S.get('cart').map(item),n=v.reduce((s,x)=>s+x.q,0);
   <div class="sp-tot"><span>${T.total}</span><b>${fmt(tot)}</b></div>
   <div class="sp-mo"><span>${T.inst}</span><b>${mo(tot)}${T.mo}</b></div>
   <button class="sp-b p big" id="spGo">${T.checkout}</button><button class="sp-b big" id="spOne">${T.oneClick}</button>
-  <div class="sp-promo"><input id="spCode" placeholder="${T.promo}" value="${promo?'LED5':''}"><button class="sp-b" id="spApply">${T.apply}</button></div><small id="spPm" class="${promo?'ok':''}">${promo?T.promoOk:T.promoHint}</small>
   <div class="sp-safe">${ic('sp-shield')}${T.safe}</div><div class="sp-pay"><span>ArCa</span><span>VISA</span><span>Mastercard</span><span>Idram</span></div>
  </aside></div>`+ups(v);
 }
@@ -372,7 +371,7 @@ function checkout(){
  if(coDone){const o=coDone;root.innerHTML=crumbs(ct('h'))+`<div class="sp-card co-done"><div class="art">${ic('check')}</div><h1>${ct('ok')}</h1>
    <div class="co-num"><small>${ct('num')}</small><b>№ ${o.n}</b></div>${o.email?`<p>${ct('okP')} <b>${o.email}</b></p>`:''}
    <div class="co-next"><h3>${ct('next')}</h3><ol><li>${ic('call')}<span>${ct('n1')}</span></li><li>${ic('ix-box')}<span>${ct('n2')}</span></li><li>${ic('truck')}<span>${ct('n3')}</span></li></ol></div>
-   <div class="co-sum2">${o.it.map(x=>`<div><span>${x[0]} × ${x[2]}</span><b>${fmt(x[2]*x[3])}</b></div>`).join('')}<div class="t"><span>${T.total}</span><b>${fmt(o.tot)}</b></div></div>
+   <div class="co-sum2">${o.it.map(x=>`<div><span>${x[0]} × ${x[2]}</span><b>${fmt(x[2]*x[3])}</b></div>`).join('')}<div class="tt"><span>${T.total}</span><b>${fmt(o.tot)}</b></div></div>
    <div class="co-btns"><a class="sp-b" href="/track-order.html?n=${o.n}">${['Отследить заказ','Հետևել պատվերին','Track order'][L()]}</a>${u?`<a class="sp-b p" href="/account.html#orders">${ct('toAcc')}</a>`:''}<a class="sp-b${u?'':' p'}" href="/category.html">${ct('cont')}</a></div><small class="co-demo">${ct('demo')}</small></div>`;return}
  const v=S.get('cart').map(item),n=v.reduce((s,x)=>s+x.q,0);
  if(!v.length){root.innerHTML=head('cart',ct('h'),'')+empty('cart',T.emptyCart,T.emptyCartP);return}
