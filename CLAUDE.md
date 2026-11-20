@@ -16,7 +16,9 @@ Details: [README.md](README.md), plan and decisions: [docs/PROJECT_PLAN.md](docs
 | `admin/` | React admin panel (`/admin`) | yes |
 | `deploy/` | docker-compose, nginx config, .env example | yes |
 | `docs/` | plan, workflow, changelog of decisions | yes |
-| `Design/site/` | **static HTML templates made in Claude desktop** (home, category) | **no** (`Design/` is gitignored) |
+| `Design/site/` | **static HTML pages** (generated output, published to the testing domain) | yes |
+| `Design/site-src/` | page generator `build_shop.py` + shared snippets (`responsive.html`, `card_fx.html`…) | yes |
+| `Design/` (rest) | concepts, drafts | no |
 | `Contracts/` | contracts | no |
 
 ## Testing domain: led.creativeweb.am (Mynewserver 176.118.198.60)
@@ -209,3 +211,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   full width and lifts above the sticky buy bar / call button, catalog menu full screen with a fixed ✕ and page scroll locked.
   **Filters button on category now opens a full-screen drawer** (✕, Esc, "Show (N)") — before, it did nothing. Tablets 761–1000 px:
   search on its own row; top menu wraps instead of overflowing. Backup `led-static-backup-20261120zr.tgz`. Published.
+- 2026-11-20 — Git: `Design/site/` and `Design/site-src/` are now tracked (`.gitignore` keeps the rest of `Design/` private; root
+  `logo.png` ignored). **Commit both after design changes: edit `site-src`, run `build_shop.py`, commit `site` + `site-src`.**
