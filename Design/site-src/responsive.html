@@ -45,11 +45,14 @@ img,video{max-width:100%}
   .sp-promo input{flex:1 1 140px}
   .rv .h{flex-wrap:wrap;gap:6px}
   /* floating bars: compare bar full width at the bottom, call button and bars never cover each other */
-  .cmp-bar{left:12px;right:84px;bottom:16px;transform:translateY(160px);padding:8px 8px 8px 14px;gap:10px;font-size:13px;white-space:nowrap}
+  .cmp-bar{left:12px;right:12px;bottom:16px;transform:translateY(160px);padding:8px 8px 8px 14px;gap:10px;font-size:13px;white-space:nowrap}
   .cmp-bar.show{transform:none}
   .cmp-bar a{margin-left:auto}
   body:has(.sbar.show) .cmp-bar.show{bottom:84px}
   body:has(.sbar.show) .fab{bottom:84px}
+  /* call button sits above the compare bar when it is shown */
+  body:has(.cmp-bar.show) .fab{bottom:84px}
+  body:has(.sbar.show):has(.cmp-bar.show) .fab{bottom:152px}
   .sbar .wrap{gap:10px}
   .toast{max-width:calc(100vw - 24px)}
   /* catalog menu: full screen above everything, one scroll, close button always visible */
@@ -72,7 +75,18 @@ img,video{max-width:100%}
   .top .pill:not(.lang){display:none}
   .top .tl.cr{font-size:12.5px}
 }
+/* compare: sticky product row sits right under the real header height (taller on phones) */
+.sp-ct thead td,.sp-ct thead th{top:var(--hdr,84px)!important}
+.sp-pc b,.sp-pc s,.sp-f b,.pr b,.sp-sum b{white-space:nowrap}
+@media (max-width:600px){
+  /* footer: brand block full width, then two equal columns */
+  .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:28px 16px!important}
+  .fgrid>*:first-child{grid-column:1/-1}
+  .fgrid>*:first-child p{max-width:none}
+}
 </style>
+<script>(function(){const h=document.querySelector('header');if(!h)return;const set=()=>document.documentElement.style.setProperty('--hdr',(getComputedStyle(h).position==='sticky'||getComputedStyle(h).position==='fixed'?h.offsetHeight:0)+'px');set();addEventListener('resize',set);addEventListener('load',set);})();</script>
+
 <script>
 (function(){
   const mq = matchMedia('(max-width:760px)');

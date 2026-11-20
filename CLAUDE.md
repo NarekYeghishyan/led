@@ -244,3 +244,9 @@ stock and prices from the Access sync. Until then the templates are design refer
   only for a real mouse (`pointerType==='mouse'`); on phones they added spans on the first touch, so iOS took the first tap as hover and
   buttons (incl. 1-click) needed two taps. 1-click modal item name class `.t` → `.nm` (`.t` is the trust-tile class and got its effect).
   Backup `led-static-backup-20261120zx.tgz`. Published.
+- 2026-11-20 — New page `forgot-password.html` (Գաղտնաբառի վերականգնում), HY/RU/EN, 3 steps: e-mail/login → 6-digit code (digits only,
+  "resend in 60 s" timer, change e-mail) + new password ×2 with strength bar → done + "Log in". Help card with phones/e-mail. Login and
+  registration "forgot" links open it; old `login.html#forgot` redirects; old led.am `users/forgot` links map to it. Source `site-src/forgot_content.html`.
+  Phone fixes (`responsive.html`): call button moves above the compare bar (bar now full width) instead of covering its button; compare
+  table's sticky product row uses the real header height (`--hdr`, set by JS; phones 127px — was 84px, left a blank strip); prices never wrap
+  (֏ on its own line); footer on phones = brand block full width + two equal columns (right column was squeezed). Backup `led-static-backup-20261120zy.tgz`. Published.

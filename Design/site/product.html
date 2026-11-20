@@ -1800,6 +1800,34 @@ sync();addEventListener('storage',sync);
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2335,6 +2363,17 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 .lg-sw{color:var(--blue-600);font-weight:600;font-size:14px}
 .lg-why{list-style:none;padding:0;margin:0;display:grid;gap:10px}.lg-why li{display:flex;gap:10px;align-items:center}.lg-why svg{width:18px;height:18px;color:var(--success)}
 .ip-form[hidden]{display:none}
+.fp-lnk{color:var(--blue-600);font-weight:600;font-size:14px}
+.fp-steps{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:18px;flex-wrap:wrap}
+.fp-steps span{display:flex;align-items:center;gap:6px}.fp-steps i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-size:12px;transition:background .3s,color .3s}
+.fp-steps span.on{color:var(--ink)}.fp-steps span.on i{background:var(--blue-600);color:#fff}.fp-steps span.dn i{background:var(--success);color:#fff}.fp-steps b{width:24px;height:2px;background:var(--line)}
+.fp-p{grid-column:1/-1;margin:0;color:var(--muted);font-size:14px}.fp-p a{color:var(--blue-600);font-weight:600}
+.fp-code{letter-spacing:.5em;font-size:20px!important;text-align:center;font-weight:600!important}
+.fp-meter{grid-column:1/-1;height:5px;border-radius:9px;background:var(--line);overflow:hidden}.fp-meter i{display:block;height:100%;width:0;transition:width .3s,background .3s}
+.fp-re{all:unset;cursor:pointer;color:var(--blue-600);font-weight:600;font-size:14px}.fp-re:disabled{color:var(--muted);cursor:default}
+.fp-demo{grid-column:1/-1;color:var(--muted)}
+.fp-3{text-align:center;padding:10px 0}.fp-3 h3{margin:10px 0 6px;font-size:21px}.fp-3 p{color:var(--muted);margin:0 0 16px}
+.fp-art{width:64px;height:64px;border-radius:50%;background:#E6F6EC;color:#1C7C43;display:inline-grid;place-items:center}.fp-art svg{width:30px;height:30px}
 .rg-alt{margin:18px 0 0;font-size:14px;color:var(--muted)}
 .rg-alt a{color:var(--blue-600);font-weight:600}
 @media (max-width:1000px){.ip{grid-template-columns:1fr}.ip-nav{position:static}.ip-stats,.ip-cc{grid-template-columns:repeat(2,1fr)}.ip-2,.ip-pay{grid-template-columns:1fr}}
@@ -2346,10 +2385,10 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
   const T={credit:["Рассрочка","Ապառիկ","Instalments"],about:["О нас","Մեր մասին","About us"],help:["Помощь","Օգնություն","Help"],
     buy:["Как купить","Ինչպես գնել","How to buy"],order:["Как заказать","Ինչպես պատվիրել","How to order"],pay:["Как оплатить","Ինչպես վճարել","How to pay"],
     delivery:["Доставка","Առաքում","Delivery"],warranty:["Гарантия","Երաշխիք","Warranty"],exchange:["Обмен и возврат","Փոխանակում","Exchange & returns"],
-    contacts:["Контакты","Կոնտակտներ","Contacts"],register:["Регистрация","Գրանցում","Registration"],login:["Вход","Մուտք","Log in"],account:["Личный кабинет","Անձնական էջ","My account"],home:["Главная","Գլխավոր","Home"],info:["Покупателям","Գնորդներին","Customers"],
+    contacts:["Контакты","Կոնտակտներ","Contacts"],register:["Регистрация","Գրանցում","Registration"],login:["Вход","Մուտք","Log in"],account:["Личный кабинет","Անձնական էջ","My account"],forgot:["Восстановление пароля","Գաղտնաբառի վերականգնում","Password recovery"],home:["Главная","Գլխավոր","Home"],info:["Покупателям","Գնորդներին","Customers"],
     q:["Остались вопросы?","Հարցեր ունե՞ք","Have a question?"],qd:["Пн–Сб 10:30–19:30","Երկ–Շբթ 10:30–19:30","Mon–Sat 10:30–19:30"]};
-  const P={credit:"/credit.html",about:"/about.html",buy:"/how-to-buy.html",order:"/how-to-order.html",pay:"/how-to-pay.html",delivery:"/delivery.html",warranty:"/warranty.html",exchange:"/exchange.html",contacts:"/contacts.html",register:"/registration.html",login:"/login.html",account:"/account.html"};
-  const IC={credit:"#card",about:"#store",buy:"#cart",order:"#ix-box",pay:"#ix-wallet",delivery:"#truck",warranty:"#shield",exchange:"#ix-ref",contacts:"#pin",register:"#user",login:"#shield",account:"#user"};
+  const P={credit:"/credit.html",about:"/about.html",buy:"/how-to-buy.html",order:"/how-to-order.html",pay:"/how-to-pay.html",delivery:"/delivery.html",warranty:"/warranty.html",exchange:"/exchange.html",contacts:"/contacts.html",register:"/registration.html",login:"/login.html",account:"/account.html",forgot:"/forgot-password.html"};
+  const IC={credit:"#card",about:"#store",buy:"#cart",order:"#ix-box",pay:"#ix-wallet",delivery:"#truck",warranty:"#shield",exchange:"#ix-ref",contacts:"#pin",register:"#user",login:"#shield",account:"#user",forgot:"#shield"};
   const HELP=["buy","order","pay","delivery","warranty","exchange"];
   const here=(location.pathname.split('/').pop()||'').replace('.html','');
   const cur=Object.keys(P).find(k=>P[k]==='/'+here+'.html');
@@ -2378,7 +2417,7 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
     if(k&&!li.querySelector('a')){li.dataset.ft=k;const a=document.createElement('a');a.href=P[FT[k]];a.style.cssText='color:inherit;text-decoration:none';while(li.firstChild)a.appendChild(li.firstChild);li.appendChild(a);}
   });
   /* link map leftovers that still point to the old site */
-  const OLD={"help_up_menu/warranty":"warranty","help_up_menu/delivery":"delivery","help_up_menu/how_order":"buy","help_up_menu/how_pay":"pay","help_up_menu/change":"exchange","contacts":"contacts","about":"about","credit_sale":"credit","users/registration":"register"};
+  const OLD={"help_up_menu/warranty":"warranty","help_up_menu/delivery":"delivery","help_up_menu/how_order":"buy","help_up_menu/how_pay":"pay","help_up_menu/change":"exchange","contacts":"contacts","about":"about","credit_sale":"credit","users/registration":"register","users/forgot":"forgot"};
   const fix=()=>document.querySelectorAll('a[href*="led.am/"]').forEach(a=>{const m=a.href.match(/led\.am\/(?:ru|am|en)\/(.+?)\.html/);if(m&&OLD[m[1]])a.href=P[OLD[m[1]]];});
   fix();setTimeout(fix,600);
 
@@ -2409,6 +2448,7 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 });
   /* login ⇄ forgot password */
   const lgShow=fg=>document.querySelectorAll('.lg-w').forEach(w=>{w.querySelector('.lg-in').hidden=fg;w.querySelector('.lg-fg').hidden=!fg;});
+  if(document.querySelector('.lg-w')&&location.hash==='#forgot')location.replace(P.forgot);
   if(document.querySelector('.lg-w')){lgShow(location.hash==='#forgot');addEventListener('hashchange',()=>lgShow(location.hash==='#forgot'));
     document.querySelectorAll('.lg-sw').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const fg=a.getAttribute('href')==='#forgot';history.replaceState(null,'',fg?'#forgot':location.pathname);lgShow(fg);}));}
   window.LEDInfoForm=f=>{if(f.dataset.v)return;f.dataset.v=1;f.addEventListener('submit',e=>{e.preventDefault();let ok=true;
@@ -2419,6 +2459,20 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
     if(!ok)return;const data=Object.fromEntries(new FormData(f));f.dispatchEvent(new CustomEvent('ok',{detail:data}));f.reset();f.querySelectorAll('.rg-type').forEach(x=>x.dispatchEvent(new Event('change')));const m=f.querySelector('.ip-ok');m.classList.add('on');setTimeout(()=>m.classList.remove('on'),5000);});};
   document.querySelectorAll('.ip-form').forEach(f=>LEDInfoForm(f));
 
+  /* forgot password: email → code + new password → done */
+  document.querySelectorAll('.fp-w').forEach(w=>{const f1=w.querySelector('.fp-1'),f2=w.querySelector('.fp-2'),f3=w.querySelector('.fp-3'),re=w.querySelector('.fp-re');let tm;
+    const step=i=>{f1.hidden=i!==0;f2.hidden=i!==1;f3.hidden=i!==2;w.querySelectorAll('.fp-steps span').forEach(s=>{const k=+s.dataset.i;s.classList.toggle('on',k===i);s.classList.toggle('dn',k<i);});};
+    const count=()=>{let n=60;re.disabled=true;clearInterval(tm);const tick=()=>{re.textContent=n>0?`${re.dataset.w} ${n} ${re.dataset.s}`:re.dataset.t;re.disabled=n>0;if(n--<=0)clearInterval(tm);};tick();tm=setInterval(tick,1000);};
+    f1.addEventListener('ok',e=>{w.querySelector('.fp-to').textContent=e.detail.email;step(1);count();setTimeout(()=>f2.querySelector('.fp-code').focus(),50);});
+    f1.addEventListener('reset',e=>e.preventDefault());
+    w.querySelector('.fp-chg').addEventListener('click',e=>{e.preventDefault();step(0);});
+    re.addEventListener('click',()=>{count();LEDInfoToast&&LEDInfoToast();});
+    f2.querySelector('.fp-code').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);});
+    const pw=f2.querySelector('[name=password]'),bar=f2.querySelector('.fp-meter i');
+    pw.addEventListener('input',()=>{const v=pw.value;let sc=(v.length>=6)+(v.length>=10)+/[A-Z]/.test(v)+/\d/.test(v)+/[^\w]/.test(v);bar.style.width=(sc/5*100)+'%';bar.style.background=['#E5484D','#E5484D','#F5A524','#F5A524','#30A46C','#30A46C'][sc];});
+    f2.addEventListener('ok',()=>{clearInterval(tm);step(2);});
+    step(0);});
+  window.LEDInfoToast=null;
   /* demo session: login / registration → account */
   const goAcc=(u)=>{localStorage.setItem('led-user',JSON.stringify(u));setTimeout(()=>location.href='/account.html',900);};
   document.querySelectorAll('.lg-in').forEach(f=>f.addEventListener('ok',e=>{let u=null;try{u=JSON.parse(localStorage.getItem('led-reg'))}catch(_){}
@@ -2580,11 +2634,14 @@ img,video{max-width:100%}
   .sp-promo input{flex:1 1 140px}
   .rv .h{flex-wrap:wrap;gap:6px}
   /* floating bars: compare bar full width at the bottom, call button and bars never cover each other */
-  .cmp-bar{left:12px;right:84px;bottom:16px;transform:translateY(160px);padding:8px 8px 8px 14px;gap:10px;font-size:13px;white-space:nowrap}
+  .cmp-bar{left:12px;right:12px;bottom:16px;transform:translateY(160px);padding:8px 8px 8px 14px;gap:10px;font-size:13px;white-space:nowrap}
   .cmp-bar.show{transform:none}
   .cmp-bar a{margin-left:auto}
   body:has(.sbar.show) .cmp-bar.show{bottom:84px}
   body:has(.sbar.show) .fab{bottom:84px}
+  /* call button sits above the compare bar when it is shown */
+  body:has(.cmp-bar.show) .fab{bottom:84px}
+  body:has(.sbar.show):has(.cmp-bar.show) .fab{bottom:152px}
   .sbar .wrap{gap:10px}
   .toast{max-width:calc(100vw - 24px)}
   /* catalog menu: full screen above everything, one scroll, close button always visible */
@@ -2607,7 +2664,18 @@ img,video{max-width:100%}
   .top .pill:not(.lang){display:none}
   .top .tl.cr{font-size:12.5px}
 }
+/* compare: sticky product row sits right under the real header height (taller on phones) */
+.sp-ct thead td,.sp-ct thead th{top:var(--hdr,84px)!important}
+.sp-pc b,.sp-pc s,.sp-f b,.pr b,.sp-sum b{white-space:nowrap}
+@media (max-width:600px){
+  /* footer: brand block full width, then two equal columns */
+  .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:28px 16px!important}
+  .fgrid>*:first-child{grid-column:1/-1}
+  .fgrid>*:first-child p{max-width:none}
+}
 </style>
+<script>(function(){const h=document.querySelector('header');if(!h)return;const set=()=>document.documentElement.style.setProperty('--hdr',(getComputedStyle(h).position==='sticky'||getComputedStyle(h).position==='fixed'?h.offsetHeight:0)+'px');set();addEventListener('resize',set);addEventListener('load',set);})();</script>
+
 <script>
 (function(){
   const mq = matchMedia('(max-width:760px)');
