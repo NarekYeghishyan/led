@@ -277,3 +277,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Compare: sticky product row `top:0` (its sticky container is the horizontal scroller `.sp-cmpw`; the header offset left a blank strip). Favourites: "Share list" button removed. Backup `led-static-backup-20261121d.tgz`. Published.
 - 2026-11-21 — Cart: delete is now a red icon button (`.sp-del`, light red, fills red on hover) left of the qty box (`.sp-ctl` wrapper); no blue button effect on it. Backup `led-static-backup-20261121e.tgz`. Published.
 - 2026-11-21 — Cart: promo code box removed. Checkout success total row class `.t` → `.tt` (`.t` got the trust-tile hover box). Backup `led-static-backup-20261121f.tgz`. Published.
+- 2026-11-21 — Account orders: "Invoice (PDF)" button removed. Backup `led-static-backup-20261121g.tgz`. Published.

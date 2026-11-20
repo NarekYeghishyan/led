@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded',function(){
         <div class="ac-ob">${o.it.map(x=>`<div class="ac-it"><img src="${x[1]}" alt=""><div>${x[0]}<br><small>${x[2]} × ${fmt(x[3])}</small></div><b>${fmt(x[2]*x[3])}</b></div>`).join('')}
         ${o.s<3?`<div class="ac-tl">${T.tl.map((s,i)=>`<span class="${i<=o.step?'on':''}">${tt(s)}</span>`).join('')}</div>`:''}
         <small style="color:var(--muted)">${t('pay')}: ${t(['cash','cardp','inst'][o.pay])} · ${t('dlv')}: ${t(['pick','cour'][o.dl])}</small>
-        <div class="ac-oa"><a class="btn" href="/track-order.html?n=${o.n}">${['Отследить','Հետևել','Track'][L()]}</a><button class="btn p ac-rep" type="button" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('repeat')}</button><button class="btn ac-inv" type="button" style="font:inherit;cursor:pointer">${t('invoice')}</button></div></div></div>`;
+        <div class="ac-oa"><a class="btn" href="/track-order.html?n=${o.n}">${['Отследить','Հետևել','Track'][L()]}</a><button class="btn p ac-rep" type="button" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('repeat')}</button></div></div></div>`;
       const adrs=get(A,null)||[{l:['Дом','Տուն','Home'][L()],city:u.city||['Ереван','Երևան','Yerevan'][L()],a:u.address||'Կիևյան 11',def:1}];
       const shown=ORD.filter(o=>flt<0||o.s===flt);
       const F=(n,l,v,ty='text',ex='')=>`<label${ex}>${l} *<input name="${n}" type="${ty}" value="${(v||'').replace(/"/g,'&quot;')}" required minlength="3"${ty==='tel'?' inputmode="tel"':''}></label>`;
