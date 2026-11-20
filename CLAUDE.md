@@ -86,3 +86,8 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Admin login page: same navy + blue glows background, white form card, blue focus ring and button. Deployed.
 - 2026-11-20 — Admin dashboard tiles use the site card style (14px radius, soft shadow, tinted icon box, hover lift; green/amber/red
   tones for in stock / out of stock / deleted). Admin light palette = site tokens (`--bg #F3F7FA`, `--line #E3E9F1`). Deployed.
+- 2026-11-20 — Added product page `Design/site/product.html` (live at `/product.html`): gallery with zoom/lightbox/swipe,
+  options that change the price, sticky buy box (price, instalment calculator, qty, cart, 1-click modal, favourite/compare),
+  delivery/warranty perks, sticky section tabs under the header, spec table with search, description, store stock,
+  bundle, reviews, similar products, bottom sticky buy bar, Product JSON-LD, RU/HY/EN strings. Category cards' "Подробнее"
+  now open `/product.html`. Backup `led-static-backup-20261120d.tgz`. Reviews/ratings are placeholders — the store has no review data yet.
