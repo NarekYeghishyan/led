@@ -192,3 +192,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   Backup `led-static-backup-20261120zl.tgz`. Published.
 - 2026-11-20 — Mega menu fits the screen: `.mega-in` max-height = viewport minus its top (`--mtop`, set by JS on scroll/hover), only the
   category list (`.mega-g`) scrolls, "Popular"/"Brands" row stays visible at the bottom (`<!--mega-fit-->` in card_fx.html). Backup `led-static-backup-20261120zm.tgz`. Published.
+- 2026-11-20 — Compare: column head hover glow no longer hugs the content edge (`.sp-pc.pc` padding 10px + margin -10px). Backup `led-static-backup-20261120zn.tgz`. Published.

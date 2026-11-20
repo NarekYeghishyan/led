@@ -1138,6 +1138,22 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1313,7 +1329,7 @@ document.addEventListener('pointerdown',e=>{const el=e.target.closest&&(e.target
 .sp-f.pc:hover .im img,.sp-pc.pc:hover .im img{transform:scale(1.06)}
 .sp-f.pc:hover h4,.sp-pc.pc:hover h4{color:var(--blue-600)}
 .sp-f.pc:hover .drop{animation:pcWig .5s ease}
-.sp-pc.pc{border-radius:14px;transition:translate .25s}.sp-pc.pc:hover{translate:0 -3px}
+.sp-pc.pc{border-radius:14px;padding:10px;margin:-10px;transition:translate .25s}.sp-pc.pc:hover{translate:0 -3px}
 .sp-slot.pc:hover{translate:0 -2px;transition:translate .25s,border-color .2s,color .2s}
 /* ---- header ---- */
 .search{transition:border-color .25s,box-shadow .3s,background .25s}
@@ -1521,5 +1537,11 @@ function syncNav(){const bs=document.querySelectorAll('.mega-l button');document
 syncNav();document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(syncNav,60)));
 })();
 </script><!--/card-fx-->
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
 </body>
 </html>
