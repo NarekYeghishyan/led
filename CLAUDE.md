@@ -175,3 +175,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   thicken and glow. Home side promo "Подобрать комплектующие" (Ընտրել մասերը) now links to `/assembly.html`. Backup `led-static-backup-20261120zg.tgz`. Published.
 - 2026-11-20 — Product bundle hover: items (`.bi`) lift + spotlight/border glow, photo springs/parallax, name/price blue, checkbox pops;
   total card (`.bsum`, navy) gets the white banner glow + sweep, total pops; its button gets the primary button effect. Backup `led-static-backup-20261120zh.tgz`. Published.
+- 2026-11-20 — Similar products already use the `.prod` card effect (checked live). Section heading links (`.sh>a`, "Все … →") slide with an
+  underline on all pages. Published.
