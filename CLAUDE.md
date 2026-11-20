@@ -184,3 +184,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Category filters hover: group titles slide + "+/−" spins blue; options slide with a blue wash, count pill turns blue (also when
   checked), checkbox pops; toggles slide; price inputs glow on focus; slider handles grow with a halo, range bar glows; "Reset" underline;
   active-filter chips lift and ✕ spins. Backup `led-static-backup-20261120zj.tgz`. Published.
+- 2026-11-20 — Category toolbar hover: sort button glow ring + chevron nudge, sort options cascade in, slide with blue wash and icon spring;
+  grid/list toggle glow + icon pop; pager buttons lift; compare checkbox tint. (Sort/view buttons also have the secondary button effect.)
+  Backup `led-static-backup-20261120zk.tgz`. Published.

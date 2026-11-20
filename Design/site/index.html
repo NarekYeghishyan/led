@@ -1144,6 +1144,11 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1485,6 +1490,26 @@ nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
 .chips i{display:inline-block;transition:transform .3s cubic-bezier(.3,1.6,.5,1),opacity .2s}
 .chips span:hover i{transform:rotate(90deg);opacity:1}
 @media (prefers-reduced-motion:reduce){.filters summary:hover,.ck:hover,.tg:hover,.chips span:hover{translate:none}}
+/* ---- category toolbar ---- */
+.sb{transition:border-color .25s,box-shadow .3s,color .2s!important}
+.sb:hover,.sort.open .sb{box-shadow:0 0 0 3px rgba(20,104,220,.1),0 6px 16px rgba(20,104,220,.12);color:var(--blue-700)}
+.sort:not(.open) .sb:hover svg.i{transform:translateY(2px)}
+.sort li{transition:background .2s,color .2s,translate .25s cubic-bezier(.2,.8,.2,1)}
+.sort li:not(.on):hover{translate:4px 0;color:var(--blue-700);background:linear-gradient(90deg,var(--blue-50),rgba(232,240,252,.3))}
+.sort li svg.i{transition:transform .35s cubic-bezier(.3,1.6,.5,1),color .2s}
+.sort li:hover svg.i{transform:scale(1.18) rotate(-8deg);color:var(--blue-600)}
+.sort.open ul li{animation:pcIn .3s both}.sort.open ul li:nth-child(2){animation-delay:.03s}.sort.open ul li:nth-child(3){animation-delay:.06s}.sort.open ul li:nth-child(4){animation-delay:.09s}.sort.open ul li:nth-child(5){animation-delay:.12s}
+@keyframes pcIn{from{opacity:0;translate:0 -4px}}
+.view button{transition:background .2s,color .2s,box-shadow .3s}
+.view button.on{box-shadow:0 4px 12px rgba(20,104,220,.35)}
+.view button svg.i{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.view button:hover svg.i{transform:scale(1.15)}
+.pager a{transition:background .2s,color .2s,translate .25s cubic-bezier(.3,1.6,.5,1),box-shadow .3s!important}
+.pager a:not(.on):hover{translate:0 -3px;box-shadow:0 10px 22px rgba(20,104,220,.18);color:var(--blue-600)}
+.pager a.on{box-shadow:0 6px 16px rgba(20,104,220,.35)}
+.cmpchk{transition:color .2s}.cmpchk:hover{color:var(--blue-700)}
+.cmpchk input{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}.cmpchk:hover input{transform:scale(1.15)}
+@media (prefers-reduced-motion:reduce){.sort li:hover,.pager a:hover{translate:none}.sort.open ul li{animation:none}}
 </style><script>
 (function(){
 const CARD='.prod,.sp-f,.sp-pc',TILE='.bi,.rv,.rv-top .big,.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p,.bsum',ALL=[CARD,TILE,BAN].join(',');
