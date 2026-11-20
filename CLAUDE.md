@@ -137,3 +137,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   `.sp-b.p`, `.asm-b.p`, card cart, "Подробнее"…) get the catalog-button look — gradient wake + light sweep + glow + lift, plus a cursor
   spotlight, slight magnetic pull and click ripple; secondary buttons a light blue version; header icons bounce. JS adds `.fx` and
   `span.fx-g/.fx-sh` on first hover. Honors reduced-motion. Backup `led-static-backup-20261120u.tgz`. Published.
+- 2026-11-20 — Product cards (`.prod`, all pages): cursor spotlight + blue border glow that follows the cursor, light sweep over the photo,
+  photo parallax, badge wiggle, price turns darker blue (`site-src/card_fx.html`, added by `build_shop.py`; spans `.pc-g/.pc-b/.pc-sh` added on
+  first hover). Backup `led-static-backup-20261120v.tgz`. Published.

@@ -1018,6 +1018,10 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1144,5 +1148,34 @@ document.addEventListener('pointerdown',e=>{const el=e.target.closest&&(e.target
  const r=el.getBoundingClientRect(),s=document.createElement('span');s.className='fx-r';s.style.left=e.clientX-r.left+'px';s.style.top=e.clientY-r.top+'px';el.appendChild(s);setTimeout(()=>s.remove(),650)});
 })();
 </script><!--/btn-fx-->
+<!--card-fx--><style>
+/* Product cards: cursor spotlight + glowing border that follows the cursor, light sweep over the photo,
+   photo parallax, badge wiggle. Spans are added by JS on first hover. */
+.prod.pc{isolation:isolate}
+.prod>.pc-g,.prod>.pc-b{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;z-index:-1}
+.prod>.pc-g{background:radial-gradient(260px circle at var(--pc-x,50%) var(--pc-y,50%),rgba(47,127,234,.09),transparent 65%)}
+.prod>.pc-b{z-index:2;padding:1.5px;background:radial-gradient(220px circle at var(--pc-x,50%) var(--pc-y,50%),rgba(47,127,234,.9),rgba(106,168,247,.35) 40%,transparent 70%);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.prod:hover>.pc-g,.prod:hover>.pc-b{opacity:1}
+.prod .img>.pc-sh{position:absolute;top:0;bottom:0;width:40%;left:-70%;z-index:2;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
+.prod:hover .img>.pc-sh{animation:fxShine .9s ease}
+.prod .img img,.prod .img svg{translate:var(--pc-tx,0px) var(--pc-ty,0px);transition:transform .3s,translate .2s ease-out}
+.prod:hover .badge{animation:pcWig .5s ease}
+.prod .pr b{transition:color .25s}.prod:hover .pr b{color:var(--blue-700)}
+@keyframes pcWig{30%{transform:rotate(-6deg) scale(1.08)}60%{transform:rotate(4deg)}}
+@keyframes fxShine{to{left:130%}}
+@media (prefers-reduced-motion:reduce){.prod:hover .img>.pc-sh,.prod:hover .badge{animation:none}.prod .img img,.prod .img svg{translate:none}}
+</style><script>
+(function(){
+function prep(c){if(c._pc||c.closest('#stubs'))return;c._pc=1;c.classList.add('pc');
+ c.insertAdjacentHTML('afterbegin','<span class="pc-g"></span><span class="pc-b"></span>');
+ const im=c.querySelector('.img');if(im)im.insertAdjacentHTML('beforeend','<span class="pc-sh"></span>')}
+document.addEventListener('pointerover',e=>{const c=e.target.closest&&e.target.closest('.prod');if(c)prep(c)});
+document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.prod.pc');if(!c)return;
+ const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;c.style.setProperty('--pc-x',x+'px');c.style.setProperty('--pc-y',y+'px');
+ c.style.setProperty('--pc-tx',((x/r.width-.5)*-8).toFixed(1)+'px');c.style.setProperty('--pc-ty',((y/Math.max(r.height,1)-.5)*-6).toFixed(1)+'px')},{passive:true});
+document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.prod.pc');if(c&&!c.contains(e.relatedTarget)){c.style.removeProperty('--pc-tx');c.style.removeProperty('--pc-ty')}});
+})();
+</script><!--/card-fx-->
 </body>
 </html>
