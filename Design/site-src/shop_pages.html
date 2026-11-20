@@ -1,0 +1,287 @@
+<style>
+.shop{padding-bottom:56px}
+.sp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:6px 0 22px}
+.sp-head h1{font-size:32px;letter-spacing:-.02em;margin:0;display:flex;align-items:center;gap:12px}
+.sp-head h1 .ic{width:46px;height:46px;border-radius:14px;background:var(--blue-50);display:grid;place-items:center}
+.sp-head h1 .ic svg{width:24px;height:24px;color:var(--blue-600)}
+.sp-head p{margin:6px 0 0;color:var(--muted)}
+.sp-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sp-b{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);font:inherit;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.sp-b:hover{border-color:var(--blue-600);color:var(--blue-700)}.sp-b:active{transform:scale(.97)}
+.sp-b.p{background:var(--blue-600);border-color:var(--blue-600);color:#fff}.sp-b.p:hover{background:var(--blue-700);color:#fff}
+.sp-b.big{height:52px;width:100%;justify-content:center;font-size:16px}
+.sp-b svg.i{width:18px;height:18px}
+.sp-seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:3px}
+.sp-seg button{border:0;background:none;font:inherit;font-size:13.5px;font-weight:600;color:var(--muted);padding:7px 12px;border-radius:8px;cursor:pointer}
+.sp-seg button.on{background:var(--blue-600);color:#fff}
+.sp-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.sp-steps{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);font-weight:600}
+.sp-steps span{display:flex;align-items:center;gap:6px}.sp-steps i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-size:12px}
+.sp-steps .on{color:var(--ink)}.sp-steps .on i{background:var(--blue-600);color:#fff}.sp-steps b{width:28px;height:2px;background:var(--line)}
+/* cart */
+.sp-cart{display:grid;grid-template-columns:1fr 370px;gap:24px;align-items:start}
+.sp-free{padding:16px 18px;margin-bottom:14px;display:flex;gap:14px;align-items:center}
+.sp-free svg{width:26px;height:26px;color:var(--blue-600);flex:none}
+.sp-free div{flex:1}.sp-free small{display:block;font-size:13.5px;margin-bottom:8px}
+.sp-bar{height:8px;border-radius:9px;background:var(--bg);overflow:hidden}.sp-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#2F7FEA,#16A34A);transition:width .5s}
+.sp-list{padding:6px 18px}
+.sp-row{display:grid;grid-template-columns:96px 1fr auto auto;gap:18px;align-items:center;padding:16px 0;border-top:1px solid var(--line);transition:opacity .25s,transform .25s}
+.sp-row:first-child{border-top:0}.sp-row.out{opacity:0;transform:translateX(30px)}
+.sp-row .im{width:96px;height:80px;border-radius:12px;background:var(--bg);display:grid;place-items:center;overflow:hidden}
+.sp-row .im img{max-width:88%;max-height:88%;object-fit:contain}
+.sp-row h4{margin:0 0 4px;font-size:15.5px}.sp-row h4 a:hover{color:var(--blue-600)}
+.sp-row .sp{font-size:13px;color:var(--muted)}
+.sp-row .mt{display:flex;gap:14px;margin-top:8px;font-size:13px}
+.sp-row .mt button{background:none;border:0;padding:0;font:inherit;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px}
+.sp-row .mt button:hover{color:var(--blue-600)}.sp-row .mt button.rm:hover{color:#E5484D}.sp-row .mt svg{width:15px;height:15px}
+.sp-ok{color:var(--success);font-weight:600;font-size:12.5px}
+.sp-qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;height:40px}
+.sp-qty button{width:36px;height:100%;border:0;background:none;font-size:18px;cursor:pointer;color:var(--ink)}.sp-qty button:hover{color:var(--blue-600)}
+.sp-qty span{min-width:28px;text-align:center;font-weight:700}
+.sp-sum{text-align:right;min-width:120px}.sp-sum b{font-size:17px;display:block}.sp-sum s{font-size:12.5px;color:var(--muted)}.sp-sum small{display:block;font-size:12px;color:var(--muted)}
+.sp-dl{padding:18px;margin-top:14px}.sp-dl h3,.sp-up h3{margin:0 0 12px;font-size:17px}
+.sp-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sp-opt{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;transition:border-color .2s,background .2s}
+.sp-opt input{display:none}.sp-opt svg{width:22px;height:22px;color:var(--slate-500);flex:none;margin-top:1px}
+.sp-opt b{display:block;font-size:14px}.sp-opt small{color:var(--muted);font-size:12.5px}
+.sp-opt.on{border-color:var(--blue-600);background:var(--blue-50)}.sp-opt.on svg{color:var(--blue-600)}
+.sp-side{position:sticky;top:96px;padding:20px}
+.sp-side h3{margin:0 0 14px;font-size:18px}
+.sp-ln{display:flex;justify-content:space-between;font-size:14.5px;padding:6px 0;color:var(--muted)}.sp-ln b{color:var(--ink);font-weight:600}
+.sp-ln.disc b{color:var(--success)}
+.sp-tot{display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed var(--line);margin-top:8px;padding-top:14px}
+.sp-tot span{font-weight:600}.sp-tot b{font-size:26px;letter-spacing:-.02em}
+.sp-mo{font-size:13px;color:var(--blue-700);background:var(--blue-50);border-radius:10px;padding:9px 12px;margin:12px 0 14px;display:flex;justify-content:space-between}
+.sp-promo{display:flex;gap:8px;margin:14px 0 4px}.sp-promo input{flex:1;height:42px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit}
+.sp-promo input:focus{outline:0;border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(20,104,220,.15)}
+.sp-promo+small{font-size:12px;color:var(--muted)}.sp-promo+small.ok{color:var(--success)}.sp-promo+small.bad{color:#E5484D}
+.sp-side .sp-b+.sp-b{margin-top:8px}
+.sp-pay{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap}.sp-pay span{font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+.sp-safe{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:12px;justify-content:center}.sp-safe svg{width:16px;height:16px;color:var(--success)}
+.sp-up{margin-top:28px}
+.sp-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sp-mi{padding:12px;display:flex;gap:12px;align-items:center}.sp-mi .im{width:56px;height:56px;border-radius:10px;background:var(--bg);display:grid;place-items:center;flex:none}
+.sp-mi img{max-width:85%;max-height:85%}.sp-mi div{flex:1;min-width:0}.sp-mi h5{margin:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sp-mi b{font-size:14px}
+.sp-mi button{width:36px;height:36px;border-radius:10px;border:0;background:var(--blue-50);color:var(--blue-600);cursor:pointer;flex:none;display:grid;place-items:center}
+.sp-mi button:hover{background:var(--blue-600);color:#fff}.sp-mi button svg{width:17px;height:17px}.sp-mi button.done{background:var(--success);color:#fff}
+/* favourites */
+.sp-fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sp-f{padding:14px;display:flex;flex-direction:column;position:relative;transition:transform .2s,box-shadow .2s,opacity .25s;cursor:pointer;animation:spIn .4s both}
+.sp-f:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(16,27,47,.1)}.sp-f.out{opacity:0;transform:scale(.94)}
+.sp-f .im{aspect-ratio:4/3;border-radius:12px;background:var(--bg);display:grid;place-items:center;margin-bottom:12px}.sp-f .im img{max-width:82%;max-height:82%}
+.sp-f h4{margin:0 0 4px;font-size:15px;transition:color .2s}.sp-f:hover h4{color:var(--blue-600)}
+.sp-f .sp{font-size:12.5px;color:var(--muted);margin-bottom:10px;flex:1}
+.sp-f .pr{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.sp-f .pr b{font-size:18px}.sp-f .pr s{display:block;font-size:12px;color:var(--muted)}
+.sp-f .ht{position:absolute;top:22px;right:22px;width:36px;height:36px;border-radius:50%;background:#fff;border:0;box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;z-index:2}
+.sp-f .ht svg{width:18px;height:18px;fill:#E5484D;color:#E5484D;transition:transform .2s}.sp-f .ht:hover svg{transform:scale(1.2)}
+.sp-f .cb{position:absolute;top:66px;right:22px;width:36px;height:36px;border-radius:50%;background:#fff;border:0;box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;z-index:2;color:var(--slate-500)}
+.sp-f .cb.on{background:var(--blue-600);color:#fff}.sp-f .cb svg{width:17px;height:17px}
+.sp-f .drop{position:absolute;top:22px;left:22px;background:#16A34A;color:#fff;font-size:11.5px;font-weight:700;border-radius:8px;padding:4px 8px;z-index:2}
+.sp-f .add{width:42px;height:42px;border-radius:12px;border:0;background:var(--blue-600);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.sp-f .add:hover{background:var(--blue-700)}.sp-f .add.in{background:var(--success)}.sp-f .add svg{width:19px;height:19px}
+@keyframes spIn{from{opacity:0;transform:translateY(12px)}}
+/* compare */
+.sp-cmpw{overflow-x:auto;padding-bottom:6px}
+.sp-ct{border-collapse:separate;border-spacing:0;width:100%;min-width:760px;table-layout:fixed}
+.sp-ct th,.sp-ct td{padding:12px 14px;text-align:left;vertical-align:top;font-size:14px;border-bottom:1px solid var(--line)}
+.sp-ct col.lab{width:200px}
+.sp-ct tbody th{font-weight:500;color:var(--muted);position:sticky;left:0;background:var(--surface);z-index:1}
+.sp-ct thead td{position:sticky;top:84px;background:var(--surface);z-index:3;border-bottom:1px solid var(--line);vertical-align:top}
+.sp-ct thead th{position:sticky;top:84px;left:0;background:var(--surface);z-index:4;vertical-align:bottom}
+.sp-pc{position:relative;animation:spIn .4s both}
+.sp-pc .im{height:110px;border-radius:12px;background:var(--bg);display:grid;place-items:center;margin-bottom:10px}.sp-pc img{max-height:88%;max-width:80%}
+.sp-pc h4{margin:0 0 6px;font-size:14.5px;min-height:38px}.sp-pc h4 a:hover{color:var(--blue-600)}
+.sp-pc .row{display:flex;justify-content:space-between;align-items:center;gap:6px}.sp-pc b{font-size:17px}
+.sp-pc .x{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:0;background:#fff;box-shadow:var(--shadow);cursor:pointer;color:var(--muted);font-size:13px}
+.sp-pc .x:hover{color:#E5484D}
+.sp-pc .add{width:38px;height:38px;border-radius:10px;border:0;background:var(--blue-600);color:#fff;display:grid;place-items:center;cursor:pointer}.sp-pc .add.in{background:var(--success)}.sp-pc .add svg{width:18px;height:18px}
+.sp-slot{display:grid;place-items:center;height:100%;min-height:200px;border:2px dashed var(--line);border-radius:14px;color:var(--muted);font-weight:600;text-align:center;transition:border-color .2s,color .2s}
+.sp-slot:hover{border-color:var(--blue-600);color:var(--blue-600)}.sp-slot span{display:block;font-size:30px;line-height:1}
+.sp-ct tr.sec th{background:var(--bg);color:var(--ink);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.04em;padding:10px 14px}
+.sp-ct tr.sec td{background:var(--bg)}
+.sp-ct tr.diff td{background:linear-gradient(0deg,rgba(20,104,220,.035),rgba(20,104,220,.035))}
+.sp-ct td.best{color:var(--success);font-weight:700}.sp-ct td.best:after{content:" ★";font-size:12px}
+.sp-ct tbody tr:not(.sec):hover td,.sp-ct tbody tr:not(.sec):hover th{background:var(--blue-50)}
+.sp-ct.only tr.same{display:none}
+.sp-score{display:flex;gap:4px;align-items:center}.sp-score i{flex:1;height:6px;border-radius:6px;background:var(--line)}.sp-score i.f{background:var(--blue-600)}
+.sp-leg{display:flex;gap:16px;font-size:12.5px;color:var(--muted);margin-top:12px;flex-wrap:wrap}.sp-leg b{color:var(--success)}
+.sp-sw{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;cursor:pointer;user-select:none}
+.sp-sw input{display:none}.sp-sw i{width:38px;height:22px;border-radius:22px;background:var(--line);position:relative;transition:background .2s}
+.sp-sw i:after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sp-sw input:checked+i{background:var(--blue-600)}.sp-sw input:checked+i:after{transform:translateX(16px)}
+/* empty */
+.sp-empty{padding:56px 24px;text-align:center}.sp-empty .art{width:120px;height:120px;margin:0 auto 18px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#EAF2FE,#D6E6FD);display:grid;place-items:center;animation:spFloat 3s ease-in-out infinite}
+.sp-empty .art svg{width:54px;height:54px;color:var(--blue-600)}.sp-empty h2{margin:0 0 8px}.sp-empty p{color:var(--muted);margin:0 auto 20px;max-width:420px}
+@keyframes spFloat{50%{transform:translateY(-8px)}}
+@media(max-width:1100px){.sp-cart{grid-template-columns:1fr}.sp-side{position:static}.sp-fgrid{grid-template-columns:repeat(3,1fr)}.sp-mini{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.sp-fgrid{grid-template-columns:repeat(2,1fr)}.sp-opts{grid-template-columns:1fr}.sp-row{grid-template-columns:72px 1fr;gap:12px}.sp-row .im{width:72px;height:64px}.sp-row .sp-qty{grid-column:2}.sp-row .sp-sum{grid-column:2;text-align:left}.sp-ct col.lab{width:130px}.sp-head h1{font-size:26px}.sp-mini{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.sp-f,.sp-pc,.sp-empty .art{animation:none}}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="sp-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
+<symbol id="sp-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v10h16V10M3 6l2-3h14l2 3v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M10 20v-5h4v5"/></symbol>
+<symbol id="sp-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></symbol>
+<symbol id="sp-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+<symbol id="sp-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+<symbol id="sp-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="sp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></symbol>
+<symbol id="sp-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="sp-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8S10 3 7.5 4.5 9 8 12 8zm0 0s2-5 4.5-3.5S15 8 12 8z"/></symbol>
+</svg>
+<script>/* cart / favourites / compare pages */
+(function(){
+const S=window.LEDStore,root=document.getElementById('spRoot'),page=document.getElementById('shop').dataset.page;
+const L=()=>({hy:1,en:2}[document.documentElement.lang]||0);
+const T=new Proxy({
+ home:['Главная','Գլխավոր','Home'],cart:['Корзина','Զամբյուղ','Cart'],fav:['Избранное','Ընտրյալներ','Favourites'],cmp:['Сравнение','Համեմատել','Compare'],
+ items:['товара','ապրանք','items'],step2:['Оформление','Ձևակերպում','Checkout'],step3:['Готово','Պատրաստ է','Done'],
+ freeLeft:['До бесплатной доставки осталось','Անվճար առաքմանը մնաց','Left to free delivery:'],freeOk:['Бесплатная доставка по Еревану — ваша!','Անվճար առաքում Երևանում — ձերն է։','Free delivery in Yerevan unlocked!'],
+ inStock:['В наличии','Առկա է','In stock'],toFav:['В избранное','Ընտրյալներում','Save'],inFav:['В избранном','Ընտրյալներում է','Saved'],del:['Удалить','Ջնջել','Remove'],
+ each:['за шт.','հատը','each'],dl:['Способ получения','Ստանալու եղանակը','Delivery'],
+ pick:['Самовывоз','Վերցնել խանութից','Pick‑up'],pickS:['Киевяна 11, сегодня','Կիևյան 11, այսօր','Kievyan 11, today'],
+ cour:['Курьер по Еревану','Առաքիչ Երևանում','Courier, Yerevan'],courS:['Завтра, 10:00–19:00','Վաղը, 10:00–19:00','Tomorrow, 10:00–19:00'],
+ reg:['По Армении','Ամբողջ Հայաստանով','Across Armenia'],regS:['1–3 дня','1–3 օր','1–3 days'],free:['Бесплатно','Անվճար','Free'],
+ sum:['Ваш заказ','Ձեր պատվերը','Your order'],goods:['Товары','Ապրանքներ','Items'],disc:['Скидка по промокоду','Պրոմոկոդի զեղչ','Promo discount'],ship:['Доставка','Առաքում','Delivery'],
+ total:['Итого','Ընդամենը','Total'],inst:['В рассрочку на 24 мес.','Ապառիկ 24 ամսով','Instalments, 24 mo.'],mo:['/мес','/ամիս','/mo'],
+ promo:['Промокод','Պրոմոկոդ','Promo code'],apply:['Применить','Կիրառել','Apply'],promoHint:['Попробуйте LED5','Փորձեք LED5','Try LED5'],promoOk:['Промокод применён: −5%','Պրոմոկոդը կիրառվեց՝ −5%','Promo applied: −5%'],promoBad:['Промокод не найден','Պրոմոկոդը չի գտնվել','Code not found'],
+ checkout:['Оформить заказ','Ձևակերպել պատվերը','Checkout'],oneClick:['Купить в 1 клик','Գնել 1 քայլով','Buy in 1 click'],safe:['Официальная гарантия и безопасная оплата','Պաշտոնական երաշխիք և անվտանգ վճարում','Official warranty, secure payment'],
+ up:['С этим часто покупают','Միասին հաճախ գնում են','Frequently bought together'],removed:['Товар удалён','Ապրանքը հեռացվեց','Item removed'],undo:['Вернуть','Վերադարձնել','Undo'],
+ emptyCart:['Корзина пока пуста','Զամբյուղը դեռ դատարկ է','Your cart is empty'],emptyCartP:['Загляните в каталог — там тысячи товаров с гарантией и доставкой по Армении.','Նայեք կատալոգը․ հազարավոր ապրանքներ՝ երաշխիքով և առաքմամբ ամբողջ Հայաստանում։','Browse the catalogue — thousands of products with warranty and delivery across Armenia.'],
+ toCat:['Перейти в каталог','Անցնել կատալոգ','Go to catalogue'],orderOk:['Спасибо! Менеджер перезвонит в течение 15 минут.','Շնորհակալություն։ Մենեջերը կզանգի 15 րոպեի ընթացքում։','Thank you! A manager will call you within 15 minutes.'],
+ allCart:['Всё в корзину','Բոլորը զամբյուղ','Add all to cart'],share:['Поделиться списком','Կիսվել ցանկով','Share list'],copied:['Ссылка скопирована','Հղումը պատճենվեց','Link copied'],
+ sAdded:['Недавние','Վերջինները','Recent'],sCheap:['Дешевле','Էժան','Cheapest'],sExp:['Дороже','Թանկ','Priciest'],drop:['Цена ↓','Գինը ↓','Price ↓'],
+ addedAll:['Все товары в корзине','Բոլոր ապրանքները զամբյուղում են','All items added to cart'],inCart:['В корзине','Զամբյուղում է','In cart'],
+ emptyFav:['Здесь будут ваши любимые товары','Այստեղ կլինեն ձեր սիրելի ապրանքները','Your favourites will live here'],emptyFavP:['Нажмите ♡ на карточке товара, чтобы сохранить его и вернуться позже.','Սեղմեք ♡ ապրանքի քարտի վրա՝ այն պահելու և հետո վերադառնալու համար։','Tap ♡ on any product card to save it for later.'],
+ favTotal:['на сумму','ընդհանուր','worth'],
+ only:['Только различия','Միայն տարբերությունները','Differences only'],clear:['Очистить','Մաքրել','Clear'],addP:['Добавить товар','Ավելացնել ապրանք','Add product'],
+ best:['лучшее значение','լավագույն արժեքը','best value'],diffL:['строки с различиями подсвечены','տարբերվող տողերը ընդգծված են','rows that differ are tinted'],
+ emptyCmp:['Сравнивать пока нечего','Համեմատելու բան դեռ չկա','Nothing to compare yet'],emptyCmpP:['Добавьте до 4 товаров кнопкой «Сравнить» на карточке — и увидите все различия в одной таблице.','Ավելացրեք մինչև 4 ապրանք «Համեմատել» կոճակով և տեսեք բոլոր տարբերությունները մեկ աղյուսակում։','Add up to 4 products with the “Compare” button and see every difference in one table.'],
+ laptops:['Ноутбуки','Նոութբուքեր','Laptops'],cleared:['Сравнение очищено','Համեմատումը մաքրվեց','Compare list cleared'],
+ sMain:['Основное','Հիմնական','Overview'],sPerf:['Производительность','Արտադրողականություն','Performance'],sBody:['Корпус и автономность','Կորպուս և ինքնավարություն','Body & battery'],
+ price:['Цена','Գին','Price'],score:['Оценка LED','LED գնահատական','LED score'],warranty:['Гарантия','Երաշխիք','Warranty'],screen:['Экран','Էկրան','Display'],cpu:['Процессор','Պրոցեսոր','Processor'],
+ ram:['Память','Հիշողություն','RAM'],ssd:['Накопитель','Կրիչ','Storage'],gpu:['Видеокарта','Վիդեոքարտ','Graphics'],weight:['Вес','Քաշ','Weight'],battery:['Батарея','Մարտկոց','Battery'],os:['ОС','ՕՀ','OS'],
+ mon:['мес.','ամիս','months'],kg:['кг','կգ','kg'],more:['Подробнее','Մանրամասն','Details']
+},{get:(o,k)=>(o[k]||[k,k,k])[L()]});
+const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' ֏';
+const ic=(id,c='i')=>`<svg class="${c}"><use href="#${id}"/></svg>`;
+/* demo catalogue (until /api is wired) */
+const C={};
+[['lenovo-ideapad-slim-3-15','Lenovo IdeaPad Slim 3 15″','img/p2.webp',289000,321000,'Core i5‑1335U · 16 ГБ · 512 ГБ SSD',{screen:'15.6″ FHD IPS',cpu:'Intel Core i5‑1335U',ram:16,ssd:512,gpu:'Intel Iris Xe',weight:1.62,battery:47,os:'Windows 11',warranty:24,score:7}],
+ ['lenovo-yoga-7-2-in-1-14','Lenovo Yoga 7 2‑in‑1 14″','img/p2.webp',398000,0,'Ryzen 7 · 16 ГБ · 512 ГБ SSD',{screen:'14″ 2.2K Touch',cpu:'AMD Ryzen 7 8840HS',ram:16,ssd:512,gpu:'Radeon 780M',weight:1.49,battery:71,os:'Windows 11',warranty:24,score:8}],
+ ['hp-pavilion-15','HP Pavilion 15','img/p2.webp',412000,448000,'Core i7‑1355U · 16 ГБ · 1 ТБ SSD',{screen:'15.6″ FHD IPS',cpu:'Intel Core i7‑1355U',ram:16,ssd:1024,gpu:'Intel Iris Xe',weight:1.75,battery:41,os:'Windows 11',warranty:12,score:7}],
+ ['asus-vivobook-16','ASUS VivoBook 16','img/p2.webp',259000,0,'Core i5‑12500H · 8 ГБ · 512 ГБ SSD',{screen:'16″ WUXGA IPS',cpu:'Intel Core i5‑12500H',ram:8,ssd:512,gpu:'Intel Iris Xe',weight:1.88,battery:42,os:'FreeDOS',warranty:12,score:6}],
+ ['dell-inspiron-14','Dell Inspiron 14','img/p2.webp',305000,0,'Ryzen 5 7530U · 16 ГБ · 512 ГБ SSD',{screen:'14″ FHD+ IPS',cpu:'AMD Ryzen 5 7530U',ram:16,ssd:512,gpu:'Radeon Graphics',weight:1.54,battery:54,os:'Windows 11',warranty:12,score:7}],
+ ['acer-nitro-v-15','Acer Nitro V 15','img/p2.webp',469000,521000,'Core i5‑13420H · RTX 4050 · 16 ГБ',{screen:'15.6″ FHD 144 Гц',cpu:'Intel Core i5‑13420H',ram:16,ssd:512,gpu:'RTX 4050 6 ГБ',weight:2.1,battery:57,os:'FreeDOS',warranty:24,score:8}],
+ ['msi-thin-gf63','MSI Thin GF63','img/p2.webp',535000,0,'Core i7‑12650H · RTX 4060 · 16 ГБ',{screen:'15.6″ FHD 144 Гц',cpu:'Intel Core i7‑12650H',ram:16,ssd:512,gpu:'RTX 4060 8 ГБ',weight:1.86,battery:52,os:'FreeDOS',warranty:24,score:8}],
+ ['lenovo-thinkpad-e14','Lenovo ThinkPad E14','img/p2.webp',372000,0,'Core i5‑1335U · 16 ГБ · 512 ГБ SSD',{screen:'14″ WUXGA IPS',cpu:'Intel Core i5‑1335U',ram:16,ssd:512,gpu:'Intel Iris Xe',weight:1.41,battery:57,os:'Windows 11 Pro',warranty:36,score:8}],
+ ['asus-zenbook-14-oled','ASUS Zenbook 14 OLED','img/p2.webp',589000,0,'Core Ultra 7 · 16 ГБ · 1 ТБ SSD',{screen:'14″ 3K OLED 120 Гц',cpu:'Intel Core Ultra 7 155H',ram:16,ssd:1024,gpu:'Intel Arc',weight:1.2,battery:75,os:'Windows 11',warranty:24,score:9}],
+ ['logitech-mx-master-3s','Logitech MX Master 3S','img/p1.webp',52000,0,'Мышь · Bluetooth',null],
+ ['hp-renew-backpack-15','Рюкзак HP Renew 15.6″','img/p1.webp',24000,0,'Рюкзак · водоотталкивающий',null],
+ ['samsung-990-evo-1tb','SSD Samsung 990 EVO 1 ТБ','img/p1.webp',48000,0,'NVMe · PCIe 4.0',null],
+ ['ugreen-nexode-100w','Ugreen Nexode 100W','img/p1.webp',21000,0,'Зарядка USB‑C · GaN',null]
+].forEach(([id,t,img,p,o,spec,s])=>C[id]={id,t,img,p,o,spec,s});
+const item=x=>({...(C[x.id]||{id:x.id,t:x.t||x.id,img:x.img||'img/p2.webp',p:x.p||0,o:0,spec:x.spec||'',s:null}),q:x.q||1,...(x.p&&C[x.id]?{p:x.p}:{})});
+const crumbs=n=>`<nav class="crumbs"><a href="/">${T.home}</a><span>/</span><b>${n}</b></nav>`;
+const empty=(icon,h,p)=>`<div class="sp-card sp-empty"><div class="art">${ic(icon)}</div><h2>${h}</h2><p>${p}</p><a class="sp-b p" href="/category.html">${T.toCat}</a></div>`;
+const head=(icon,title,sub,tools='')=>`${crumbs(title)}<div class="sp-head"><div><h1><span class="ic">${ic(icon)}</span>${title}</h1>${sub?`<p>${sub}</p>`:''}</div><div class="sp-tools">${tools}</div></div>`;
+const mo=n=>fmt(n/24);
+
+/* ---------- CART ---------- */
+let ship='pick',promo=false;const FREE=100000;
+function cart(){const v=S.get('cart').map(item),n=v.reduce((s,x)=>s+x.q,0);
+ if(!v.length){root.innerHTML=head('cart',T.cart,'')+empty('cart',T.emptyCart,T.emptyCartP)+ups([]);return}
+ const goods=v.reduce((s,x)=>s+x.p*x.q,0),old=v.reduce((s,x)=>s+(x.o||x.p)*x.q,0),d=promo?Math.round(goods*.05):0;
+ const fee={pick:0,cour:goods>=FREE?0:1000,reg:2500}[ship],tot=goods-d+fee,left=Math.max(0,FREE-goods);
+ root.innerHTML=head('cart',T.cart,`${n} ${T.items} · ${fmt(goods)}`,`<div class="sp-steps"><span class="on"><i>1</i>${T.cart}</span><b></b><span><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+
+ `<div class="sp-cart"><div>
+  <div class="sp-card sp-free">${ic('sp-truck')}<div><small>${left?`${T.freeLeft} <b>${fmt(left)}</b>`:`<b>${T.freeOk}</b>`}</small><div class="sp-bar"><i style="width:${Math.min(100,goods/FREE*100)}%"></i></div></div></div>
+  <div class="sp-card sp-list">${v.map(x=>`<div class="sp-row" data-id="${x.id}"><a class="im" href="/product.html"><img src="${x.img}" alt=""></a>
+   <div><span class="sp-ok">● ${T.inStock}</span><h4><a href="/product.html">${x.t}</a></h4><div class="sp">${x.spec}</div>
+    <div class="mt"><button class="tf">${ic(S.has('fav',x.id)?'heart':'heart')}${S.has('fav',x.id)?T.inFav:T.toFav}</button><button class="rm">${ic('sp-trash')}${T.del}</button></div></div>
+   <div class="sp-qty"><button data-d="-1" aria-label="−">−</button><span>${x.q}</span><button data-d="1" aria-label="+">+</button></div>
+   <div class="sp-sum"><b>${fmt(x.p*x.q)}</b>${x.o?`<s>${fmt(x.o*x.q)}</s>`:''}${x.q>1?`<small>${fmt(x.p)} ${T.each}</small>`:''}</div></div>`).join('')}</div>
+  <div class="sp-card sp-dl"><h3>${T.dl}</h3><div class="sp-opts">${[['pick','sp-store',T.pickS,0],['cour','sp-truck',T.courS,goods>=FREE?0:1000],['reg','sp-map',T.regS,2500]].map(([k,i,s,f])=>
+   `<label class="sp-opt${ship===k?' on':''}"><input type="radio" name="ship" value="${k}"${ship===k?' checked':''}>${ic(i)}<span><b>${T[k]}</b><small>${s} · ${f?fmt(f):T.free}</small></span></label>`).join('')}</div></div>
+ </div>
+ <aside class="sp-card sp-side"><h3>${T.sum}</h3>
+  <div class="sp-ln"><span>${T.goods} (${n})</span><b>${fmt(old)}</b></div>
+  ${old>goods?`<div class="sp-ln disc"><span>−%</span><b>−${fmt(old-goods)}</b></div>`:''}
+  ${d?`<div class="sp-ln disc"><span>${T.disc}</span><b>−${fmt(d)}</b></div>`:''}
+  <div class="sp-ln"><span>${T.ship}</span><b>${fee?fmt(fee):T.free}</b></div>
+  <div class="sp-tot"><span>${T.total}</span><b>${fmt(tot)}</b></div>
+  <div class="sp-mo"><span>${T.inst}</span><b>${mo(tot)}${T.mo}</b></div>
+  <button class="sp-b p big" id="spGo">${T.checkout}</button><button class="sp-b big" id="spOne">${T.oneClick}</button>
+  <div class="sp-promo"><input id="spCode" placeholder="${T.promo}" value="${promo?'LED5':''}"><button class="sp-b" id="spApply">${T.apply}</button></div><small id="spPm" class="${promo?'ok':''}">${promo?T.promoOk:T.promoHint}</small>
+  <div class="sp-safe">${ic('sp-shield')}${T.safe}</div><div class="sp-pay"><span>ArCa</span><span>VISA</span><span>Mastercard</span><span>Idram</span></div>
+ </aside></div>`+ups(v);
+}
+function ups(v){const inC=new Set(v.map(x=>x.id));
+ return `<section class="sp-up"><h3>${T.up}</h3><div class="sp-mini">${['logitech-mx-master-3s','hp-renew-backpack-15','samsung-990-evo-1tb','ugreen-nexode-100w'].map(id=>{const x=C[id];
+  return `<div class="sp-card sp-mi"><div class="im"><img src="${x.img}" alt=""></div><div><h5>${x.t}</h5><b>${fmt(x.p)}</b></div><button data-up="${id}" class="${inC.has(id)?'done':''}" aria-label="+">${ic(inC.has(id)?'sp-check':'sp-plus')}</button></div>`}).join('')}</div></section>`}
+root.addEventListener('click',e=>{if(page!=='cart')return;const r=e.target.closest('.sp-row'),id=r?.dataset.id;
+ const q=e.target.closest('[data-d]');if(q){const v=S.get('cart'),x=v.find(y=>y.id===id);x.q=Math.max(1,Math.min(9,(x.q||1)+ +q.dataset.d));S.set('cart',v);return}
+ if(e.target.closest('.rm')){const v=S.get('cart'),i=v.findIndex(y=>y.id===id),gone=v[i];r.classList.add('out');
+  setTimeout(()=>{v.splice(i,1);S.set('cart',v);S.toast(T.removed,T.undo,()=>{const w=S.get('cart');w.splice(i,0,gone);S.set('cart',w)})},230);return}
+ if(e.target.closest('.tf')){const x=item({id});if(!S.has('fav',id))S.add('fav',{id,t:x.t,img:x.img,p:x.p,spec:x.spec});render();return}
+ const u=e.target.closest('[data-up]');if(u){const x=C[u.dataset.up];if(!S.has('cart',x.id))S.add('cart',{id:x.id});return}
+ if(e.target.id==='spApply'){const ok=document.getElementById('spCode').value.trim().toUpperCase()==='LED5';promo=ok;render();if(!ok){const m=document.getElementById('spPm');m.textContent=T.promoBad;m.className='bad'}return}
+ if(e.target.id==='spGo'||e.target.id==='spOne'){S.toast(T.orderOk)}});
+root.addEventListener('change',e=>{if(e.target.name==='ship'){ship=e.target.value;render()}});
+
+/* ---------- FAVOURITES ---------- */
+let fsort=0;
+function fav(){let v=S.get('fav').map(item).reverse();
+ if(!v.length){root.innerHTML=head('heart',T.fav,'')+empty('heart',T.emptyFav,T.emptyFavP);return}
+ if(fsort===1)v.sort((a,b)=>a.p-b.p);if(fsort===2)v.sort((a,b)=>b.p-a.p);
+ const sum=v.reduce((s,x)=>s+x.p,0);
+ root.innerHTML=head('heart',T.fav,`${v.length} ${T.items} · ${T.favTotal} ${fmt(sum)}`,
+  `<div class="sp-seg">${[T.sAdded,T.sCheap,T.sExp].map((t,i)=>`<button data-s="${i}" class="${i===fsort?'on':''}">${t}</button>`).join('')}</div><button class="sp-b" id="spShare">${ic('sp-share')}${T.share}</button><button class="sp-b p" id="spAll">${ic('cart')}${T.allCart}</button>`)+
+ `<div class="sp-fgrid">${v.map((x,i)=>{const inC=S.has('cart',x.id),cm=S.has('cmp',x.id);
+  return `<div class="sp-card sp-f" data-id="${x.id}" style="animation-delay:${i*45}ms">${x.o?`<span class="drop">${T.drop} ${fmt(x.o-x.p)}</span>`:''}
+   <button class="ht" aria-label="${T.del}">${ic('heart')}</button><button class="cb${cm?' on':''}" aria-label="${T.cmp}">${ic('cmp')}</button>
+   <div class="im"><img src="${x.img}" alt=""></div><span class="sp-ok">● ${T.inStock}</span><h4>${x.t}</h4><div class="sp">${x.spec}</div>
+   <div class="pr"><div>${x.o?`<s>${fmt(x.o)}</s>`:''}<b>${fmt(x.p)}</b></div><button class="add${inC?' in':''}" aria-label="${T.cart}" title="${inC?T.inCart:T.cart}">${ic(inC?'sp-check':'cart')}</button></div></div>`}).join('')}</div>`}
+root.addEventListener('click',e=>{if(page!=='favorites')return;const s=e.target.closest('[data-s]');if(s){fsort=+s.dataset.s;render();return}
+ if(e.target.closest('#spAll')){S.get('fav').forEach(x=>{if(!S.has('cart',x.id))S.add('cart',{id:x.id,t:x.t,img:x.img,p:x.p,spec:x.spec})});S.toast(T.addedAll,T.cart,()=>location.href=S.URL.cart);return}
+ if(e.target.closest('#spShare')){const u=location.origin+location.pathname+'?ids='+S.get('fav').map(x=>x.id).join(',');(navigator.clipboard?.writeText(u)||Promise.reject()).then(()=>S.toast(T.copied),()=>prompt(T.share,u));return}
+ const c=e.target.closest('.sp-f');if(!c)return;const id=c.dataset.id,x=item({id});
+ if(e.target.closest('.ht')){const v=S.get('fav'),i=v.findIndex(y=>y.id===id),gone=v[i];c.classList.add('out');
+  setTimeout(()=>{v.splice(i,1);S.set('fav',v);S.toast(T.removed,T.undo,()=>{const w=S.get('fav');w.splice(i,0,gone);S.set('fav',w)})},230);return}
+ if(e.target.closest('.cb')){S.toggle('cmp',{id,t:x.t,img:x.img,p:x.p,spec:x.spec});return}
+ if(e.target.closest('.add')){if(!S.has('cart',id))S.add('cart',{id,t:x.t,img:x.img,p:x.p,spec:x.spec});else location.href=S.URL.cart;return}
+ if(e.ctrlKey||e.metaKey)open('/product.html','_blank');else location.href='/product.html'});
+/* shared link: ?ids=a,b,c opens someone's list */
+if(page==='favorites'){const ids=new URLSearchParams(location.search).get('ids');if(ids){S.set('fav',ids.split(',').filter(Boolean).map(id=>({id})));history.replaceState(null,'',location.pathname)}}
+
+/* ---------- COMPARE ---------- */
+let only=false;
+const ROWS=[['sMain',[['price',x=>x.p,'min',fmt],['score',x=>x.s?.score,'max',v=>`<div class="sp-score">${Array.from({length:10},(_,i)=>`<i class="${i<v?'f':''}"></i>`).join('')}<b style="margin-left:6px">${v}</b></div>`],['warranty',x=>x.s?.warranty,'max',v=>`${v} ${T.mon}`]]],
+ ['sPerf',[['cpu',x=>x.s?.cpu],['ram',x=>x.s?.ram,'max',v=>`${v} GB`],['ssd',x=>x.s?.ssd,'max',v=>v>=1024?`${v/1024} TB SSD`:`${v} GB SSD`],['gpu',x=>x.s?.gpu]]],
+ ['sBody',[['screen',x=>x.s?.screen],['weight',x=>x.s?.weight,'min',v=>`${String(v).replace('.',',')} ${T.kg}`],['battery',x=>x.s?.battery,'max',v=>`${v} Wh`],['os',x=>x.s?.os]]]];
+function cmp(){const v=S.get('cmp').map(item);
+ if(!v.length){root.innerHTML=head('cmp',T.cmp,'')+empty('cmp',T.emptyCmp,T.emptyCmpP);return}
+ const slots=Math.max(v.length+(v.length<4?1:0),3);
+ root.innerHTML=head('cmp',T.cmp,`${T.laptops}: ${v.length} ${T.items}`,`<label class="sp-sw"><input type="checkbox" id="spOnly"${only?' checked':''}><i></i>${T.only}</label><button class="sp-b" id="spClr">${ic('sp-trash')}${T.clear}</button>`)+
+ `<div class="sp-card sp-cmpw"><table class="sp-ct${only?' only':''}"><colgroup><col class="lab">${Array.from({length:slots},()=>'<col>').join('')}</colgroup>
+ <thead><tr><th></th>${v.map((x,i)=>{const inC=S.has('cart',x.id);return `<td><div class="sp-pc" data-id="${x.id}" style="animation-delay:${i*60}ms"><button class="x" aria-label="${T.del}">✕</button><a class="im" href="/product.html"><img src="${x.img}" alt=""></a><h4><a href="/product.html">${x.t}</a></h4><div class="row"><div>${x.o?`<s style="font-size:12px;color:var(--muted)">${fmt(x.o)}</s><br>`:''}<b>${fmt(x.p)}</b></div><button class="add${inC?' in':''}" aria-label="${T.cart}">${ic(inC?'sp-check':'cart')}</button></div></div></td>`}).join('')}
+  ${v.length<slots?Array.from({length:slots-v.length},(_,i)=>`<td>${i===0&&v.length<4?`<a class="sp-slot" href="/category.html"><div><span>+</span>${T.addP}</div></a>`:''}</td>`).join(''):''}</tr></thead>
+ <tbody>${ROWS.map(([sec,rows])=>`<tr class="sec"><th>${T[sec]}</th><td colspan="${slots}"></td></tr>`+rows.map(([k,get,dir,f])=>{const vals=v.map(get),def=vals.filter(x=>x!=null);
+   const same=new Set(vals.map(String)).size<=1,best=dir&&def.length>1&&!same?(dir==='min'?Math.min(...def):Math.max(...def)):null;
+   return `<tr class="${same?'same':'diff'}"><th>${T[k]}</th>${vals.map(x=>`<td class="${best!=null&&x===best?'best':''}">${x==null?'—':(f?f(x):x)}</td>`).join('')}${'<td></td>'.repeat(slots-v.length)}</tr>`}).join('')).join('')}</tbody></table></div>
+ <div class="sp-leg"><span><b>★</b> — ${T.best}</span><span>▮ ${T.diffL}</span></div>`}
+root.addEventListener('click',e=>{if(page!=='compare')return;
+ if(e.target.closest('#spClr')){const was=S.get('cmp');S.set('cmp',[]);S.toast(T.cleared,T.undo,()=>S.set('cmp',was));return}
+ const c=e.target.closest('.sp-pc');if(!c)return;const id=c.dataset.id;
+ if(e.target.closest('.x')){const was=S.get('cmp');S.remove('cmp',id);S.toast(T.removed,T.undo,()=>S.set('cmp',was));return}
+ if(e.target.closest('.add')){e.preventDefault();if(!S.has('cart',id)){const x=item({id});S.add('cart',{id,t:x.t,img:x.img,p:x.p,spec:x.spec})}else location.href=S.URL.cart}});
+root.addEventListener('change',e=>{if(e.target.id==='spOnly'){only=e.target.checked;root.querySelector('.sp-ct').classList.toggle('only',only)}});
+
+const R={cart,favorites:fav,compare:cmp};
+function render(){R[page]()}
+S.subscribe(()=>render());
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(render)));
+addEventListener('storage',render);
+render();
+})();
+</script>

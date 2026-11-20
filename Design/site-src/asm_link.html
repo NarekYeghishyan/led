@@ -1,0 +1,7 @@
+<!--asm-link--><script>
+/* "Собрать ПК" / configurator links -> /assembly.html */
+document.addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;
+ const t=(a.getAttribute('aria-label')||a.textContent||'').trim();
+ if(/^(Собрать (свой )?ПК|Открыть конфигуратор|Соберите ПК в конфигураторе|Конфигуратор|Создай свою конфигурацию|Հավաքել համակարգիչ|Build a PC)$/.test(t)||/assembly\.html/.test(a.href)){
+  e.preventDefault();e.stopImmediatePropagation();(e.ctrlKey||e.metaKey||e.button===1)?open('/assembly.html'):location.href='/assembly.html'}},true);
+</script><!--/asm-link-->

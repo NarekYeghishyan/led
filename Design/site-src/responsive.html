@@ -1,0 +1,106 @@
+<!--responsive--><style>
+/* Responsive fixes for tablets and phones (all pages). Added last by build_shop.py. */
+html,body{max-width:100%;overflow-x:clip}
+img,video{max-width:100%}
+.flt-hd,.flt-go{display:none}
+/* grid children must be allowed to shrink (long words/inputs blew tracks out) */
+.sp-cart>*,.sp-fgrid>*,.pgrid>*,.asm-grid>*,.ip>*,.ip-2>*,.ip-main,.results,.cat-body>*{min-width:0}
+@media (max-width:1100px){
+  .asm-grid{grid-template-columns:minmax(0,1fr) minmax(300px,340px)!important}
+  .ip-2{grid-template-columns:minmax(0,1fr)!important}
+}
+@media (min-width:761px) and (max-width:1000px){
+  .h .row{flex-wrap:wrap;height:auto;padding:12px 0;row-gap:10px}
+  .h .search{order:9;flex:1 1 100%;max-width:none}
+  .h .acts{margin-left:auto}
+}
+@media (min-width:761px) and (max-width:1100px){
+  nav.cats:not(.icons){display:flex!important;flex-wrap:wrap;justify-content:flex-start}
+  nav.cats:not(.icons) a{flex:1 1 auto;justify-content:center}
+  nav.cats:not(.icons) a.tool{flex:0 0 auto}
+}
+@media (max-width:760px){
+  .top .wrap{gap:8px}
+  .top .tl:not(.cr),.top .hlp{display:none!important}
+  .top .ph{padding:6px 4px}
+  .h .row{gap:10px}
+  .logo img{height:34px!important;width:auto}
+  .acts{gap:0!important;flex-wrap:nowrap}
+  .acts .act{padding:8px 7px!important;min-width:0}
+  .sp-cart{grid-template-columns:minmax(0,1fr)!important}
+  .sp-fgrid,.pgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .asm-grid{grid-template-columns:minmax(0,1fr)!important}
+}
+@media (max-width:360px){
+  .top .tl.cr{display:none}
+  .top .pill.lang button{padding:2px 6px!important}
+  .wrap{padding-left:12px!important;padding-right:12px!important}
+  .prod .pr{flex-wrap:wrap;gap:6px}
+  .prod{padding:10px!important}
+}
+.sp-mini>*,.sp-promo input,.rv .h>*{min-width:0}
+@media (max-width:760px){
+  .sp-mini{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .sp-promo{flex-wrap:wrap}
+  .sp-promo input{flex:1 1 140px}
+  .rv .h{flex-wrap:wrap;gap:6px}
+  /* floating bars: compare bar full width at the bottom, call button and bars never cover each other */
+  .cmp-bar{left:12px;right:84px;bottom:16px;transform:translateY(160px);padding:8px 8px 8px 14px;gap:10px;font-size:13px;white-space:nowrap}
+  .cmp-bar.show{transform:none}
+  .cmp-bar a{margin-left:auto}
+  body:has(.sbar.show) .cmp-bar.show{bottom:84px}
+  body:has(.sbar.show) .fab{bottom:84px}
+  .sbar .wrap{gap:10px}
+  .toast{max-width:calc(100vw - 24px)}
+  /* catalog menu: full screen above everything, one scroll, close button always visible */
+  .mega{z-index:1000!important}
+  .mega-in{max-height:none!important}
+  .mega-g{max-height:none!important;overflow:visible!important}
+  .mega .mx{position:fixed!important;top:10px;right:10px;z-index:5;width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(14,26,46,.2)}
+  .mega-l{padding-top:12px!important;padding-right:60px!important}
+  body.mega-open{overflow:hidden}
+  body.mega-open .top,body.flt-open .top,body.flt-open header.h{visibility:hidden}
+  /* filters drawer */
+  body.flt-open{overflow:hidden}
+  body.flt-open .filters{display:block!important;position:fixed;inset:0;z-index:1000;overflow:auto;background:#fff;padding:0 16px 96px;margin:0;border-radius:0;max-height:none}
+  body.flt-open .flt-hd{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:3;background:#fff;margin:0 -16px 8px;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:18px}
+  .flt-hd button{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--blue-50);color:var(--blue-700);font-size:18px}
+  body.flt-open .flt-go{display:block;position:fixed;left:16px;right:16px;bottom:16px;z-index:1001;border:0;border-radius:12px;padding:15px;background:var(--blue-600);color:#fff;font:inherit;font-weight:700;font-size:16px;box-shadow:0 10px 30px rgba(20,104,220,.35);cursor:pointer}
+  body.flt-open .fab{display:none}
+}
+@media (max-width:420px){
+  .top .pill:not(.lang){display:none}
+  .top .tl.cr{font-size:12.5px}
+}
+</style>
+<script>
+(function(){
+  const mq = matchMedia('(max-width:760px)');
+  // lock page scroll while the catalog menu covers the screen
+  const mega = document.getElementById('mega');
+  if (mega) new MutationObserver(() => document.body.classList.toggle('mega-open', mq.matches && !mega.hidden))
+    .observe(mega, {attributes: true, attributeFilter: ['hidden']});
+  // filters drawer on phones (category page)
+  const btn = document.querySelector('.fbtn'), f = document.querySelector('aside.filters');
+  if (!btn || !f) return;
+  const L = {hy: ['Ֆիլտրեր', 'Ցույց տալ'], ru: ['Фильтры', 'Показать'], en: ['Filters', 'Show']};
+  const lang = () => (document.documentElement.lang || 'ru').slice(0, 2);
+  const hd = document.createElement('div'); hd.className = 'flt-hd';
+  hd.innerHTML = '<span></span><button type="button" aria-label="Close">✕</button>';
+  f.prepend(hd);
+  const go = document.createElement('button'); go.type = 'button'; go.className = 'flt-go';
+  document.body.appendChild(go);
+  const label = () => {
+    const t = L[lang()] || L.ru, n = document.getElementById('catCount');
+    hd.firstChild.textContent = t[0];
+    go.textContent = t[1] + (n ? ' (' + n.textContent.trim() + ')' : '');
+  };
+  const open = on => { document.body.classList.toggle('flt-open', on); if (on) { label(); f.scrollTop = 0; } };
+  btn.addEventListener('click', e => { e.preventDefault(); open(true); });
+  hd.lastChild.addEventListener('click', () => open(false));
+  go.addEventListener('click', () => { open(false); (document.querySelector('.results') || document.body).scrollIntoView({behavior: 'smooth'}); });
+  f.addEventListener('input', () => setTimeout(label, 50)); f.addEventListener('click', () => setTimeout(label, 50));
+  mq.addEventListener('change', e => { if (!e.matches) open(false); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') open(false); });
+})();
+</script><!--/responsive-->

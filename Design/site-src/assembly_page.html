@@ -1,0 +1,143 @@
+<!--asm-page-->
+<style>
+.asm{padding-bottom:56px}
+.asm-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:6px 0 22px}
+.asm-head h1{font-size:32px;letter-spacing:-.02em;margin:0;display:flex;align-items:center;gap:12px}
+.asm-head h1 .ic{width:46px;height:46px;border-radius:14px;background:var(--blue-50);display:grid;place-items:center}
+.asm-head h1 .ic svg{width:24px;height:24px;color:var(--blue-600)}
+.asm-head p{margin:6px 0 0;color:var(--muted)}
+.asm-b{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);font:inherit;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer}
+.asm-b:hover{border-color:var(--blue-600);color:var(--blue-700)}
+.asm-b.p{background:var(--blue-600);border-color:var(--blue-600);color:#fff}.asm-b.p:hover{background:var(--blue-700);color:#fff}
+.asm-b.big{height:52px;width:100%;justify-content:center;font-size:16px}
+.asm-b:disabled{opacity:.5;cursor:not-allowed}
+.asm-grid{display:grid;grid-template-columns:1fr 370px;gap:24px;align-items:start}
+.asm-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.asm-prog{padding:16px 18px;margin-bottom:14px;display:flex;gap:14px;align-items:center}
+.asm-prog div{flex:1}.asm-prog small{display:block;font-size:13.5px;margin-bottom:8px}
+.asm-bar{height:8px;border-radius:9px;background:var(--bg);overflow:hidden}.asm-bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#2F7FEA,#16A34A);transition:width .4s}
+.asm-grp{margin:18px 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.asm-row{display:grid;grid-template-columns:44px 170px 1fr 110px 120px 32px;gap:14px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
+.asm-row:first-child{border-top:0}
+.asm-row .ic{width:44px;height:44px;border-radius:12px;background:var(--bg);display:grid;place-items:center;color:var(--muted)}
+.asm-row.on .ic{background:var(--blue-50);color:var(--blue-600)}
+.asm-row .ic svg{width:22px;height:22px}
+.asm-row b{font-size:14.5px}.asm-row b em{font-style:normal;color:#DC2626;margin-left:3px}
+.asm-row select{width:100%;height:40px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 10px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink)}
+.asm-row select:focus{outline:2px solid var(--blue-600);outline-offset:1px}
+.asm-q{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-sm);height:40px;align-items:center}
+.asm-q button{width:32px;height:38px;border:0;background:none;font-size:18px;cursor:pointer;color:var(--ink)}
+.asm-q span{min-width:28px;text-align:center;font-weight:600}
+.asm-row .pr{text-align:right;font-weight:700;white-space:nowrap}
+.asm-row .x{width:32px;height:32px;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer;font-size:18px}
+.asm-row .x:hover{background:var(--bg);color:#DC2626}
+.asm-warn{grid-column:2/-1;font-size:13px;color:#B45309;background:#FFFBEB;border-radius:8px;padding:6px 10px;margin-top:-4px}
+.asm-sum{padding:20px;position:sticky;top:90px}
+.asm-sum h3{margin:0 0 14px;font-size:19px}
+.asm-sum ul{list-style:none;margin:0 0 14px;padding:0;max-height:300px;overflow:auto}
+.asm-sum li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.asm-sum li span{color:var(--muted)}
+.asm-tot{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin:8px 0}
+.asm-tot b{font-size:24px}.asm-tot.c b{font-size:17px;color:#16A34A}
+.asm-note{font-size:12.5px;color:var(--muted);margin:10px 0 14px}
+.asm-ok{display:flex;gap:8px;align-items:center;font-size:13.5px;margin:6px 0;color:#16A34A;font-weight:600}
+.asm-ok.bad{color:#B45309}
+.asm-tools{display:flex;gap:8px;margin-top:10px}.asm-tools .asm-b{flex:1;justify-content:center}
+@media (max-width:1000px){.asm-grid{grid-template-columns:1fr}.asm-sum{position:static}}
+@media (max-width:700px){.asm-row{grid-template-columns:44px 1fr auto;}.asm-row select{grid-column:1/-1}.asm-row .asm-q{grid-column:1/2}.asm-warn{grid-column:1/-1}}
+@media print{header,footer,.cats,.asm-tools,.asm-b,.asm-row .x,.asm-q button,.crumbs{display:none!important}.asm-grid{grid-template-columns:1fr}.asm-card{box-shadow:none}}
+</style>
+<script>
+(function(){
+const S=window.LEDStore,root=document.getElementById('spRoot');
+const L=()=>({hy:1,en:2}[document.documentElement.lang]||0);
+const T=new Proxy({
+ home:['Главная','Գլխավոր','Home'],title:['Собери свою конфигурацию','Հավաքիր քո համակարգիչը','Build your own PC'],
+ sub:['Выберите комплектующие — мы проверим совместимость, соберём и протестируем ПК бесплатно.','Ընտրեք բաղադրիչները․ մենք կստուգենք համատեղելիությունը, կհավաքենք և կփորձարկենք անվճար։','Pick the parts — we check compatibility, assemble and test the PC for free.'],
+ g1:['Основа системы','Համակարգի հիմքը','Core'],g2:['Хранение и графика','Պահեստ և գրաֆիկա','Storage & graphics'],g3:['Корпус и питание','Կորպուս և սնուցում','Case & power'],g4:['Периферия','Ծայրամասային սարքեր','Peripherals'],
+ pick:['Выберите продукт','Ընտրեք ապրանքը','Select a product'],none:['— не нужно —','— պետք չէ —','— not needed —'],
+ prog:['Обязательных компонентов выбрано','Ընտրված պարտադիր բաղադրիչներ','Required parts selected'],
+ sum:['Ваша сборка','Ձեր հավաքածուն','Your build'],empty:['Пока ничего не выбрано','Դեռ ոչինչ ընտրված չէ','Nothing selected yet'],
+ total:['Итого','Ընդամենը','Total'],cash:['При наличной оплате','Կանխիկ վճարելիս','Paying cash'],
+ note:['Все цены включают НДС. Сборка и тестирование — бесплатно.','Բոլոր գները ներառում են ԱԱՀ։ Հավաքումը և փորձարկումը՝ անվճար։','All prices include VAT. Assembly and testing are free.'],
+ add:['Добавить в корзину','Ավելացնել զամբյուղ','Add to cart'],added:['Сборка добавлена в корзину','Հավաքածուն ավելացվեց զամբյուղ','Build added to cart'],go:['Перейти','Անցնել','Open'],
+ print:['Распечатать','Տպել','Print'],reset:['Сбросить','Զրոյացնել','Reset'],cleared:['Конфигурация очищена','Կոնֆիգուրացիան մաքրվեց','Build cleared'],
+ compOk:['Компоненты совместимы','Բաղադրիչները համատեղելի են','Parts are compatible'],compBad:['Есть замечания по совместимости','Կան համատեղելիության դիտողություններ','Compatibility warnings'],
+ sock:['Сокет процессора не совпадает с материнской платой','Պրոցեսորի սոկետը չի համընկնում մայրական սալիկի հետ','CPU socket does not match the motherboard'],
+ ramw:['Тип памяти не подходит к материнской плате','Հիշողության տեսակը չի համապատասխանում մայրական սալիկին','Memory type does not fit the motherboard'],
+ psuw:['Мощности блока питания может не хватить (нужно от','Սնուցման բլոկի հզորությունը կարող է չբավարարել (պետք է','PSU may be too weak (need at least'],w:[' Вт)',' Վտ)',' W)'],
+ need:['Рекомендуемая мощность БП','Խորհուրդ տրվող սնուցման հզորություն','Recommended PSU'],
+ mb:['Материнские платы','Մայրական սալիկներ','Motherboards'],cpu:['Процессоры','Պրոցեսորներ','Processors'],cool:['Охлаждение','Սառեցում','Cooling'],ram:['Модули памяти','Հիշողության մոդուլներ','Memory'],
+ hdd:['Жесткие диски','Կոշտ սկավառակներ','Hard drives'],ssd:['Накопители SSD','SSD կրիչներ','SSD drives'],gpu:['Видеокарты','Վիդեոքարտեր','Graphics cards'],odd:['Дисководы','Դիսկովոդներ','Optical drives'],
+ case:['Корпуса','Կորպուսներ','Cases'],psu:['Блоки питания','Սնուցման բլոկներ','Power supplies'],kb:['Клавиатуры','Ստեղնաշարեր','Keyboards'],mouse:['Мышки','Մկնիկներ','Mice'],
+ head:['Наушники','Ականջակալներ','Headsets'],cam:['Веб камеры','Վեբ տեսախցիկներ','Webcams'],mon:['Мониторы','Մոնիտորներ','Monitors'],ups:['Устройства питания','Անխափան սնուցման սարքեր','UPS & power']
+},{get:(o,k)=>(o[k]||[k,k,k])[L()]});
+const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' ֏';
+const U={'ГБ':['ԳԲ','GB'],'ТБ':['ՏԲ','TB'],'Вт':['Վտ','W'],'ВА':['ՎԱ','VA'],'Гц':['Հց','Hz'],'Pro FHD':['Pro FHD','Pro FHD']};
+const nm=s=>L()?s.replace(/ГБ|ТБ|Вт|ВА|Гц/g,m=>U[m][L()-1]):s;
+const ic=id=>`<svg class="i"><use href="#${id}"/></svg>`;
+/* demo catalogue (until /api is wired): [id, name, price, extra] */
+const P={
+ mb:[['asus-prime-b760m','ASUS PRIME B760M-A D4 (LGA1700, DDR4)',62000,{s:'1700',m:'DDR4',w:40}],['msi-pro-b760-ddr5','MSI PRO B760-P WiFi (LGA1700, DDR5)',78000,{s:'1700',m:'DDR5',w:45}],['gigabyte-b650-gaming','Gigabyte B650 Gaming X AX (AM5, DDR5)',89000,{s:'AM5',m:'DDR5',w:45}],['asrock-a620m','ASRock A620M-HDV (AM5, DDR5)',49000,{s:'AM5',m:'DDR5',w:35}]],
+ cpu:[['intel-i5-12400f','Intel Core i5-12400F (LGA1700)',58000,{s:'1700',w:65}],['intel-i5-14600kf','Intel Core i5-14600KF (LGA1700)',112000,{s:'1700',w:125}],['intel-i7-14700f','Intel Core i7-14700F (LGA1700)',158000,{s:'1700',w:65}],['amd-r5-7600','AMD Ryzen 5 7600 (AM5)',85000,{s:'AM5',w:65}],['amd-r7-7800x3d','AMD Ryzen 7 7800X3D (AM5)',189000,{s:'AM5',w:120}]],
+ cool:[['deepcool-ak400','DeepCool AK400',14000,{w:5}],['idcooling-se-224','ID-Cooling SE-224-XTS',9500,{w:5}],['arctic-lf3-240','Arctic Liquid Freezer III 240',38000,{w:10}]],
+ ram:[['kingston-ddr4-16','Kingston Fury Beast DDR4 16 ГБ (2×8) 3200',19000,{m:'DDR4',w:6}],['kingston-ddr5-32','Kingston Fury Beast DDR5 32 ГБ (2×16) 6000',43000,{m:'DDR5',w:8}],['gskill-ddr5-16','G.Skill Ripjaws S5 DDR5 16 ГБ (2×8) 5600',24000,{m:'DDR5',w:6}]],
+ hdd:[['seagate-1tb','Seagate Barracuda 1 ТБ 7200 rpm',19500,{w:8}],['wd-2tb','WD Blue 2 ТБ',26000,{w:8}]],
+ ssd:[['samsung-990-evo-1tb','SSD Samsung 990 EVO 1 ТБ NVMe',48000,{w:6}],['kingston-nv3-500','Kingston NV3 500 ГБ NVMe',17000,{w:5}],['crucial-p3-2tb','Crucial P3 Plus 2 ТБ NVMe',61000,{w:7}]],
+ gpu:[['rtx-4060','MSI GeForce RTX 4060 Ventus 2X 8 ГБ',142000,{w:115}],['rtx-4070-super','ASUS Dual RTX 4070 Super 12 ГБ',298000,{w:220}],['rx-7600','Sapphire Pulse RX 7600 8 ГБ',121000,{w:165}]],
+ odd:[['asus-drw-24d5','ASUS DRW-24D5MT DVD-RW',9000,{w:15}]],
+ case:[['deepcool-ch360','DeepCool CH360 Digital',34000,{}],['zalman-i3-neo','Zalman i3 Neo',24000,{}],['montech-air-903','Montech Air 903 Max',41000,{}]],
+ psu:[['deepcool-pk550','DeepCool PK550D 550 Вт 80+ Bronze',22000,{p:550}],['corsair-rm750e','Corsair RM750e 750 Вт 80+ Gold',45000,{p:750}],['chieftec-650','Chieftec Proton 650 Вт',27000,{p:650}]],
+ kb:[['logitech-k120','Logitech K120',5500,{}],['redragon-k552','Redragon Kumara K552 RGB',16000,{}]],
+ mouse:[['logitech-g102','Logitech G102 Lightsync',9500,{}],['logitech-mx-master-3s','Logitech MX Master 3S',52000,{}]],
+ head:[['hyperx-cloud-2','HyperX Cloud II',39000,{}],['logitech-h390','Logitech H390 USB',14000,{}]],
+ cam:[['logitech-c270','Logitech C270 HD',11000,{}],['logitech-c920','Logitech C920 Pro FHD',32000,{}]],
+ mon:[['lg-24mr400','LG 24MR400 24″ IPS 100 Гц',49000,{}],['samsung-odyssey-g5','Samsung Odyssey G5 27″ 165 Гц',129000,{}]],
+ ups:[['apc-bx700','APC Back-UPS BX700UI 700 ВА',36000,{}],['powercom-rpt-1000','Powercom RPT-1000AP 1000 ВА',42000,{}]]
+};
+const ROWS=[['g1',[['mb','pc',1],['cpu','cpu',1],['cool','spark',0],['ram','grid',1]]],['g2',[['ssd','doc',1],['hdd','doc',0],['gpu','monitor',0],['odd','doc',0]]],
+ ['g3',[['case','tower',1],['psu','ups',1]]],['g4',[['mon','monitor',0],['kb','kb',0],['mouse','kb',0],['head','head',0],['cam','user',0],['ups','ups',0]]]];
+const KEY='led-asm';let st={};try{st=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const sel=k=>st[k]&&P[k].find(x=>x[0]===st[k].id);
+function issues(){const a=[],mb=sel('mb'),cpu=sel('cpu'),ram=sel('ram'),psu=sel('psu');
+ if(mb&&cpu&&mb[3].s!==cpu[3].s)a.push(['cpu',T.sock]);
+ if(mb&&ram&&mb[3].m!==ram[3].m)a.push(['ram',T.ramw]);
+ const need=watts();if(psu&&psu[3].p<need)a.push(['psu',T.psuw+' '+need+T.w]);return a}
+function watts(){let w=0;Object.keys(P).forEach(k=>{const x=sel(k);if(x&&x[3].w)w+=x[3].w*(st[k].q||1)});return w?Math.ceil((w*1.4+50)/50)*50:0}
+function render(){const iss=issues(),req=ROWS.flatMap(g=>g[1]).filter(r=>r[2]),done=req.filter(r=>sel(r[0])).length;
+ let goods=0;const chosen=[];ROWS.forEach(g=>g[1].forEach(([k])=>{const x=sel(k);if(x){const q=st[k].q||1;goods+=x[2]*q;chosen.push([k,x,q])}}));
+ root.innerHTML=`<nav class="crumbs"><a href="/">${T.home}</a><span>/</span><b>${T.title}</b></nav>
+ <div class="asm-head"><div><h1><span class="ic">${ic('tool')}</span>${T.title}</h1><p>${T.sub}</p></div></div>
+ <div class="asm-grid"><div>
+  <div class="asm-card asm-prog">${ic('check')}<div><small>${T.prog}: <b>${done} / ${req.length}</b>${watts()?` · ${T.need}: <b>${watts()} ${T.w.replace(/[ )]/g,'')}</b>`:''}</small><div class="asm-bar"><i style="width:${done/req.length*100}%"></i></div></div></div>
+  ${ROWS.map(([g,rows])=>`<div class="asm-grp">${T[g]}</div><div class="asm-card">${rows.map(([k,icon,r])=>{const x=sel(k),q=x?st[k].q||1:1,w=iss.filter(i=>i[0]===k);
+   return `<div class="asm-row${x?' on':''}" data-k="${k}"><span class="ic">${ic(icon)}</span><b>${T[k]}${r?'<em>*</em>':''}</b>
+   <select aria-label="${T[k]}"><option value="">${x?T.none:T.pick}</option>${P[k].map(p=>`<option value="${p[0]}"${x&&x[0]===p[0]?' selected':''}>${nm(p[1])} — ${fmt(p[2])}</option>`).join('')}</select>
+   <span class="asm-q">${x?`<button data-d="-1" aria-label="−">−</button><span>${q}</span><button data-d="1" aria-label="+">+</button>`:'<span>—</span>'}</span>
+   <span class="pr">${x?fmt(x[2]*q):'0 ֏'}</span>${x?'<button class="x" aria-label="×">×</button>':'<span></span>'}
+   ${w.map(i=>`<div class="asm-warn">⚠ ${i[1]}</div>`).join('')}</div>`}).join('')}</div>`).join('')}
+ </div><aside class="asm-card asm-sum"><h3>${T.sum}</h3>
+  ${chosen.length?`<ul>${chosen.map(([k,x,q])=>`<li><span>${T[k]}${q>1?' ×'+q:''}</span><b>${fmt(x[2]*q)}</b></li>`).join('')}</ul>`:`<p class="asm-note">${T.empty}</p>`}
+  ${chosen.length>1?`<div class="asm-ok${iss.length?' bad':''}">${iss.length?'⚠ '+T.compBad:'✓ '+T.compOk}</div>`:''}
+  <div class="asm-tot"><span>${T.total}</span><b>${fmt(goods)}</b></div>
+  <div class="asm-tot c"><span>${T.cash}</span><b>${fmt(goods*.97)}</b></div>
+  <p class="asm-note">${T.note}</p>
+  <button class="asm-b p big" id="asmAdd"${chosen.length?'':' disabled'}>${ic('cart')} ${T.add}</button>
+  <div class="asm-tools"><button class="asm-b" id="asmPrint">${T.print}</button><button class="asm-b" id="asmReset">${T.reset}</button></div>
+ </aside></div>`}
+root.addEventListener('change',e=>{const r=e.target.closest('.asm-row');if(!r)return;const k=r.dataset.k;
+ if(e.target.value)st[k]={id:e.target.value,q:1};else delete st[k];save();render()});
+root.addEventListener('click',e=>{const r=e.target.closest('.asm-row'),b=e.target.closest('button');if(!b)return;
+ if(r&&b.dataset.d){const k=r.dataset.k;st[k].q=Math.max(1,Math.min(8,(st[k].q||1)+ +b.dataset.d));save();render()}
+ else if(r&&b.classList.contains('x')){delete st[r.dataset.k];save();render()}
+ else if(b.id==='asmPrint')print();
+ else if(b.id==='asmReset'){st={};save();render();S.toast(T.cleared)}
+ else if(b.id==='asmAdd'){const v=S.get('cart');Object.keys(st).forEach(k=>{const x=sel(k);if(!x)return;const q=st[k].q||1,i=v.findIndex(y=>y.id===x[0]);
+   if(i>=0)v[i].q=(v[i].q||1)+q;else v.push({id:x[0],t:nm(x[1]),p:x[2],q,img:'img/p1.webp',spec:T[k]})});S.set('cart',v);S.toast(T.added,T.go,()=>location.href=S.URL.cart)}});
+render();
+new MutationObserver(()=>{render();document.title=T.title+' — LED Computers'}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+document.title=T.title+' — LED Computers';
+})();
+</script>
+<!--/asm-page-->

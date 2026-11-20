@@ -1,0 +1,17 @@
+<!--phone-mask--><style>input.tel-bad{border-color:#DC2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.15)!important}</style><script>
+/* +374 XX XXX XXX mask for every phone field (inputmode=tel / type=tel), incl. ones added later */
+(function(){const sel='input[inputmode="tel"],input[type="tel"]';
+const fmt=v=>{let d=v.replace(/\D/g,'');if(d.startsWith('374'))d=d.slice(3);else if(d.startsWith('0'))d=d.slice(1);d=d.slice(0,8);
+ let s='+374';if(d.length)s+=' '+d.slice(0,2);if(d.length>2)s+=' '+d.slice(2,5);if(d.length>5)s+=' '+d.slice(5);return [s,d.length]};
+const full=el=>fmt(el.value)[1]===8;
+document.addEventListener('focusin',e=>{const el=e.target;if(!el.matches||!el.matches(sel))return;el.maxLength=16;el.autocomplete='tel';if(!el.value)el.value='+374 ';
+ setTimeout(()=>el.setSelectionRange(el.value.length,el.value.length))});
+document.addEventListener('focusout',e=>{const el=e.target;if(el.matches&&el.matches(sel)&&fmt(el.value)[1]===0)el.value=''});
+document.addEventListener('input',e=>{const el=e.target;if(!el.matches||!el.matches(sel))return;
+ const atEnd=el.selectionStart>=el.value.length;el.value=fmt(el.value)[0];if(atEnd)el.setSelectionRange(el.value.length,el.value.length);
+ el.classList.toggle('tel-bad',el.classList.contains('tel-bad')&&!full(el))});
+document.addEventListener('keydown',e=>{const el=e.target;if(el.matches&&el.matches(sel)&&e.key==='Backspace'&&el.selectionStart<=5&&el.selectionEnd<=5)e.preventDefault()});
+document.addEventListener('submit',e=>{const bad=[...e.target.querySelectorAll(sel)].filter(el=>!full(el));
+ if(bad.length){e.preventDefault();e.stopImmediatePropagation();bad.forEach(el=>el.classList.add('tel-bad'));bad[0].focus()}},true);
+})();
+</script><!--/phone-mask-->
