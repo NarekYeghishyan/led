@@ -153,3 +153,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   "Apply" get the button effect. Also applies on favourites/compare where the same classes appear. Backup `led-static-backup-20261120z.tgz`. Published.
 - 2026-11-20 — Assembly page hover effects: component rows spotlight + slide + icon spring + select highlight; summary and progress cards
   get banner glow; qty ± and remove × get the button effect (main buttons already had it). Backup `led-static-backup-20261120za.tgz`. Published.
+- 2026-11-20 — Favourites/compare hover effects: favourite cards (`.sp-f`) and compare column heads (`.sp-pc`) use the product-card effect
+  (spotlight, border glow, photo sweep/zoom/parallax, title blue, price-drop badge wiggle); "add product" slot lifts and glows; ♡/compare/×
+  buttons get the button effect. Backup `led-static-backup-20261120zb.tgz`. Published.
