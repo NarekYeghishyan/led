@@ -151,3 +151,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Cart page hover effects: item rows (`.sp-row`) spotlight + slide + photo zoom; delivery options (`.sp-opt`) and upsell cards
   (`.sp-mi`) lift + glow; summary, free-delivery bar, delivery block and empty state get the banner spotlight/border glow; qty ± and promo
   "Apply" get the button effect. Also applies on favourites/compare where the same classes appear. Backup `led-static-backup-20261120z.tgz`. Published.
+- 2026-11-20 — Assembly page hover effects: component rows spotlight + slide + icon spring + select highlight; summary and progress cards
+  get banner glow; qty ± and remove × get the button effect (main buttons already had it). Backup `led-static-backup-20261120za.tgz`. Published.
