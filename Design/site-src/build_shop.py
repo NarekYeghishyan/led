@@ -45,8 +45,8 @@ print("assembly", len(html))
 
 # info pages (top bar: Ապառիկ · Մեր մասին · Օգնություն ▾ · Կոնտակտներ), content in info_content.html
 INFO = {"credit": "credit", "about": "about", "buy": "how-to-buy", "order": "how-to-order", "pay": "how-to-pay",
-        "delivery": "delivery", "warranty": "warranty", "exchange": "exchange", "contacts": "contacts", "register": "registration", "login": "login"}
-icontent = "".join((pathlib.Path(__file__).parent / f).read_text(encoding="utf-8") for f in ("info_content.html", "info_content_i18n.html", "register_content.html", "login_content.html"))
+        "delivery": "delivery", "warranty": "warranty", "exchange": "exchange", "contacts": "contacts", "register": "registration", "login": "login", "account": "account"}
+icontent = "".join((pathlib.Path(__file__).parent / f).read_text(encoding="utf-8") for f in ("info_content.html", "info_content_i18n.html", "register_content.html", "login_content.html", "account_content.html"))
 blocks = {}
 for m in re.finditer(r"<!--@(\w+)(?:\.(ru|en))?\|([^|]*)\|([^|]*)\|([^|]*)\|(.*?)-->(.*?)(?=<!--@|\Z)", icontent, flags=re.S):
     key, lg, title, icon, h1, lead, body = m.groups()

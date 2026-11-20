@@ -1,0 +1,186 @@
+
+<!--@account|Անձնական էջ|#user|Անձնական էջ|Ձեր պատվերները, տվյալներն ու հասցեները՝ մեկ տեղում։-->
+<div class="ac-app"></div>
+<style>
+.ac-who{display:flex;align-items:center;gap:12px;padding:6px 4px 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.ac-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--blue-600),#6AA8F7);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px;flex:none}
+.ac-who b{display:block;font-size:15px}.ac-who small{color:var(--muted);font-size:12.5px}
+.ac-tag{display:inline-block;margin-top:4px;background:var(--blue-50);color:var(--blue-700);border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:600}
+.ip-menu a.ac-out{color:#C23B3F}.ip-menu a.ac-out svg{color:#C23B3F}
+.ac-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ac-stats a{display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow);padding:16px 18px;color:inherit;text-decoration:none;transition:transform .25s,box-shadow .25s,border-color .25s}
+.ac-stats a:hover{transform:translateY(-4px);border-color:#BFD5F5;box-shadow:0 14px 28px rgba(20,104,220,.12)}
+.ac-stats .ic{width:38px;height:38px;border-radius:12px;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;margin-bottom:6px}
+.ac-stats .ic svg{width:19px;height:19px}
+.ac-stats b{font-size:24px}.ac-stats small{color:var(--muted);font-size:13px}
+.ac-ord{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.ac-ord:hover{border-color:#BFD5F5;box-shadow:0 10px 22px rgba(20,104,220,.08)}
+.ac-oh{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto auto 24px;gap:14px;align-items:center;padding:14px 16px;cursor:pointer;background:none;border:0;width:100%;font:inherit;text-align:left;color:inherit}
+.ac-oh small{display:block;color:var(--muted);font-size:12.5px}
+.ac-oh .chv{width:18px;height:18px;transition:transform .25s;color:var(--muted)}
+.ac-ord.open .chv{transform:rotate(180deg)}
+.ac-st{border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.ac-st.s0{background:#FFF4E0;color:#A86200}.ac-st.s1{background:var(--blue-50);color:var(--blue-700)}.ac-st.s2{background:#E6F6EC;color:#1C7C43}.ac-st.s3{background:#F1F3F6;color:#5B6678}
+.ac-ob{display:none;border-top:1px solid var(--line);padding:12px 16px;background:#FAFCFE}
+.ac-ord.open .ac-ob{display:block}
+.ac-it{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:6px 0}
+.ac-it img{width:48px;height:48px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:8px}
+.ac-it small{color:var(--muted)}
+.ac-tl{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}
+.ac-tl span{font-size:12px;padding:3px 9px;border-radius:999px;background:#EEF2F7;color:#5B6678}
+.ac-tl span.on{background:var(--blue-600);color:#fff}
+.ac-oa{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.ac-flt{display:flex;gap:8px;flex-wrap:wrap}
+.ac-flt button{font:inherit;font-size:13.5px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;transition:all .2s}
+.ac-flt button:hover{border-color:var(--blue-600);color:var(--blue-700)}
+.ac-flt button.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
+.ac-adr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ac-adr>div{border:1px solid var(--line);border-radius:12px;padding:16px;position:relative;transition:transform .25s,border-color .25s,box-shadow .25s}
+.ac-adr>div:hover{transform:translateY(-3px);border-color:#BFD5F5;box-shadow:0 12px 26px rgba(20,104,220,.1)}
+.ac-adr>div.def{border-color:var(--blue-600)}
+.ac-adr b{display:block;margin-bottom:4px}.ac-adr p{margin:0;color:#33415A;font-size:14px}
+.ac-adr .acts{display:flex;gap:12px;margin-top:10px;font-size:13.5px}
+.ac-adr .acts a{color:var(--blue-600);font-weight:600;cursor:pointer}
+.ac-adr .acts a.del{color:#C23B3F}
+.ac-adr .new{display:grid;place-items:center;border-style:dashed;color:var(--blue-600);font-weight:600;cursor:pointer;min-height:120px}
+.ac-gate{text-align:center;padding:40px 20px}
+.ac-gate .ic{width:64px;height:64px;border-radius:18px;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;margin:0 auto 14px}
+.ac-gate .ic svg{width:30px;height:30px}
+.ac-gate p{color:var(--muted)}
+.ac-sec{display:none}.ac-sec.on{display:block}
+.ac-sec>.ip-card+.ip-card{margin-top:18px}
+.ac-empty{color:var(--muted);padding:18px 0}
+@media (max-width:1000px){.ac-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.ac-adr{grid-template-columns:1fr}.ac-oh{grid-template-columns:minmax(0,1fr) auto 20px}.ac-oh>.d,.ac-oh>.sm{display:none}}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  /* [ru, hy, en] */
+  const T={
+    ov:["Обзор","Ընդհանուր","Overview"],orders:["Мои заказы","Իմ պատվերները","My orders"],profile:["Личные данные","Անձնական տվյալներ","Personal data"],
+    adr:["Адреса доставки","Առաքման հասցեներ","Delivery addresses"],pwd:["Смена пароля","Գաղտնաբառի փոփոխում","Change password"],out:["Выйти","Դուրս գալ","Log out"],
+    fav:["Избранное","Ընտրյալներ","Favourites"],cmp:["Сравнение","Համեմատում","Compare"],cart:["Корзина","Զամբյուղ","Cart"],
+    hi:["Здравствуйте","Բարև","Hello"],recent:["Последние заказы","Վերջին պատվերները","Recent orders"],all:["Все заказы →","Բոլոր պատվերները →","All orders →"],
+    order:["Заказ","Պատվեր","Order"],items:["товара","ապրանք","items"],total:["Итого","Ընդամենը","Total"],
+    st:[["Обрабатывается","Մշակվում է","Processing"],["В пути","Ճանապարհին է","On the way"],["Доставлен","Առաքված է","Delivered"],["Отменён","Չեղարկված է","Cancelled"]],
+    stAll:["Все","Բոլորը","All"],repeat:["Повторить заказ","Կրկնել պատվերը","Order again"],invoice:["Счёт (PDF)","Հաշիվ (PDF)","Invoice (PDF)"],
+    tl:[["Принят","Ընդունված","Received"],["Собран","Հավաքված","Packed"],["В пути","Ճանապարհին","Shipped"],["Доставлен","Առաքված","Delivered"]],
+    pay:["Оплата","Վճարում","Payment"],dlv:["Доставка","Առաքում","Delivery"],none:["Заказов нет","Պատվերներ չկան","No orders"],
+    fname:["Полное имя","Անուն, ազգանուն","Full name"],email:["Электронная почта","Էլ. հասցե","Email"],phone:["Телефон","Հեռախոս","Phone"],
+    type:["Тип клиента","Հաճախորդի տեսակ","Customer type"],types:[["Частное лицо","Ֆիզիկական անձ","Private person"],["Дилер","Դիլեր","Dealer"],["Юридическое лицо","Իրավաբանական անձ","Corporation"]],
+    company:["Компания","Ընկերություն","Company"],tax:["Налоговый код","ՀՎՀՀ","Tax code"],news:["Получать новости и акции по e-mail","Ստանալ նորություններ և ակցիաներ էլ. փոստով","Get news and offers by email"],
+    save:["Сохранить","Պահպանել","Save"],saved:["Сохранено","Պահպանված է","Saved"],req:["* Обязательное поле","* Պարտադիր դաշտ","* Required field"],
+    oldp:["Текущий пароль","Ընթացիկ գաղտնաբառ","Current password"],newp:["Новый пароль","Նոր գաղտնաբառ","New password"],rep:["Повторите пароль","Կրկնեք գաղտնաբառը","Repeat password"],
+    pwdOk:["Пароль изменён (демо)","Գաղտնաբառը փոխված է (դեմո)","Password changed (demo)"],mis:["Не совпадает","Չի համընկնում","Does not match"],
+    def:["Основной","Հիմնական","Default"],mkdef:["Сделать основным","Դարձնել հիմնական","Make default"],edit:["Изменить","Փոխել","Edit"],del:["Удалить","Ջնջել","Delete"],
+    add:["+ Добавить адрес","+ Ավելացնել հասցե","+ Add address"],aname:["Название (Дом, Офис…)","Անվանում (Տուն, Գրասենյակ…)","Label (Home, Office…)"],
+    city:["Город","Քաղաք","City"],street:["Адрес","Հասցե","Address"],cancel:["Отмена","Չեղարկել","Cancel"],
+    gate:["Войдите в аккаунт","Մուտք գործեք","Please log in"],gated:["Личный кабинет доступен после входа.","Անձնական էջը հասանելի է մուտք գործելուց հետո։","Your account is available after you log in."],
+    login:["Войти","Մուտք","Log in"],reg:["Регистрация","Գրանցում","Register"],demo:["Демо: войдите с любым логином и паролем.","Դեմո՝ մուտք գործեք ցանկացած մուտքանունով և գաղտնաբառով։","Demo: log in with any login and password."],
+    since:["Клиент с","Հաճախորդ է","Customer since"],bonus:["Бонусные баллы","Բոնուսային միավորներ","Bonus points"],
+    cash:["Наличными","Կանխիկ","Cash"],cardp:["Картой","Քարտով","Card"],inst:["Рассрочка","Ապառիկ","Instalments"],pick:["Самовывоз, Киевян 11","Ինքնատարում, Կիևյան 11","Pick-up, Kievyan 11"],cour:["Курьер","Առաքիչ","Courier"]
+  };
+  const L=()=>({hy:1,en:2}[document.documentElement.lang]||0), t=k=>T[k][L()], tt=a=>a[L()];
+  const U='led-user', A='led-adr';
+  const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}, put=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const fmt=n=>n.toLocaleString('ru-RU').replace(/,/g,' ')+' ֏';
+  const ic=h=>`<svg class="i"><use href="#${h}"/></svg>`;
+  const ORD=[
+    {n:'LED-104823',d:'2026-11-14',s:1,step:2,pay:2,dl:1,it:[['Lenovo IdeaPad Slim 3 15″','img/p2.webp',1,289000],['Logitech MX Master 3S','img/p5.webp',1,49000]]},
+    {n:'LED-104511',d:'2026-10-28',s:2,step:3,pay:1,dl:0,it:[['Samsung 990 PRO 1 TB','img/p3.webp',2,52000]]},
+    {n:'LED-103977',d:'2026-09-03',s:2,step:3,pay:0,dl:1,it:[['ASUS VivoBook 16','img/p1.webp',1,329000],['HyperX Cloud II','img/p4.webp',1,39000],['Kingston FURY 16 GB DDR5','img/p6.webp',2,26000]]},
+    {n:'LED-103402',d:'2026-07-19',s:3,step:0,pay:1,dl:1,it:[['HP Pavilion 15','img/p2.webp',1,355000]]},
+    {n:'LED-104901',d:'2026-11-19',s:0,step:0,pay:1,dl:0,it:[['Xiaomi Redmi Pad SE','img/p1.webp',1,99000]]}
+  ].sort((a,b)=>b.d.localeCompare(a.d));
+  const sum=o=>o.it.reduce((s,x)=>s+x[2]*x[3],0), cnt=o=>o.it.reduce((s,x)=>s+x[2],0);
+  const dfmt=d=>new Date(d).toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{day:'numeric',month:'long',year:'numeric'});
+  let sec=(location.hash||'#ov').slice(1), flt=-1, adrEdit=null;
+  if(!T[sec])sec='ov';
+
+  const nav=document.getElementById('ipNav'), crumb=document.getElementById('ipCrumb');
+  function render(){
+    const u=get(U,null);
+    if(crumb)crumb.innerHTML=`<a href="/">${['Главная','Գլխավոր','Home'][L()]}</a><span>/</span><b>${tt(["Личный кабинет","Անձնական էջ","My account"])}</b>`;
+    document.querySelectorAll('.ac-app').forEach(app=>{
+      if(!u){
+        nav.innerHTML=`<div class="ip-menu"><a href="/login.html">${ic('user')}<span>${t('login')}</span></a><a href="/registration.html">${ic('doc')}<span>${t('reg')}</span></a></div>`;
+        app.innerHTML=`<div class="ip-card ac-gate"><span class="ic">${ic('shield')}</span><h2 style="justify-content:center">${t('gate')}</h2><p>${t('gated')}</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn p" href="/login.html">${t('login')}</a><a class="btn" href="/registration.html">${t('reg')}</a></div><p style="font-size:13px;margin-top:16px">${t('demo')}</p></div>`;
+        return;
+      }
+      const ini=(u.fname||u.login||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      const ti=['consumer','dealer','corporate'].indexOf(u.type);
+      const M=[['ov','grid'],['orders','ix-box'],['profile','user'],['adr','pin'],['pwd','shield']];
+      nav.innerHTML=`<div class="ip-menu"><div class="ac-who"><span class="ac-av">${ini}</span><div><b>${u.fname||u.login}</b><small>${u.email||''}</small>${ti>0?`<br><span class="ac-tag">${tt(T.types[ti])}</span>`:''}</div></div>`+
+        M.map(([k,i])=>`<a href="#${k}" data-s="${k}"${k===sec?' class="on"':''}>${ic(i)}<span>${t(k)}</span></a>`).join('')+
+        `<hr><a href="/favorites.html">${ic('heart')}<span>${t('fav')}</span></a><a href="/compare.html">${ic('cmp')}<span>${t('cmp')}</span></a><a href="/cart.html">${ic('cart')}<span>${t('cart')}</span></a>`+
+        `<hr><a href="#" class="ac-out">${ic('arrow')}<span>${t('out')}</span></a></div>`;
+      const S=window.LEDStore, c=k=>S?S.count(k):0;
+      const orderHTML=o=>`<div class="ac-ord" data-n="${o.n}"><button class="ac-oh" type="button"><div><b>${t('order')} № ${o.n}</b><small>${dfmt(o.d)}</small></div>
+        <div class="sm"><small>${cnt(o)} ${t('items')}</small></div><span class="ac-st s${o.s}">${tt(T.st[o.s])}</span><b>${fmt(sum(o))}</b><svg class="chv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="ac-ob">${o.it.map(x=>`<div class="ac-it"><img src="${x[1]}" alt=""><div>${x[0]}<br><small>${x[2]} × ${fmt(x[3])}</small></div><b>${fmt(x[2]*x[3])}</b></div>`).join('')}
+        ${o.s<3?`<div class="ac-tl">${T.tl.map((s,i)=>`<span class="${i<=o.step?'on':''}">${tt(s)}</span>`).join('')}</div>`:''}
+        <small style="color:var(--muted)">${t('pay')}: ${t(['cash','cardp','inst'][o.pay])} · ${t('dlv')}: ${t(['pick','cour'][o.dl])}</small>
+        <div class="ac-oa"><button class="btn p ac-rep" type="button" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('repeat')}</button><button class="btn ac-inv" type="button" style="font:inherit;cursor:pointer">${t('invoice')}</button></div></div></div>`;
+      const adrs=get(A,null)||[{l:['Дом','Տուն','Home'][L()],city:u.city||['Ереван','Երևան','Yerevan'][L()],a:u.address||'Կիևյան 11',def:1}];
+      const shown=ORD.filter(o=>flt<0||o.s===flt);
+      const F=(n,l,v,ty='text',ex='')=>`<label${ex}>${l} *<input name="${n}" type="${ty}" value="${(v||'').replace(/"/g,'&quot;')}" required minlength="3"${ty==='tel'?' inputmode="tel"':''}></label>`;
+      app.innerHTML=
+      `<section class="ac-sec${sec==='ov'?' on':''}" data-s="ov">
+        <div class="ip-card"><h2><span class="ic">${ic('user')}</span>${t('hi')}, ${(u.fname||u.login).split(' ')[0]}!</h2>
+        <p style="margin:0;color:var(--muted)">${t('since')} 2024 · ${t('bonus')}: <b style="color:var(--blue-700)">2 450</b></p></div>
+        <div class="ac-stats" style="margin-top:18px">
+          <a href="#orders" data-s="orders"><span class="ic">${ic('ix-box')}</span><b>${ORD.length}</b><small>${t('orders')}</small></a>
+          <a href="/favorites.html"><span class="ic">${ic('heart')}</span><b>${c('fav')}</b><small>${t('fav')}</small></a>
+          <a href="/compare.html"><span class="ic">${ic('cmp')}</span><b>${c('cmp')}</b><small>${t('cmp')}</small></a>
+          <a href="/cart.html"><span class="ic">${ic('cart')}</span><b>${c('cart')}</b><small>${t('cart')}</small></a></div>
+        <div class="ip-card" style="margin-top:18px"><h2 style="justify-content:space-between"><span style="display:flex;gap:12px;align-items:center"><span class="ic">${ic('ix-box')}</span>${t('recent')}</span><a href="#orders" data-s="orders" style="font-size:14px;color:var(--blue-600)">${t('all')}</a></h2>${ORD.slice(0,2).map(orderHTML).join('')}</div>
+      </section>
+      <section class="ac-sec${sec==='orders'?' on':''}" data-s="orders"><div class="ip-card"><h2><span class="ic">${ic('ix-box')}</span>${t('orders')}</h2>
+        <div class="ac-flt">${[-1,0,1,2,3].map(i=>`<button type="button" data-f="${i}" class="${i===flt?'on':''}">${i<0?t('stAll'):tt(T.st[i])}</button>`).join('')}</div>
+        ${shown.length?shown.map(orderHTML).join(''):`<div class="ac-empty">${t('none')}</div>`}</div></section>
+      <section class="ac-sec${sec==='profile'?' on':''}" data-s="profile"><div class="ip-card"><h2><span class="ic">${ic('user')}</span>${t('profile')}</h2>
+        <form class="ip-form ac-prof" novalidate>${F('fname',t('fname'),u.fname,'text',' class="w"')}${F('email',t('email'),u.email,'email')}${F('phone',t('phone'),u.phone,'tel')}
+        <label>${t('type')}<input value="${ti<0?tt(T.types[0]):tt(T.types[ti])}" disabled></label>
+        ${ti>0?`<label>${t('company')}<input name="company" value="${u.company||''}"></label><label>${t('tax')}<input name="taxcode" value="${u.taxcode||''}"></label>`:''}
+        <label class="w lg-rem"><input type="checkbox" name="news"${u.news!==false?' checked':''}> ${t('news')}</label>
+        <div class="row"><small>${t('req')}</small><span class="ip-ok"><svg class="i"><use href="#check"/></svg>${t('saved')}</span><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div></form></div></section>
+      <section class="ac-sec${sec==='adr'?' on':''}" data-s="adr"><div class="ip-card"><h2><span class="ic">${ic('pin')}</span>${t('adr')}</h2>
+        ${adrEdit!==null?`<form class="ip-form ac-af" novalidate>${F('l',t('aname'),(adrs[adrEdit]||{}).l,'text',' class="w"')}${F('city',t('city'),(adrs[adrEdit]||{}).city)}${F('a',t('street'),(adrs[adrEdit]||{}).a)}
+          <div class="row"><a href="#" class="ac-ac lg-sw">${t('cancel')}</a><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div></form>`:
+        `<div class="ac-adr">${adrs.map((a,i)=>`<div class="${a.def?'def':''}"><b>${a.l}${a.def?` <span class="ac-tag">${t('def')}</span>`:''}</b><p>${a.city}, ${a.a}</p><div class="acts"><a data-e="${i}">${t('edit')}</a>${a.def?'':`<a data-d="${i}">${t('mkdef')}</a><a class="del" data-x="${i}">${t('del')}</a>`}</div></div>`).join('')}<div class="new" data-e="${adrs.length}">${t('add')}</div></div>`}</div></section>
+      <section class="ac-sec${sec==='pwd'?' on':''}" data-s="pwd"><div class="ip-card"><h2><span class="ic">${ic('shield')}</span>${t('pwd')}</h2>
+        <form class="ip-form" novalidate><label class="w">${t('oldp')} *<input name="old" type="password" required minlength="3" autocomplete="current-password"></label>
+        <label>${t('newp')} *<input name="password" type="password" required minlength="3" autocomplete="new-password"></label><label>${t('rep')} *<input name="re_password" type="password" required minlength="3" data-same="password" autocomplete="new-password"></label>
+        <div class="row"><small>${t('req')}</small><span class="ip-ok"><svg class="i"><use href="#check"/></svg>${t('pwdOk')}</span><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div>
+        <div class="row rg-mis" hidden data-mis="${t('mis')}"></div></form></div></section>`;
+      /* wiring */
+      const go=s=>{sec=s;history.replaceState(null,'','#'+s);render();scrollTo({top:0,behavior:'smooth'});};
+      document.querySelectorAll('[data-s]').forEach(a=>{if(a.tagName==='A')a.onclick=e=>{e.preventDefault();go(a.dataset.s);};});
+      nav.querySelector('.ac-out').onclick=e=>{e.preventDefault();localStorage.removeItem(U);location.href='/login.html';};
+      app.querySelectorAll('.ac-oh').forEach(b=>b.onclick=()=>b.parentNode.classList.toggle('open'));
+      app.querySelectorAll('.ac-flt button').forEach(b=>b.onclick=()=>{flt=+b.dataset.f;render();});
+      app.querySelectorAll('.ac-rep').forEach(b=>b.onclick=()=>{if(S){S.add&&S.add('cart',{id:S.slug?S.slug(b.closest('.ac-ord').querySelector('.ac-it').textContent.split('\n')[0]):'x',q:1});S.toast&&S.toast(t('cart')+' ✓');}});
+      app.querySelectorAll('.ac-inv').forEach(b=>b.onclick=()=>print());
+      const pf=app.querySelector('.ac-prof');
+      pf.addEventListener('ok',e=>{const d=e.detail;put(U,{...u,...d,news:!!d.news});setTimeout(render,1500);});
+      pf.addEventListener('reset',e=>e.preventDefault());
+      app.querySelectorAll('[data-e]').forEach(a=>a.onclick=()=>{adrEdit=+a.dataset.e;render();});
+      app.querySelectorAll('[data-d]').forEach(a=>a.onclick=()=>{adrs.forEach((x,i)=>x.def=i===+a.dataset.d?1:0);put(A,adrs);render();});
+      app.querySelectorAll('[data-x]').forEach(a=>a.onclick=()=>{adrs.splice(+a.dataset.x,1);put(A,adrs);render();});
+      const af=app.querySelector('.ac-af');
+      if(af){af.querySelector('.ac-ac').onclick=e=>{e.preventDefault();adrEdit=null;render();};
+        af.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();let ok=true;af.querySelectorAll('[required]').forEach(x=>{const b=x.value.trim().length<2;x.classList.toggle('bad',b);if(b)ok=false;});if(!ok)return;
+          const d=Object.fromEntries(new FormData(af));adrs[adrEdit]={...(adrs[adrEdit]||{def:adrs.length?0:1}),...d};put(A,adrs);adrEdit=null;render();},true);}
+      app.querySelectorAll('.ip-form:not(.ac-af)').forEach(f=>window.LEDInfoForm&&window.LEDInfoForm(f));
+    });
+  }
+  render();
+  addEventListener('hashchange',()=>{const s=location.hash.slice(1);if(T[s]&&s!==sec){sec=s;render();}});
+  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+});
+</script>
+<!--@account.ru|Личный кабинет|#user|Личный кабинет|Ваши заказы, данные и адреса — в одном месте.-->
+<div class="ac-app"></div>
+<!--@account.en|My account|#user|My account|Your orders, details and addresses in one place.-->
+<div class="ac-app"></div>

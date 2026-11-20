@@ -220,3 +220,10 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — New page `login.html` (Մուտք), HY/RU/EN: login/email + password, "remember me", "forgot password" panel on the same page
   (`/login.html#forgot`, e-mail → demo "link sent"), card with account benefits + "Register" → `/registration.html`. Header "Кабинет" icon now
   opens `/login.html`; registration page's login/forgot links point here. Source `site-src/login_content.html`. Backup `led-static-backup-20261120zt.tgz`. Published.
+- 2026-11-20 — New page `account.html` (Անձնական էջ / Личный кабинет), HY/RU/EN, demo session in localStorage `led-user` (addresses `led-adr`,
+  last registration `led-reg`). Login (any login/password) and registration save the session and open the account; not logged in → "please
+  log in" card. Tabs (`#ov`, `#orders`, `#profile`, `#adr`, `#pwd`): overview (greeting, bonus points, live counts of orders/favourites/
+  compare/cart, 2 recent orders), orders (5 demo orders, status filter, expandable items, progress steps, payment/delivery, repeat order →
+  cart, invoice = print), profile edit (saved), addresses (add/edit/delete/make default), password change (match check), logout. Header
+  "Кабинет" → account when logged in, else login. Shared form validation is now `window.LEDInfoForm(form)` and fires an `ok` event with the
+  form data. Source `site-src/account_content.html` (CSS + JS in the HY block). Backup `led-static-backup-20261120zu.tgz`. Published.
