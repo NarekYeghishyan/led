@@ -5,7 +5,8 @@ dist/
 
 # private: contracts, design sources, store data
 Contracts/
-Design/
+Design/*
+!Design/site/
 *.mdb
 *.accdb
 *.ldb
