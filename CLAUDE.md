@@ -273,3 +273,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   `window.LEDBrandLogos` on brand.html; others get a text logo. Home brand tiles, catalog-menu brand tiles and the product page brand chip open
   the brand page (`search_box.html`). Fix: order tracking progress line now runs from the first to the last dot centre and sits under the
   dots (was drawn over the current dot and misaligned). Backup `led-static-backup-20261121b.tgz`. Published.
+- 2026-11-21 — Hand cursor on range sliders (`input[type=range]`, e.g. credit/instalment term slider) via the cursor rule in `card_fx.html`. Backup `led-static-backup-20261121c.tgz`. Published.
