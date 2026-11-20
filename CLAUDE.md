@@ -286,3 +286,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   (`.ac-tabs`), favourites/compare/cart/logout as 4 small icon buttons. Phones (≤600px): tighter cards, stats with icon + number in a row,
   status filters scroll sideways, order header = number/date left, status + sum right (was wrapping), item rows stack the sum, order buttons
   full width. CSS in `site-src/account_content.html`. Backup `led-static-backup-20261121l.tgz`. Published.
+- 2026-11-21 — Checkout mobile: steps row scrolls, tighter cards, private/company switch full width, 16px inputs (no iOS zoom), delivery/payment
+  options one per row (auto-fit on tablets), address chips scroll, instalment monthly sum on its own line, full-width submit and success
+  buttons. Search/brand cards: compare button aligned under the ♡ (`right:22px`, was 14px). Backup `led-static-backup-20261121m.tgz`. Published.
