@@ -911,7 +911,7 @@ const CAT=[
   G('Смартфоны|Սմարթֆոններ|Smartphones',['Смартфоны|Սմարթֆոններ|Smartphones','Телефоны|Հեռախոսներ|Phones','Аксессуары для смартфонов|Սմարթֆոնի աքսեսուարներ|Smartphone accessories']),
   G('Гаджеты|Գաջեթներ|Gadgets',['Смарт-часы|Խելացի ժամացույցներ|Smartwatches','Цифровые браслеты|Թվային ապարանջաններ|Fitness bands','Аксессуары для гаджетов|Գաջեթների աքսեսուարներ|Gadget accessories'])
  ],T('Новые планшеты уже в наличии|Նոր պլանշետներն արդեն առկա են|New tablets in stock')],
- ['cpu',T('Комплектующие|Համակարգչային մասեր|Components'),[
+ ['cpu',T('Комплектующие|Համալրող սարքեր|Components'),[
   G('Процессоры|Պրոցեսորներ|Processors',['Сокет 1151/1151v2|Սոկետ 1151/1151v2|Socket 1151/1151v2','Сокет 1200|Սոկետ 1200|Socket 1200','Сокет 1700|Սոկետ 1700|Socket 1700','Сокет AM4|Սոկետ AM4|Socket AM4','Сокет AM5|Սոկետ AM5|Socket AM5']),
   G('Материнские платы|Մայրական սալիկներ|Motherboards',['Сокет 1151/1151v2|Սոկետ 1151/1151v2|Socket 1151/1151v2','Сокет 1200|Սոկետ 1200|Socket 1200','Сокет 1700|Սոկետ 1700|Socket 1700','Сокет AM4|Սոկետ AM4|Socket AM4','Сокет AM5|Սոկետ AM5|Socket AM5']),
   G('Охлаждение|Հովացում|Cooling',['Универсальные для процессоров|Ունիվերսալ պրոցեսորների համար|Universal CPU coolers','Для процессоров сокет 1155/1156/K8|Սոկետ 1155/1156/K8 պրոցեսորների համար|For socket 1155/1156/K8 CPUs','Для корпусов|Իրանների համար|Case fans','Для жестких дисков|Կոշտ սկավառակների համար|For hard drives','Термопаста|Ջերմամածուկ|Thermal paste','Термопрокладки|Ջերմատակդիրներ|Thermal pads','Для прочих устройств|Այլ սարքերի համար|For other devices']),
@@ -926,7 +926,7 @@ const CAT=[
   G('Контроллеры|Կոնտրոլերներ|Controllers',['Bluetooth|Bluetooth|Bluetooth','USB/COM/LPT|USB/COM/LPT|USB/COM/LPT','IDE/SATA/SCSI|IDE/SATA/SCSI|IDE/SATA/SCSI']),
   G('ТВ-тюнеры|TV թյուներներ|TV tuners',['Цифровые|Թվային|Digital','Аналоговые|Անալոգային|Analog'])
  ],T('Соберите ПК в конфигураторе|Հավաքեք համակարգիչը կոնֆիգուրատորում|Build a PC in the configurator')],
- ['monitor',T('Периферия|Ծայրամասային սարքեր|Peripherals'),[
+ ['monitor',T('Периферия|Համալրող պարագաներ|Peripherals'),[
   G('Мониторы|Մոնիտորներ|Monitors'),G('Телевизоры|Հեռուստացույցներ|TVs'),G('Проекторы и экраны|Պրոյեկտորներ և էկրաններ|Projectors & screens'),G('Принтеры и сканеры|Տպիչներ և սկաներներ|Printers & scanners'),G('ИБП и питание|ԱԱՍ և սնուցում|UPS & power'),G('Программное обеспечение|Ծրագրային ապահովում|Software'),G('Офисная мебель|Գրասենյակային կահույք|Office furniture'),G('POS-оборудование|POS սարքավորումներ|POS equipment'),G('Видеонаблюдение|Տեսահսկում|Video surveillance'),G('Графические планшеты|Գրաֆիկական պլանշետներ|Drawing tablets')
  ],T('Мониторы 165 Гц для игр и работы|165 Հց մոնիտորներ խաղի և աշխատանքի համար|165 Hz monitors for work and play')],
  ['head',T('Аксессуары|Աքսեսուարներ|Accessories'),[
@@ -1014,6 +1014,16 @@ document.addEventListener('click',e=>{const c=e.target.closest('.prod');if(!c||e
  e.preventDefault();if(e.ctrlKey||e.metaKey)open('/product.html','_blank');else location.href='/product.html'});
 document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.prod')&&!e.target.closest('.cart,.fav'))open('/product.html','_blank')});
 </script>
+
+
+
+
+
+
+
+
+
+
 
 
 

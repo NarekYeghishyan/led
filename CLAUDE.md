@@ -187,3 +187,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Category toolbar hover: sort button glow ring + chevron nudge, sort options cascade in, slide with blue wash and icon spring;
   grid/list toggle glow + icon pop; pager buttons lift; compare checkbox tint. (Sort/view buttons also have the secondary button effect.)
   Backup `led-static-backup-20261120zk.tgz`. Published.
+- 2026-11-20 — Armenian catalog section names = led.am: Համակարգիչներ, նոութբուքեր, սերվերներ · Պլանշետներ, սմարթֆոններ, գաջեթներ ·
+  Համալրող սարքեր · Համալրող պարագաներ · Աքսեսուարներ · Ցանցային սարքեր (in `CAT` on index/category/product; top row copies them).
+  Backup `led-static-backup-20261120zl.tgz`. Published.
