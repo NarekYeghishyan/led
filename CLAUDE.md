@@ -166,3 +166,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   Mega menu hover effects: section buttons spotlight/slide/icon spring, links slide with underline, popular tiles lift, brand tiles
   lift/glow, promo banner glow+sweep, ✕ rotates. Fix: mega brand logos were empty on category/product pages (hidden `#stubs` → getBBox 0 →
   viewBox "0 0 0 0"); now skipped when 0. Backup `led-static-backup-20261120zd.tgz`. Published.
+- 2026-11-20 — Product section tabs (`.ptabs`): underline grows + soft spotlight + lift, count badge turns blue; home tab pills lift/glow.
+  Top menu items all the same height on hover (stretch). Fix: banner border glow was offset on `.credit` (its `>*{grid-column:1}` shrank the
+  effect layers) — effect layers now `grid-area:auto`. Backup `led-static-backup-20261120ze.tgz`. Published.

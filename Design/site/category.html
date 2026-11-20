@@ -1083,6 +1083,11 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1317,6 +1322,27 @@ footer .logo:hover img{transform:scale(1.05) rotate(-1.5deg)}
 #megaBr a svg{transition:fill .2s,transform .35s cubic-bezier(.3,1.6,.5,1)}#megaBr a:hover svg{transform:scale(1.12)}
 .mega-p.pc a{transition:translate .25s,box-shadow .3s}.mega-p.pc a:hover{translate:0 -2px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
 @media (prefers-reduced-motion:reduce){.mega-l button:hover,.mega-g .mg-i a:hover,#megaAll:hover{translate:none}.mega-l button:hover .mi,#megaX:hover,#megaBr a:hover svg{transform:none}}
+/* grid containers (e.g. .credit>*{grid-column:1}) must not shrink the effect layers to one column */
+.pc>.pc-g,.pc>.pc-b,.pc>.pc-sh{grid-column:auto!important;grid-row:auto!important;grid-area:auto!important}
+/* top menu: same hover height for every item */
+nav.cats{align-items:stretch!important}
+nav.cats a{min-height:48px;box-sizing:border-box;align-self:stretch}
+nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
+/* ---- product page section tabs ---- */
+.ptabs a{border-radius:10px 10px 0 0;transition:color .2s,background-size .35s cubic-bezier(.2,.8,.2,1),translate .25s!important;
+ background-image:linear-gradient(var(--blue-600),var(--blue-600)),radial-gradient(90px circle at 50% 100%,rgba(47,127,234,.14),transparent 70%);
+ background-repeat:no-repeat;background-position:50% 100%,50% 100%;background-size:0 2px,0 0}
+.ptabs a:not(.on):hover{color:var(--blue-700);background-size:calc(100% - 24px) 2px,100% 100%}
+.ptabs a:hover{translate:0 -1px}
+.ptabs a em{transition:background .25s,color .25s,border-color .25s,transform .35s cubic-bezier(.3,1.6,.5,1)}
+.ptabs a:hover em{background:var(--blue-600);border-color:var(--blue-600);color:#fff;transform:scale(1.1)}
+.ptabs a.on:after{transition:left .3s,right .3s}
+.ptabs a.on:hover:after{left:6px;right:6px}
+/* home tabs pills */
+.tabs span:not(.on){transition:background .2s,color .2s,border-color .2s,translate .25s,box-shadow .25s}
+.tabs span:not(.on):hover{border-color:var(--blue-600);color:var(--blue-700);translate:0 -2px;box-shadow:0 6px 14px rgba(20,104,220,.14);
+ background:radial-gradient(60px circle at 50% 50%,rgba(47,127,234,.12),transparent 70%),var(--surface)}
+@media (prefers-reduced-motion:reduce){.ptabs a:hover,.tabs span:hover{translate:none}}
 </style><script>
 (function(){
 const CARD='.prod,.sp-f,.sp-pc',TILE='#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p',ALL=[CARD,TILE,BAN].join(',');
