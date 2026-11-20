@@ -1139,6 +1139,11 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1451,6 +1456,35 @@ nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
 .tree li a.on{background:linear-gradient(110deg,var(--blue-600),#4F8EF7);box-shadow:0 6px 16px rgba(20,104,220,.3)}
 .tree li a.on:hover{box-shadow:0 8px 22px rgba(20,104,220,.42)}
 @media (prefers-reduced-motion:reduce){.tree .tg-h:hover,.tree li a:hover{translate:none}}
+/* ---- category filters ---- */
+.filters summary{transition:color .2s,translate .25s cubic-bezier(.2,.8,.2,1)}
+.filters summary:hover{color:var(--blue-700);translate:3px 0}
+.filters summary:after{transition:transform .35s cubic-bezier(.3,1.6,.5,1),color .2s}
+.filters summary:hover:after{color:var(--blue-600);transform:rotate(90deg)}
+.filters details[open] summary:hover:after{transform:rotate(180deg)}
+.ck,.tg{border-radius:8px;transition:background .2s,color .2s,translate .25s cubic-bezier(.2,.8,.2,1)}
+.ck:hover{translate:4px 0;color:var(--blue-700);background:linear-gradient(90deg,var(--blue-50),rgba(232,240,252,0))}
+.ck:has(input:checked){color:var(--blue-700)}
+.ck em{transition:background .2s,color .2s}
+.ck:hover em,.ck:has(input:checked) em{background:var(--blue-600);color:#fff}
+.ck input,.tg input{transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.ck:hover input,.tg:hover input{transform:scale(1.15)}
+.tg:hover{color:var(--blue-700);translate:3px 0}
+.price input{transition:border-color .25s,box-shadow .3s,background .25s}
+.price input:hover{border-color:#B9C7DB}
+.price input:focus{outline:0;border-color:var(--blue-600);background:#fff;box-shadow:0 0 0 3px rgba(20,104,220,.12)}
+.dr input::-webkit-slider-thumb{transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s}
+.dr input::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 0 0 6px rgba(20,104,220,.15),0 2px 6px rgba(14,26,46,.25)}
+.dr input:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.25)}
+.dr input::-moz-range-thumb:hover{box-shadow:0 0 0 6px rgba(20,104,220,.15)}
+.dr i{transition:box-shadow .3s}.dr:hover i{box-shadow:0 0 8px rgba(47,127,234,.5)}
+.fh a{background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px;transition:background-size .3s,color .2s}
+.fh a:hover{background-size:100% 1px;color:var(--blue-700)}
+.chips span{transition:translate .25s,box-shadow .25s,background .2s}
+.chips span:hover{translate:0 -2px;box-shadow:0 6px 14px rgba(20,104,220,.18);background:#DCE8FB}
+.chips i{display:inline-block;transition:transform .3s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+.chips span:hover i{transform:rotate(90deg);opacity:1}
+@media (prefers-reduced-motion:reduce){.filters summary:hover,.ck:hover,.tg:hover,.chips span:hover{translate:none}}
 </style><script>
 (function(){
 const CARD='.prod,.sp-f,.sp-pc',TILE='.bi,.rv,.rv-top .big,.sg,#megaBr a,.sp-slot,.asm-row,.sp-row,.sp-opt,.sp-mi,.thumbs button,.t,.feats>div,.brands a,.mh,.c',BAN='.promo,.build,.credit,.b2b,.stage,.sp-free,.sp-side,.sp-dl,.sp-empty,.asm-sum,.asm-prog,.mega-p,.bsum',ALL=[CARD,TILE,BAN].join(',');

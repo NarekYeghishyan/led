@@ -181,3 +181,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   effects must not change text size/spacing — use translate/colour/underline only.** Published.
 - 2026-11-20 — Category tree hover: group headers spotlight + slide + arrow nudge, branch line turns blue, items slide with a blue wash and
   their count becomes a blue pill; active item gradient + glow. CSS only (tree re-renders). Backup `led-static-backup-20261120zi.tgz`. Published.
+- 2026-11-20 — Category filters hover: group titles slide + "+/−" spins blue; options slide with a blue wash, count pill turns blue (also when
+  checked), checkbox pops; toggles slide; price inputs glow on focus; slider handles grow with a halo, range bar glows; "Reset" underline;
+  active-filter chips lift and ✕ spins. Backup `led-static-backup-20261120zj.tgz`. Published.
