@@ -215,7 +215,7 @@ export function ProductPage() {
     [t('f.weight'), fmt.num(p.weight, 3)],
     [t('f.volume'), fmt.num(p.volume, 3)],
     [t('f.note'), p.note || '—'],
-    ...Object.entries(p.raw || {}).map(([k, v]) => [k, v === null || v === '' ? '—' : String(v)] as [string, ReactNode]),
+    ...Object.entries(p.raw || {}).map(([k, v]) => [k, v === null || v === '' ? '—' : num2(v)] as [string, ReactNode]),
   ];
   return (
     <>
@@ -412,7 +412,7 @@ export function LogsPage() {
   }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
   const page = Number(params.get('page') || 1);
   const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
-  const val = (v: unknown) => (v === null || v === undefined ? '—' : v === true ? t('common.yes') : v === false ? t('common.no') : String(v));
+  const val = (v: unknown) => (v === null || v === undefined ? '—' : v === true ? t('common.yes') : v === false ? t('common.no') : num2(v));
 
   return (
     <>
@@ -476,9 +476,14 @@ export function LogsPage() {
 
 const entityLabel = (e: string, t: (k: TKey) => string) => (e.startsWith('t:') ? e.slice(2) : t(`entity.${e}` as TKey));
 
+// Fractional numbers (prices, sums) are shown with two decimals: 252.88777 → 252.89.
+const num2 = (v: unknown): string =>
+  typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(2))
+    : typeof v === 'string' && /^-?\d+\.\d+$/.test(v) ? Number(v).toFixed(2) : String(v);
+
 const cell = (v: unknown, t: (k: TKey) => string) =>
   v === null || v === undefined || v === '' ? <span className="muted">—</span>
-    : v === true ? t('common.yes') : v === false ? t('common.no') : String(v);
+    : v === true ? t('common.yes') : v === false ? t('common.no') : num2(v);
 
 // ------------------------------------------------------------------ Access tables (full copy)
 
