@@ -68,3 +68,8 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Claude desktop made home (`index.html`) and category (`category.html`) templates in
   `Design/site/`. Claude Code published them to led.creativeweb.am (`/`, `/category.html`, `img/logo.png`);
   backup `/root/led-static-backup-20261120.tgz` on the server. Added this file.
+- 2026-11-20 — Client chose v2 (`Design/concept/homepage-v2.html`, the "top-picks" slider) as the home page.
+  `Design/site/index.html` = v2 + v1 top menu (icon row) + v1 container width (1280px) + PNG logo; every
+  category link (top menu, mega menu, tiles) opens `/category.html`. Old v1 kept as `Design/site/index-v1.html`
+  (live at `/v1/`). Admin panel now shows the logo (`admin/public/logo.png`). Backup `led-static-backup-20261120b.tgz`.
+  **Edit `Design/site/index.html` from now on, not the concept files.**

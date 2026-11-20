@@ -33,7 +33,7 @@ function Login() {
   return (
     <div className="login">
       <form onSubmit={submit} className="card">
-        <div className="login-head"><h1>LED Computers</h1><div className="switches"><ThemeSwitch /><LangSwitch /></div></div>
+        <div className="login-head"><h1><img className="login-logo" src="/admin/logo.png" alt="LED Computers" /></h1><div className="switches"><ThemeSwitch /><LangSwitch /></div></div>
         <p className="muted">{t('login.title')}</p>
         <label>{t('login.email')}<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></label>
         <label>{t('login.password')}<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>
@@ -61,7 +61,7 @@ function Layout() {
   }, [open]);
 
   if (!auth.token) return <Navigate to="/login" replace />;
-  const brand = <div className="brand">LED<span>{t('brand.sub')}</span></div>;
+  const brand = <div className="brand"><img src="/admin/logo.png" alt="LED Computers" /><span>{t('brand.sub')}</span></div>;
   return (
     <div className={`layout${open ? ' menu-open' : ''}`}>
       <header className="topbar">
