@@ -1328,6 +1328,19 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1915,6 +1928,15 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 .ip-ok.on{display:flex}
 .ip-hours{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:14.5px}
 .ip-hours span{color:var(--muted)}
+/* registration */
+.ip-form.rg .rg-h{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:14px 0 0;font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:#33415A}
+.ip-form.rg .rg-h:first-child{margin-top:0}
+.ip-form.rg .rg-h svg{width:20px;height:20px;color:var(--blue-600)}
+.ip-form.rg .rg-g{display:contents}
+.ip-form.rg .rg-g[hidden]{display:none}
+.rg-mis{color:#E5484D;font-size:13px;font-weight:600}
+.rg-alt{margin:18px 0 0;font-size:14px;color:var(--muted)}
+.rg-alt a{color:var(--blue-600);font-weight:600}
 @media (max-width:1000px){.ip{grid-template-columns:1fr}.ip-nav{position:static}.ip-stats,.ip-cc{grid-template-columns:repeat(2,1fr)}.ip-2,.ip-pay{grid-template-columns:1fr}}
 @media (max-width:600px){.ip-hero{flex-direction:column;align-items:flex-start;padding:24px}.ip-hero h1{font-size:24px}.ip-card{padding:20px}.ip-form{grid-template-columns:1fr}.ip-stats,.ip-cc{grid-template-columns:1fr}}
 </style>
@@ -1924,10 +1946,10 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
   const T={credit:["Рассрочка","Ապառիկ","Instalments"],about:["О нас","Մեր մասին","About us"],help:["Помощь","Օգնություն","Help"],
     buy:["Как купить","Ինչպես գնել","How to buy"],order:["Как заказать","Ինչպես պատվիրել","How to order"],pay:["Как оплатить","Ինչպես վճարել","How to pay"],
     delivery:["Доставка","Առաքում","Delivery"],warranty:["Гарантия","Երաշխիք","Warranty"],exchange:["Обмен и возврат","Փոխանակում","Exchange & returns"],
-    contacts:["Контакты","Կոնտակտներ","Contacts"],home:["Главная","Գլխավոր","Home"],info:["Покупателям","Գնորդներին","Customers"],
+    contacts:["Контакты","Կոնտակտներ","Contacts"],register:["Регистрация","Գրանցում","Registration"],home:["Главная","Գլխավոր","Home"],info:["Покупателям","Գնորդներին","Customers"],
     q:["Остались вопросы?","Հարցեր ունե՞ք","Have a question?"],qd:["Пн–Сб 10:30–19:30","Երկ–Շբթ 10:30–19:30","Mon–Sat 10:30–19:30"]};
-  const P={credit:"/credit.html",about:"/about.html",buy:"/how-to-buy.html",order:"/how-to-order.html",pay:"/how-to-pay.html",delivery:"/delivery.html",warranty:"/warranty.html",exchange:"/exchange.html",contacts:"/contacts.html"};
-  const IC={credit:"#card",about:"#store",buy:"#cart",order:"#ix-box",pay:"#ix-wallet",delivery:"#truck",warranty:"#shield",exchange:"#ix-ref",contacts:"#pin"};
+  const P={credit:"/credit.html",about:"/about.html",buy:"/how-to-buy.html",order:"/how-to-order.html",pay:"/how-to-pay.html",delivery:"/delivery.html",warranty:"/warranty.html",exchange:"/exchange.html",contacts:"/contacts.html",register:"/registration.html"};
+  const IC={credit:"#card",about:"#store",buy:"#cart",order:"#ix-box",pay:"#ix-wallet",delivery:"#truck",warranty:"#shield",exchange:"#ix-ref",contacts:"#pin",register:"#user"};
   const HELP=["buy","order","pay","delivery","warranty","exchange"];
   const here=(location.pathname.split('/').pop()||'').replace('.html','');
   const cur=Object.keys(P).find(k=>P[k]==='/'+here+'.html');
@@ -1956,14 +1978,14 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
     if(k&&!li.querySelector('a')){li.dataset.ft=k;const a=document.createElement('a');a.href=P[FT[k]];a.style.cssText='color:inherit;text-decoration:none';while(li.firstChild)a.appendChild(li.firstChild);li.appendChild(a);}
   });
   /* link map leftovers that still point to the old site */
-  const OLD={"help_up_menu/warranty":"warranty","help_up_menu/delivery":"delivery","help_up_menu/how_order":"buy","help_up_menu/how_pay":"pay","help_up_menu/change":"exchange","contacts":"contacts","about":"about","credit_sale":"credit"};
+  const OLD={"help_up_menu/warranty":"warranty","help_up_menu/delivery":"delivery","help_up_menu/how_order":"buy","help_up_menu/how_pay":"pay","help_up_menu/change":"exchange","contacts":"contacts","about":"about","credit_sale":"credit","users/registration":"register"};
   const fix=()=>document.querySelectorAll('a[href*="led.am/"]').forEach(a=>{const m=a.href.match(/led\.am\/(?:ru|am|en)\/(.+?)\.html/);if(m&&OLD[m[1]])a.href=P[OLD[m[1]]];});
   fix();setTimeout(fix,600);
 
   /* info page chrome */
   const nav=document.getElementById('ipNav');
   if(nav){
-    const main=["credit","about"],rest=["contacts"];
+    const main=["credit","about"],rest=["contacts","register"];
     const item=k=>`<a href="${P[k]}" data-k="${k}"${k===cur?' class="on" aria-current="page"':''}>${ic(IC[k])}<span></span></a>`;
     nav.innerHTML=`<div class="ip-menu"><h6 data-k="info"></h6>${main.map(item).join('')}<hr><h6 data-k="help"></h6>${HELP.map(item).join('')}<hr>${rest.map(item).join('')}</div>`+
       `<div class="ip-call"><b data-k="q"></b><a href="tel:+37410502802">${ic('#call')}010 502‑802</a><a href="tel:+37499502802">${ic('#call')}099 502‑802</a><small data-k="qd"></small></div>`;
@@ -1978,9 +2000,19 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
   new MutationObserver(()=>{paint();retitle();}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 
   /* contact forms (one per language) */
+  /* header "Кабинет" → registration */
+  document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=P.register;});
+  /* registration: customer type shows dealer / company fields */
+  document.querySelectorAll('.ip-form.rg').forEach(f=>{const sel=f.querySelector('.rg-type');
+    const sync=()=>f.querySelectorAll('.rg-g').forEach(g=>{const on=g.dataset.t===sel.value;g.hidden=!on;g.querySelectorAll('input').forEach(x=>x.disabled=!on);});
+    sel.addEventListener('change',sync);sync();
+    f.querySelectorAll('.rg-login').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'});}));});
   document.querySelectorAll('.ip-form').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();let ok=true;
-    f.querySelectorAll('[required]').forEach(x=>{const bad=!x.value.trim()||(x.type==='email'&&!/^\S+@\S+\.\S+$/.test(x.value));x.classList.toggle('bad',bad);if(bad)ok=false;});
-    if(!ok)return;f.reset();const m=f.querySelector('.ip-ok');m.classList.add('on');setTimeout(()=>m.classList.remove('on'),5000);}));
+    const mis=f.querySelector('.rg-mis');let mm=false;
+    f.querySelectorAll('[data-same]').forEach(x=>{const o=f.querySelector(`[name="${x.dataset.same}"]`);const bad=x.value!==o.value;if(bad&&x.value){x.classList.add('bad');ok=false;mm=true;}});
+    if(mis){mis.hidden=!mm;mis.textContent=mm?mis.dataset.mis:'';}
+    f.querySelectorAll('[required]:not(:disabled)').forEach(x=>{if(x.closest('[hidden]'))return;const bad=!x.value.trim()||(x.minLength>0&&x.value.trim().length<x.minLength)||(x.type==='email'&&!/^\S+@\S+\.\S+$/.test(x.value));if(bad||!x.dataset.same||x.value===f.querySelector(`[name="${x.dataset.same}"]`).value)x.classList.toggle('bad',bad);if(bad)ok=false;});
+    if(!ok)return;f.reset();f.querySelectorAll('.rg-type').forEach(x=>x.dispatchEvent(new Event('change')));const m=f.querySelector('.ip-ok');m.classList.add('on');setTimeout(()=>m.classList.remove('on'),5000);}));
 })();
 </script>
 <!--/info-shared-->
