@@ -123,3 +123,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Category price filter: two-handle range slider (`#dRange`, 0–1 500 000 ֏, synced with the min/max inputs; script `<!--dual-range-->`).
   Product 1-click modal text translated (I18N entry). Assembly page follows the site language (HY/RU/EN, re-renders on switch; part units ԳԲ/Վտ…).
   Backup `led-static-backup-20261120q.tgz`. Published.
+- 2026-11-20 — Category: price slider/inputs now filter the cards (by `.pr b` price, live; empty-state text; count updates; "Reset" clears it).
+  Product page: reviews rating bars renamed `.bars` → `.rbars` — the old name broke the "Կատալոգ" button's hamburger icon.
+  **Don't reuse the class `.bars` — it belongs to the catalog button.** Backup `led-static-backup-20261120r.tgz`. Published.

@@ -959,10 +959,19 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 <!--dual-range--><script>(function(){const d=document.getElementById('dRange');if(!d)return;const [a,b]=d.querySelectorAll('input'),bar=d.querySelector('i'),mn=document.getElementById('prMin'),mx=document.getElementById('prMax'),M=+a.max,G=20000;
 const f=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '),num=s=>+String(s).replace(/\D/g,'')||0;
 function paint(){bar.style.left=a.value/M*100+'%';bar.style.width=(b.value-a.value)/M*100+'%';mn.value=f(a.value);mx.value=f(b.value)}
-a.oninput=()=>{if(+a.value>b.value-G)a.value=b.value-G;a.style.zIndex=3;b.style.zIndex=2;paint()};
-b.oninput=()=>{if(+b.value<+a.value+G)b.value=+a.value+G;b.style.zIndex=3;a.style.zIndex=2;paint()};
-mn.onchange=()=>{a.value=Math.min(num(mn.value),b.value-G);paint()};mx.onchange=()=>{b.value=Math.max(Math.min(num(mx.value),M),+a.value+G);paint()};
-paint()})();</script><!--/dual-range--><!--shop-shared-->
+const grid=document.querySelector('.cgrid3');let em=null,cnt=document.getElementById('catCount'),cnt0=cnt&&cnt.textContent;
+function filt(){if(!grid)return;let n=0;const lo=+a.value,hi=+b.value>=M?Infinity:+b.value;
+ grid.querySelectorAll('.prod').forEach(c=>{const pb=c.querySelector('.pr b'),p=pb?+pb.textContent.replace(/\D/g,''):0,ok=!p||(p>=lo&&p<=hi);c.style.display=ok?'':'none';if(ok)n++});
+ if(!em){em=document.createElement('p');em.className='pr-empty';em.style.cssText='grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;margin:0';grid.appendChild(em)}
+ em.textContent=document.documentElement.lang==='hy'?'Այս գնային միջակայքում ապրանքներ չկան':document.documentElement.lang==='en'?'No products in this price range':'В этом диапазоне цен товаров нет';
+ em.style.display=n?'none':'';const all=lo<=0&&hi===Infinity;if(cnt)cnt.textContent=all?cnt0:n}
+let ft;const run=()=>{clearTimeout(ft);ft=setTimeout(filt,120)};
+a.oninput=()=>{if(+a.value>b.value-G)a.value=b.value-G;a.style.zIndex=3;b.style.zIndex=2;paint();run()};
+b.oninput=()=>{if(+b.value<+a.value+G)b.value=+a.value+G;b.style.zIndex=3;a.style.zIndex=2;paint();run()};
+mn.onchange=()=>{a.value=Math.min(num(mn.value),b.value-G);paint();filt()};mx.onchange=()=>{b.value=Math.max(Math.min(num(mx.value),M),+a.value+G);paint();filt()};
+document.getElementById('fReset')?.addEventListener('click',()=>{a.value=0;b.value=M;paint();filt()});
+new MutationObserver(()=>em&&filt()).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+paint();filt()})();</script><!--/dual-range--><!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
 .act em.bump{animation:spBump .5s}@keyframes spBump{40%{transform:scale(1.5)}}
