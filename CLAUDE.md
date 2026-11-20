@@ -73,3 +73,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   category link (top menu, mega menu, tiles) opens `/category.html`. Old v1 kept as `Design/site/index-v1.html`
   (live at `/v1/`). Admin panel now shows the logo (`admin/public/logo.png`). Backup `led-static-backup-20261120b.tgz`.
   **Edit `Design/site/index.html` from now on, not the concept files.**
+- 2026-11-20 — `category.html` uses the same top menu as home: logo → `/`, menu and catalog-menu links open
+  `/category.html` (overrides the led.am link map for menu links). Keep the header block identical on both pages.
