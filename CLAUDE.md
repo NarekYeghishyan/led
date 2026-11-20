@@ -190,3 +190,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Armenian catalog section names = led.am: Համակարգիչներ, նոութբուքեր, սերվերներ · Պլանշետներ, սմարթֆոններ, գաջեթներ ·
   Համալրող սարքեր · Համալրող պարագաներ · Աքսեսուարներ · Ցանցային սարքեր (in `CAT` on index/category/product; top row copies them).
   Backup `led-static-backup-20261120zl.tgz`. Published.
+- 2026-11-20 — Mega menu fits the screen: `.mega-in` max-height = viewport minus its top (`--mtop`, set by JS on scroll/hover), only the
+  category list (`.mega-g`) scrolls, "Popular"/"Brands" row stays visible at the bottom (`<!--mega-fit-->` in card_fx.html). Backup `led-static-backup-20261120zm.tgz`. Published.
