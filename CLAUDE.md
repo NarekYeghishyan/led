@@ -289,3 +289,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Checkout mobile: steps row scrolls, tighter cards, private/company switch full width, 16px inputs (no iOS zoom), delivery/payment
   options one per row (auto-fit on tablets), address chips scroll, instalment monthly sum on its own line, full-width submit and success
   buttons. Search/brand cards: compare button aligned under the ♡ (`right:22px`, was 14px). Backup `led-static-backup-20261121m.tgz`. Published.
+- 2026-11-21 — Cart phones (≤600px): smaller title, item row = photo | name/spec (2 lines) on top, delete+qty and price on one line under it,
+  full-width checkout buttons, upsell one per row. Login phones: the help sidebar moves below the form (≤1000px, `.ip:has(.lg-w)`), compact
+  hero, big full-width "Log in"/"Register" buttons, 16px inputs on all info forms (no iOS zoom). Backup `led-static-backup-20261121n.tgz`. Published.

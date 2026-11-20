@@ -153,6 +153,21 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 .rg-alt{margin:18px 0 0;font-size:14px;color:var(--muted)}
 .rg-alt a{color:var(--blue-600);font-weight:600}
 @media (max-width:1000px){.ip{grid-template-columns:1fr}.ip-nav{position:static}.ip-stats,.ip-cc{grid-template-columns:repeat(2,1fr)}.ip-2,.ip-pay{grid-template-columns:1fr}}
+@media (max-width:1000px){.ip:has(.lg-w)>.ip-nav{order:2}}
+@media (max-width:600px){
+ .ip-form input,.ip-form select,.ip-form textarea{font-size:16px}
+ .lg-w{gap:14px!important}.lg-w .ip-form{gap:14px}
+ .lg-w .rg-h{display:flex;align-items:center;gap:10px;margin:0;font-size:19px}.lg-w .rg-h svg{width:22px;height:22px;color:var(--blue-600)}
+ .lg-w .ip-form input{padding:13px 14px}
+ .lg-w .ip-form .row{gap:10px}
+ .lg-w .ip-form .row .btn{flex:1 1 100%;order:-1;justify-content:center;text-align:center;min-height:50px;font-size:16px}
+ .lg-w .ip-form .row small{flex:1 1 100%;text-align:center}
+ .lg-w .ip-card>.btn{display:flex!important;justify-content:center;min-height:48px;align-items:center}
+ .lg-w .ip-card h2{font-size:18px}.lg-why{font-size:14px}
+ .ip:has(.lg-w) .ip-hero{padding:18px 20px;flex-direction:row!important;align-items:center!important;gap:14px}
+ .ip:has(.lg-w) .ip-hero .ic{width:48px;height:48px;border-radius:14px}.ip:has(.lg-w) .ip-hero .ic svg{width:24px;height:24px}
+ .ip:has(.lg-w) .ip-hero h1{font-size:21px!important;margin:0}.ip:has(.lg-w) .ip-hero p{display:none}
+}
 @media (max-width:600px){.ip-hero{flex-direction:column;align-items:flex-start;padding:24px}.ip-hero h1{font-size:24px}.ip-card{padding:20px}.ip-form{grid-template-columns:1fr}.ip-stats,.ip-cc{grid-template-columns:1fr}}
 </style>
 <script>
