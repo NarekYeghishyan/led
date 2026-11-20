@@ -1,4 +1,7 @@
 <!--responsive--><style>
+/* product page: compare bar sits above the sticky buy bar (all widths; phones override below) */
+.cmp-bar{transition:transform .3s,bottom .3s}
+body:has(.sbar.show) .cmp-bar.show{bottom:92px}
 /* Responsive fixes for tablets and phones (all pages). Added last by build_shop.py. */
 html,body{max-width:100%;overflow-x:clip}
 img,video{max-width:100%}
