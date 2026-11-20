@@ -1,0 +1,150 @@
+
+<!--@track|Պատվերի կարգավիճակ|#truck|Պատվերի կարգավիճակ|Մուտքագրեք պատվերի համարը և հեռախոսը՝ տեսնելու, թե որտեղ է ձեր պատվերը։-->
+<div class="tr-app"></div>
+<style>
+.tr-q{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:12px;align-items:end}
+.tr-q label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#33415A}
+.tr-q input{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;box-sizing:border-box}
+.tr-q input:focus{border-color:var(--blue-600);box-shadow:0 0 0 4px rgba(20,104,220,.14)}
+.tr-q .bad{border-color:#E5484D!important;box-shadow:0 0 0 4px rgba(229,72,77,.12)!important}
+.tr-q button{height:46px}
+.tr-hint{margin:10px 0 0;font-size:13px;color:var(--muted)}.tr-hint a{color:var(--blue-600);font-weight:600;cursor:pointer}
+.tr-nf{display:flex;gap:12px;align-items:center;margin-top:14px;padding:14px 16px;border-radius:12px;background:#FFF1F1;color:#A3282C;font-size:14px}
+.tr-nf svg{width:22px;height:22px;flex:none}
+.tr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.tr-top h2{margin:0}.tr-top small{color:var(--muted)}
+.tr-st{border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:700}
+.tr-st.s0{background:#FFF4E0;color:#A86200}.tr-st.s1{background:var(--blue-50);color:var(--blue-700)}.tr-st.s2{background:#E6F6EC;color:#1C7C43}.tr-st.s3{background:#F1F3F6;color:#5B6678}
+.tr-eta{display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px 18px;border-radius:14px;background:linear-gradient(120deg,#1257C4,#2F7FEA 60%,#6AA8F7);color:#fff}
+.tr-eta svg{width:30px;height:30px;flex:none}.tr-eta small{opacity:.85;display:block}.tr-eta b{font-size:19px}
+.tr-bar{position:relative;height:6px;border-radius:9px;background:var(--line);margin:26px 8px 0}
+.tr-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:9px;background:linear-gradient(90deg,var(--blue-600),#6AA8F7);transition:width .8s cubic-bezier(.3,.9,.3,1)}
+.tr-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:-15px;text-align:center;font-size:12.5px}
+.tr-steps div{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted)}
+.tr-steps .dot{width:24px;height:24px;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center}
+.tr-steps .dot svg{width:13px;height:13px}
+.tr-steps .dn{color:var(--ink)}.tr-steps .dn .dot{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
+.tr-steps .cur .dot{box-shadow:0 0 0 6px rgba(20,104,220,.18);animation:trP 1.6s infinite}
+@keyframes trP{50%{box-shadow:0 0 0 10px rgba(20,104,220,.06)}}
+.tr-steps b{font-weight:600}.tr-steps small{font-size:11.5px}
+.tr-cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;margin-top:18px}
+.tr-log{list-style:none;margin:0;padding:0;position:relative}
+.tr-log li{position:relative;padding:0 0 16px 26px;font-size:14px}
+.tr-log li::before{content:"";position:absolute;left:5px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--blue-600)}
+.tr-log li::after{content:"";position:absolute;left:9px;top:18px;bottom:0;width:2px;background:var(--line)}
+.tr-log li:last-child::after{display:none}.tr-log li:not(:first-child)::before{background:#B9C6D8}
+.tr-log small{display:block;color:var(--muted);font-size:12.5px}
+.tr-info{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px}.tr-info span{color:var(--muted)}
+.tr-cour{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.tr-cour .av{width:42px;height:42px;border-radius:50%;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;font-weight:700}
+.tr-cour div{flex:1}.tr-cour small{color:var(--muted);display:block}
+.tr-cour a{width:40px;height:40px;border-radius:50%;background:var(--blue-600);color:#fff;display:grid;place-items:center}.tr-cour a svg{width:18px;height:18px}
+.tr-it{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tr-it:last-of-type{border-bottom:0}
+.tr-it img{width:52px;height:52px;object-fit:contain;border:1px solid var(--line);border-radius:10px;background:#fff}
+.tr-it small{color:var(--muted)}
+.tr-tot{display:flex;justify-content:space-between;border-top:1px dashed var(--line);margin-top:6px;padding-top:12px;font-weight:600}.tr-tot b{font-size:20px}
+.tr-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.tr-sms{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;margin-right:auto}.tr-sms input{width:17px;height:17px;accent-color:var(--blue-600)}
+.tr-mine{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tr-mine button{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer}.tr-mine button:hover{border-color:var(--blue-600);color:var(--blue-700)}
+.tr-res>.ip-card{margin-top:18px}
+@media (max-width:760px){.tr-q{grid-template-columns:minmax(0,1fr)}.tr-cols{grid-template-columns:minmax(0,1fr)}
+ .tr-steps{font-size:11px}.tr-steps small{display:none}}
+@media print{header,footer,.top,.ip-nav,.crumbs,.ip-hero,.tr-qc,.tr-act,.fab,.cmp-bar{display:none!important}}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  /* [ru, hy, en] */
+  const T={
+    n:['Номер заказа','Պատվերի համար','Order number'],ph:['Телефон','Հեռախոս','Phone'],go:['Отследить','Հետևել','Track'],
+    hint:['Номер есть в SMS и письме после заказа. Демо:','Համարը կա պատվերից հետո ստացված SMS-ում և նամակում։ Դեմո՝','The number is in the SMS and email you got after ordering. Demo:'],
+    mine:['Мои последние заказы:','Իմ վերջին պատվերները՝','My recent orders:'],
+    nf:['Заказ не найден. Проверьте номер (например, LED-104823) или позвоните: 010 502-802.','Պատվերը չի գտնվել։ Ստուգեք համարը (օր.՝ LED-104823) կամ զանգահարեք՝ 010 502-802։','Order not found. Check the number (e.g. LED-104823) or call 010 502-802.'],
+    order:['Заказ','Պատվեր','Order'],from:['от','','from'],
+    st:[['Обрабатывается','Մշակվում է','Processing'],['В пути','Ճանապարհին է','On the way'],['Доставлен','Առաքված է','Delivered'],['Отменён','Չեղարկված է','Cancelled']],
+    steps:[['Принят','Ընդունված','Received'],['Подтверждён','Հաստատված','Confirmed'],['Собран','Հավաքված','Packed'],['В пути','Ճանապարհին','On the way'],['Доставлен','Առաքված','Delivered']],
+    stepsP:[['Принят','Ընդունված','Received'],['Подтверждён','Հաստատված','Confirmed'],['Собран','Հավաքված','Packed'],['Готов к выдаче','Պատրաստ է','Ready'],['Выдан','Տրված է','Collected']],
+    eta:['Ожидаемая доставка','Սպասվող առաքում','Expected delivery'],etaP:['Можно забрать','Կարող եք վերցնել','Ready for pick-up'],done:['Доставлен','Առաքված է','Delivered'],doneP:['Получен','Ստացված է','Collected'],
+    cancel:['Заказ отменён','Պատվերը չեղարկված է','Order cancelled'],cancelD:['Если это ошибка — позвоните нам, восстановим заказ.','Եթե սա սխալ է՝ զանգահարեք, կվերականգնենք պատվերը։','If this is a mistake, call us and we will restore it.'],
+    hist:['История','Պատմություն','History'],det:['Детали','Մանրամասներ','Details'],items:['Товары','Ապրանքներ','Items'],total:['Итого','Ընդամենը','Total'],
+    dlv:['Получение','Ստացում','Delivery'],pay:['Оплата','Վճարում','Payment'],
+    pick:['Самовывоз — Киевян 11‑34','Ինքնատարում — Կիևյան 11‑34','Pick-up — Kievyan 11‑34'],cour:['Курьер по Еревану','Առաքիչ Երևանում','Courier, Yerevan'],
+    pays:[['Наличными','Կանխիկ','Cash'],['Картой','Քարտով','Card'],['Рассрочка','Ապառիկ','Instalments']],
+    courier:['Курьер','Առաքիչ','Courier'],hours:['Пн–Сб 10:30–19:30','Երկ–Շբթ 10:30–19:30','Mon–Sat 10:30–19:30'],
+    sms:['Сообщать об изменениях по SMS','Տեղեկացնել փոփոխությունների մասին SMS-ով','Text me when the status changes'],smsOn:['Готово: пришлём SMS','Պատրաստ է՝ կուղարկենք SMS','Done: we will text you'],
+    print:['Печать','Տպել','Print'],call:['Позвонить менеджеру','Զանգել մենեջերին','Call the manager'],acc:['Все мои заказы','Բոլոր պատվերներս','All my orders'],pcs:['шт.','հատ','pcs'],
+    ev:[['Заказ принят','Պատվերն ընդունված է','Order received'],['Менеджер подтвердил заказ','Մենեջերը հաստատեց պատվերը','Manager confirmed the order'],['Заказ собран и проверен','Պատվերը հավաքվել և ստուգվել է','Order packed and checked'],
+        ['Передан курьеру','Հանձնվել է առաքիչին','Handed to the courier'],['Доставлен, спасибо за покупку!','Առաքված է, շնորհակալություն գնման համար։','Delivered — thank you!']],
+    evP:[['Заказ принят','Պատվերն ընդունված է','Order received'],['Менеджер подтвердил заказ','Մենեջերը հաստատեց պատվերը','Manager confirmed the order'],['Заказ собран и проверен','Պատվերը հավաքվել և ստուգվել է','Order packed and checked'],
+        ['Ждёт вас в шоуруме','Սպասում է ձեզ ցուցասրահում','Waiting for you in the showroom'],['Выдан покупателю','Տրվել է գնորդին','Collected']],
+    evX:['Заказ отменён','Պատվերը չեղարկվել է','Order cancelled']
+  };
+  const L=()=>({hy:1,en:2}[document.documentElement.lang]||0),t=k=>T[k][L()],tt=a=>a[L()];
+  const fmt=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')+' ֏';
+  const ic=h=>`<svg class="i"><use href="#${h}"/></svg>`;
+  const DEMO=[
+    {n:'LED-104823',d:'2026-11-14',s:1,step:3,pay:2,dl:1,it:[['Lenovo IdeaPad Slim 3 15″','img/p2.webp',1,289000],['Logitech MX Master 3S','img/p5.webp',1,49000]]},
+    {n:'LED-104511',d:'2026-10-28',s:2,step:4,pay:1,dl:0,it:[['Samsung 990 PRO 1 TB','img/p3.webp',2,52000]]},
+    {n:'LED-104901',d:'2026-11-19',s:0,step:1,pay:1,dl:1,it:[['Xiaomi Redmi Pad SE','img/p1.webp',1,99000]]},
+    {n:'LED-103402',d:'2026-07-19',s:3,step:1,pay:1,dl:1,it:[['HP Pavilion 15','img/p2.webp',1,355000]]}];
+  const mine=()=>{try{return JSON.parse(localStorage.getItem('led-orders'))||[]}catch(e){return[]}};
+  const find=n=>{n=n.toUpperCase().replace(/\s/g,'');if(/^\d+$/.test(n))n='LED-'+n;return [...mine(),...DEMO].find(o=>o.n===n)};
+  const user=()=>{try{return JSON.parse(localStorage.getItem('led-user'))}catch(e){return null}};
+  const dt=(d,h)=>{const x=new Date(d);x.setHours(10,0,0,0);x.setMinutes(x.getMinutes()+h*60);return x};
+  const HYM=['հունվարի','փետրվարի','մարտի','ապրիլի','մայիսի','հունիսի','հուլիսի','օգոստոսի','սեպտեմբերի','հոկտեմբերի','նոյեմբերի','դեկտեմբերի'],HYW=['կիրակի','երկուշաբթի','երեքշաբթի','չորեքշաբթի','հինգշաբթի','ուրբաթ','շաբաթ'];
+  const hyD=(x,o)=>{let s=`${x.getDate()} ${o.month==='short'?HYM[x.getMonth()].slice(0,3):HYM[x.getMonth()]}`;if(o.year)s+=` ${x.getFullYear()} թ.`;if(o.weekday)s=HYW[x.getDay()]+', '+s;if(o.hour)s+=`, ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;return s};
+  const df=(x,time)=>{const o=time?{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}:{weekday:'long',day:'numeric',month:'long'};return L()===1?hyD(x,o):x.toLocaleString(['ru-RU','hy-AM','en-GB'][L()],o)};
+  let st={n:'',ph:'',o:null,nf:false,sms:false};
+  const qs=new URLSearchParams(location.search);if(qs.get('n')){st.n=qs.get('n');st.o=find(st.n)||null;st.nf=!st.o;}
+  const u0=user();if(u0&&u0.phone)st.ph=u0.phone;
+
+  function view(o){
+    const pick=o.dl===0,S=pick?T.stepsP:T.steps,E=pick?T.evP:T.ev;
+    /* step 0..4 from status: processing 0-1, on the way 3, delivered 4 */
+    const step=o.s===2?4:o.s===1?3:Math.max(0,Math.min(2,o.step||0));
+    const offs=[0,0.6,20,26,31];const tot=o.it.reduce((s,x)=>s+x[2]*x[3],0),n=o.it.reduce((s,x)=>s+x[2],0);
+    const log=o.s===3?[[tt(T.evX),dt(o.d,3)],[tt(E[0]),dt(o.d,0)]]:E.slice(0,step+1).map((e,i)=>[tt(e),dt(o.d,offs[i])]).reverse();
+    let eta=dt(o.d,offs[4]);if(o.s<2&&eta<new Date()){eta=new Date();eta.setDate(eta.getDate()+1);eta.setHours(13,0,0,0);}const slot='13:00–16:00';
+    return `<div class="ip-card"><div class="tr-top"><div><h2>${t('order')} № ${o.n}</h2><small>${t('from')} ${df(new Date(o.d))} · ${n} ${t('pcs')} · ${fmt(tot)}</small></div><span class="tr-st s${o.s}">${tt(T.st[o.s])}</span></div>
+      ${o.s===3?`<div class="tr-nf" style="background:#F1F3F6;color:#5B6678">${ic('ix-alert')}<div><b>${t('cancel')}</b><br>${t('cancelD')}</div></div>`:
+      `<div class="tr-eta">${ic(pick?'store':'truck')}<div><small>${o.s===2?(pick?t('doneP'):t('done')):(pick?t('etaP'):t('eta'))}</small><b>${df(eta)}${pick||o.s===2?'':', '+slot}</b></div></div>
+      <div class="tr-bar"><i style="width:${step/4*100}%"></i></div>
+      <div class="tr-steps">${S.map((s,i)=>`<div class="${i<=step?'dn':''}${i===step&&o.s!==2?' cur':''}"><span class="dot">${i<=step?ic('check'):''}</span><b>${tt(s)}</b>${i<=step?`<small>${df(dt(o.d,offs[i]),1)}</small>`:''}</div>`).join('')}</div>`}
+      <div class="tr-act"><label class="tr-sms"><input type="checkbox" class="tr-smsc"${st.sms?' checked':''}> <span>${st.sms?t('smsOn'):t('sms')}</span></label>
+        <a class="btn" href="tel:+37410502802">${ic('call')}${t('call')}</a><button class="btn tr-pr" type="button" style="font:inherit;cursor:pointer">${t('print')}</button></div></div>
+    <div class="tr-cols"><div class="ip-card"><h2><span class="ic">${ic('clock')}</span>${t('hist')}</h2><ul class="tr-log">${log.map(([e,d])=>`<li>${e}<small>${df(d,1)}</small></li>`).join('')}</ul></div>
+      <div class="ip-card"><h2><span class="ic">${ic('ix-info')}</span>${t('det')}</h2><div class="tr-info"><span>${t('dlv')}</span><b>${pick?t('pick'):t('cour')}</b><span>${t('pay')}</span><b>${tt(T.pays[o.pay||0])}</b></div>
+        ${!pick&&o.s===1?`<div class="tr-cour"><span class="av">ԱՄ</span><div><b>${['Арман М.','Արման Մ.','Arman M.'][L()]}</b><small>${t('courier')} · ${t('hours')}</small></div><a href="tel:+37499502802" aria-label="${t('call')}">${ic('call')}</a></div>`:''}</div></div>
+    <div class="ip-card"><h2><span class="ic">${ic('ix-box')}</span>${t('items')}</h2>${o.it.map(x=>`<div class="tr-it"><img src="${x[1]}" alt=""><div>${x[0]}<br><small>${x[2]} × ${fmt(x[3])}</small></div><b>${fmt(x[2]*x[3])}</b></div>`).join('')}
+      <div class="tr-tot"><span>${t('total')}</span><b>${fmt(tot)}</b></div>${user()?`<div class="tr-act"><a class="btn p" href="/account.html#orders">${t('acc')}</a></div>`:''}</div>`;
+  }
+  function render(){
+    const my=mine().slice(0,4);
+    document.querySelectorAll('.tr-app').forEach(app=>{
+      app.innerHTML=`<div class="ip-card tr-qc"><form class="tr-q" novalidate><label>${t('n')} *<input name="n" value="${st.n}" placeholder="LED-104823" autocomplete="off" required></label>
+        <label>${t('ph')}<input name="ph" type="tel" inputmode="tel" value="${st.ph}" placeholder="+374 __ ___ ___"></label><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${ic('truck')}${t('go')}</button></form>
+        <p class="tr-hint">${t('hint')} ${DEMO.map(o=>`<a data-n="${o.n}">${o.n}</a>`).join(', ')}</p>
+        ${my.length?`<div class="tr-mine"><small style="color:var(--muted);align-self:center">${t('mine')}</small>${my.map(o=>`<button type="button" data-n="${o.n}">${o.n}</button>`).join('')}</div>`:''}
+        ${st.nf?`<div class="tr-nf">${ic('ix-alert')}<span>${t('nf')}</span></div>`:''}</div>
+        <div class="tr-res">${st.o?view(st.o):''}</div>`;
+      const f=app.querySelector('.tr-q');
+      f.addEventListener('trk',()=>{const n=f.n.value.trim();f.n.classList.toggle('bad',!n);if(!n)return;
+        st.n=n;st.ph=f.ph.value;st.o=find(n)||null;st.nf=!st.o;history.replaceState(null,'','?n='+encodeURIComponent(st.o?st.o.n:n));render();
+        const r=document.querySelector('.ipl:not([hidden]) .tr-res .ip-card')||document.querySelector('.tr-res .ip-card');r&&r.offsetParent&&r.scrollIntoView({behavior:'smooth',block:'start'});});
+      f.n.addEventListener('input',()=>f.n.classList.remove('bad'));
+      app.querySelectorAll('[data-n]').forEach(a=>a.onclick=()=>{f.n.value=a.dataset.n;f.dispatchEvent(new Event('trk'));});
+      const sc=app.querySelector('.tr-smsc');if(sc)sc.onchange=()=>{st.sms=sc.checked;render();};
+      const pr=app.querySelector('.tr-pr');if(pr)pr.onclick=()=>print();
+    });
+  }
+  /* runs before the phone mask (phone is optional here) */
+  window.addEventListener('submit',e=>{const f=e.target.closest&&e.target.closest('.tr-q');if(!f)return;e.preventDefault();e.stopImmediatePropagation();f.dispatchEvent(new Event('trk'));},true);
+  render();
+  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+});
+</script>
+<!--@track.ru|Отследить заказ|#truck|Отследить заказ|Введите номер заказа и телефон, чтобы узнать, где сейчас ваш заказ.-->
+<div class="tr-app"></div>
+<!--@track.en|Track order|#truck|Track order|Enter your order number and phone to see where your order is.-->
+<div class="tr-app"></div>

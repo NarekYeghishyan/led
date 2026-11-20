@@ -314,7 +314,7 @@ function checkout(){
    <div class="co-num"><small>${ct('num')}</small><b>№ ${o.n}</b></div>${o.email?`<p>${ct('okP')} <b>${o.email}</b></p>`:''}
    <div class="co-next"><h3>${ct('next')}</h3><ol><li>${ic('call')}<span>${ct('n1')}</span></li><li>${ic('ix-box')}<span>${ct('n2')}</span></li><li>${ic('truck')}<span>${ct('n3')}</span></li></ol></div>
    <div class="co-sum2">${o.it.map(x=>`<div><span>${x[0]} × ${x[2]}</span><b>${fmt(x[2]*x[3])}</b></div>`).join('')}<div class="t"><span>${T.total}</span><b>${fmt(o.tot)}</b></div></div>
-   <div class="co-btns">${u?`<a class="sp-b p" href="/account.html#orders">${ct('toAcc')}</a>`:''}<a class="sp-b${u?'':' p'}" href="/category.html">${ct('cont')}</a></div><small class="co-demo">${ct('demo')}</small></div>`;return}
+   <div class="co-btns"><a class="sp-b" href="/track-order.html?n=${o.n}">${['Отследить заказ','Հետևել պատվերին','Track order'][L()]}</a>${u?`<a class="sp-b p" href="/account.html#orders">${ct('toAcc')}</a>`:''}<a class="sp-b${u?'':' p'}" href="/category.html">${ct('cont')}</a></div><small class="co-demo">${ct('demo')}</small></div>`;return}
  const v=S.get('cart').map(item),n=v.reduce((s,x)=>s+x.q,0);
  if(!v.length){root.innerHTML=head('cart',ct('h'),'')+empty('cart',T.emptyCart,T.emptyCartP);return}
  if(u&&!co.u){co.u=1;co.name=co.name||u.fname||'';co.email=co.email||u.email||'';co.phone=co.phone||u.phone||'';if(u.type==='dealer'||u.type==='corporate'){co.who='com';co.cname=u.company||u.law_name||u.dealer_company||'';co.tax=u.taxcode||''}if(u.city)co.city=u.city;if(u.address)co.adr=u.address}
@@ -323,7 +323,7 @@ function checkout(){
  const fee={pick:0,cour:goods>=FREE?0:1000,reg:2500}[ship],tot=goods-d+fee,m=+(co.m||24);
  const val=k=>(co[k]||'').replace(/"/g,'&quot;');
  const F=(k,l,ty='text',w='',ex='')=>`<label class="${w}">${l} *<input name="${k}" type="${ty}" value="${val(k)}" required${ty==='tel'?' inputmode="tel" autocomplete="tel"':''}${ex}></label>`;
- const days=[0,1,2,3,4].map(i=>{const dt=new Date();dt.setDate(dt.getDate()+i+1);return [i,i===0?ct('tomorrow'):dt.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{weekday:'short',day:'numeric',month:'short'})]});
+ const days=[0,1,2,3,4].map(i=>{const dt=new Date();dt.setDate(dt.getDate()+i+1);return [i,i===0?ct('tomorrow'):(L()===1?['կիր','երկ','երք','չրք','հնգ','ուրբ','շբթ'][dt.getDay()]+', '+dt.getDate()+' '+['հնվ','փտվ','մրտ','ապր','մյս','հնս','հլս','օգս','սպտ','հկտ','նյմ','դկտ'][dt.getMonth()]:dt.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{weekday:'short',day:'numeric',month:'short'}))]});
  const adrs=(()=>{try{return JSON.parse(localStorage.getItem('led-adr'))||[]}catch(e){return[]}})();
  const PAY=[['cash','ix-wallet'],['card','card'],['idram','phone'],['inst','doc'],...(who==='com'?[['bank','store']]:[])];
  root.innerHTML=head('ix-box',ct('h'),`${n} ${T.items} · ${fmt(tot)}`,`<div class="sp-steps"><a href="/cart.html" class="on" style="display:flex;gap:6px;align-items:center;color:inherit;text-decoration:none"><i>✓</i>${T.cart}</a><b></b><span class="on"><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+

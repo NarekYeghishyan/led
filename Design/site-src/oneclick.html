@@ -55,7 +55,7 @@ body.oc-lock{overflow:hidden}
   const render=()=>{if(!st)return;const tot=st.items.reduce((s,x)=>s+x.p*x.q,0);
     if(st.done){const u=user();el.innerHTML=`<div class="oc-box"><button class="oc-x" type="button" aria-label="${t('close')}">✕</button><div class="oc-ok"><div class="art"><svg class="i"><use href="#check"/></svg></div>
       <h3>${t('ok')}</h3><p>${t('okP')} <b>${st.phone}</b> ${t('okT')}</p><div class="n">${t('num')} № ${st.done}</div>
-      <div class="bt">${u?`<a class="p" href="/account.html#orders">${t('acc')}</a>`:''}<button type="button" class="oc-cl${u?'':' p'}">${t('close')}</button></div><p style="font-size:12px;margin-top:14px">${t('demo')}</p></div></div>`;return}
+      <div class="bt"><a href="/track-order.html?n=${st.done}">${['Отследить','Հետևել','Track'][L()]}</a>${u?`<a class="p" href="/account.html#orders">${t('acc')}</a>`:''}<button type="button" class="oc-cl${u?'':' p'}">${t('close')}</button></div><p style="font-size:12px;margin-top:14px">${t('demo')}</p></div></div>`;return}
     el.innerHTML=`<div class="oc-box"><button class="oc-x" type="button" aria-label="${t('close')}">✕</button>
     <div class="oc-hd"><h3><span class="ic"><svg class="i"><use href="#call"/></svg></span>${t('h')}</h3><p>${t('p')}</p></div>
     <div class="oc-its">${st.items.map((x,i)=>`<div class="oc-it"><img src="${x.img}" alt=""><div><span class="nm">${x.t}</span>

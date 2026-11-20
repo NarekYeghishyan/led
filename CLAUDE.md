@@ -250,3 +250,10 @@ stock and prices from the Access sync. Until then the templates are design refer
   Phone fixes (`responsive.html`): call button moves above the compare bar (bar now full width) instead of covering its button; compare
   table's sticky product row uses the real header height (`--hdr`, set by JS; phones 127px — was 84px, left a blank strip); prices never wrap
   (֏ on its own line); footer on phones = brand block full width + two equal columns (right column was squeezed). Backup `led-static-backup-20261120zy.tgz`. Published.
+- 2026-11-20 — New page `track-order.html` (Պատվերի կարգավիճակ / Отследить заказ), HY/RU/EN, in the Help menu and info sidebar. Order
+  number (accepts `104823` or `LED-104823`) + optional phone → status badge, expected date/slot card, 5-step progress bar (pick-up orders:
+  "Ready"/"Collected"), history log with times, details (delivery, payment, courier with call button while on the way), items + total,
+  "SMS me" toggle, call manager, print. Finds orders from `led-orders` (checkout / 1-click) + 4 demo orders (LED-104823 on the way,
+  LED-104511 delivered, LED-104901 processing, LED-103402 cancelled); "not found" message otherwise; `?n=` in the URL. "Track" links on
+  account orders, checkout success, 1-click success. Its form runs before the phone mask (phone optional). Armenian dates are formatted by
+  hand (browsers lack hy-AM month names) — also in account and checkout. Source `site-src/track_content.html`. Backup `led-static-backup-20261120zz.tgz`. Published.
