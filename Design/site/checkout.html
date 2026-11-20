@@ -1526,6 +1526,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -1785,6 +1800,11 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 .sp-row .mt button{background:none;border:0;padding:0;font:inherit;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px}
 .sp-row .mt button:hover{color:var(--blue-600)}.sp-row .mt button.rm:hover{color:#E5484D}.sp-row .mt svg{width:15px;height:15px}
 .sp-ok{color:var(--success);font-weight:600;font-size:12.5px}
+.sp-ctl{display:flex;align-items:center;gap:10px}
+.sp-row .sp-del{width:40px;height:40px;display:grid;place-items:center;padding:0;border-radius:10px;border:1px solid #F6D3D3;background:#FEF2F2;color:#DC2626;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s}
+.sp-row .sp-del svg{width:18px;height:18px}
+.sp-row .sp-del:hover{background:#DC2626;border-color:#DC2626;color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px rgba(220,38,38,.28)}
+.sp-row .sp-del:active{transform:none}
 .sp-qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;height:40px}
 .sp-qty button{width:36px;height:100%;border:0;background:none;font-size:18px;cursor:pointer;color:var(--ink)}.sp-qty button:hover{color:var(--blue-600)}
 .sp-qty span{min-width:28px;text-align:center;font-weight:700}
@@ -1865,7 +1885,7 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 .sp-empty .art svg{width:54px;height:54px;color:var(--blue-600)}.sp-empty h2{margin:0 0 8px}.sp-empty p{color:var(--muted);margin:0 auto 20px;max-width:420px}
 @keyframes spFloat{50%{transform:translateY(-8px)}}
 @media(max-width:1100px){.sp-cart{grid-template-columns:1fr}.sp-side{position:static}.sp-fgrid{grid-template-columns:repeat(3,1fr)}.sp-mini{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.sp-fgrid{grid-template-columns:repeat(2,1fr)}.sp-opts{grid-template-columns:1fr}.sp-row{grid-template-columns:72px 1fr;gap:12px}.sp-row .im{width:72px;height:64px}.sp-row .sp-qty{grid-column:2}.sp-row .sp-sum{grid-column:2;text-align:left}.sp-ct col.lab{width:130px}.sp-head h1{font-size:26px}.sp-mini{grid-template-columns:1fr}}
+@media(max-width:760px){.sp-fgrid{grid-template-columns:repeat(2,1fr)}.sp-opts{grid-template-columns:1fr}.sp-row{grid-template-columns:72px 1fr;gap:12px}.sp-row .im{width:72px;height:64px}.sp-row .sp-ctl{grid-column:2}.sp-row .sp-sum{grid-column:2;text-align:left}.sp-ct col.lab{width:130px}.sp-head h1{font-size:26px}.sp-mini{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.sp-f,.sp-pc,.sp-empty .art{animation:none}}
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1948,8 +1968,8 @@ function cart(){const v=S.get('cart').map(item),n=v.reduce((s,x)=>s+x.q,0);
   <div class="sp-card sp-free">${ic('sp-truck')}<div><small>${left?`${T.freeLeft} <b>${fmt(left)}</b>`:`<b>${T.freeOk}</b>`}</small><div class="sp-bar"><i style="width:${Math.min(100,goods/FREE*100)}%"></i></div></div></div>
   <div class="sp-card sp-list">${v.map(x=>`<div class="sp-row" data-id="${x.id}"><a class="im" href="/product.html"><img src="${x.img}" alt=""></a>
    <div><span class="sp-ok">● ${T.inStock}</span><h4><a href="/product.html">${x.t}</a></h4><div class="sp">${x.spec}</div>
-    <div class="mt"><button class="tf">${ic(S.has('fav',x.id)?'heart':'heart')}${S.has('fav',x.id)?T.inFav:T.toFav}</button><button class="rm">${ic('sp-trash')}${T.del}</button></div></div>
-   <div class="sp-qty"><button data-d="-1" aria-label="−">−</button><span>${x.q}</span><button data-d="1" aria-label="+">+</button></div>
+    <div class="mt"><button class="tf">${ic(S.has('fav',x.id)?'heart':'heart')}${S.has('fav',x.id)?T.inFav:T.toFav}</button></div></div>
+   <div class="sp-ctl"><button class="rm sp-del" title="${T.del}" aria-label="${T.del}">${ic('sp-trash')}</button><div class="sp-qty"><button data-d="-1" aria-label="−">−</button><span>${x.q}</span><button data-d="1" aria-label="+">+</button></div></div>
    <div class="sp-sum"><b>${fmt(x.p*x.q)}</b>${x.o?`<s>${fmt(x.o*x.q)}</s>`:''}${x.q>1?`<small>${fmt(x.p)} ${T.each}</small>`:''}</div></div>`).join('')}</div>
   <div class="sp-card sp-dl"><h3>${T.dl}</h3><div class="sp-opts">${[['pick','sp-store',T.pickS,0],['cour','sp-truck',T.courS,goods>=FREE?0:1000],['reg','sp-map',T.regS,2500]].map(([k,i,s,f])=>
    `<label class="sp-opt${ship===k?' on':''}"><input type="radio" name="ship" value="${k}"${ship===k?' checked':''}>${ic(i)}<span><b>${T[k]}</b><small>${s} · ${f?fmt(f):T.free}</small></span></label>`).join('')}</div></div>
@@ -2307,7 +2327,7 @@ document.addEventListener('submit',e=>{const bad=[...e.target.querySelectorAll(s
 </style><script>
 (function(){
 const P='.bsum button,.search button,.btn.p,.addc,.sp-b.p,.asm-b.p,.add,.prod .cart,.loadmore,#sAdd,.mi-act .det';
-const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec-act button,.sb,.sl-arr,.sp-seg button:not(.on),.stage .nav,.sp-qty button,.asm-q button,.asm-row .x,.sp-f .ht,.sp-f .cb,.sp-pc .x,.sp-promo button,.view button:not(.on),.fbtn,.tf,.rm';
+const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec-act button,.sb,.sl-arr,.sp-seg button:not(.on),.stage .nav,.sp-qty button,.asm-q button,.asm-row .x,.sp-f .ht,.sp-f .cb,.sp-pc .x,.sp-promo button,.view button:not(.on),.fbtn,.tf,.rm:not(.sp-del)';
 const skip=el=>el.closest('#stubs,.catbtn,.fab,.lang')||el.classList.contains('catbtn');
 function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pri&&!el.matches(S))return null;el._fx=1;
  if(getComputedStyle(el).position==='static')el.style.position='relative';

@@ -31,7 +31,7 @@
 </style><script>
 (function(){
 const P='.bsum button,.search button,.btn.p,.addc,.sp-b.p,.asm-b.p,.add,.prod .cart,.loadmore,#sAdd,.mi-act .det';
-const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec-act button,.sb,.sl-arr,.sp-seg button:not(.on),.stage .nav,.sp-qty button,.asm-q button,.asm-row .x,.sp-f .ht,.sp-f .cb,.sp-pc .x,.sp-promo button,.view button:not(.on),.fbtn,.tf,.rm';
+const S='.btn:not(.p),.sp-b:not(.p),.asm-b:not(.p),.cmpb,.morebtn,.oneclick,.sec-act button,.sb,.sl-arr,.sp-seg button:not(.on),.stage .nav,.sp-qty button,.asm-q button,.asm-row .x,.sp-f .ht,.sp-f .cb,.sp-pc .x,.sp-promo button,.view button:not(.on),.fbtn,.tf,.rm:not(.sp-del)';
 const skip=el=>el.closest('#stubs,.catbtn,.fab,.lang')||el.classList.contains('catbtn');
 function prep(el){if(el._fx||skip(el))return null;const pri=el.matches(P);if(!pri&&!el.matches(S))return null;el._fx=1;
  if(getComputedStyle(el).position==='static')el.style.position='relative';
