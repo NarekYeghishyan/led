@@ -49,6 +49,25 @@ function SyncBadge({ s }: { s: Stats }) {
 
 // ------------------------------------------------------------------ Dashboard
 
+const TILE_ICONS = {
+  box: <><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z" /><path d="m3 8 9 5 9-5M12 13v8" /></>,
+  check: <><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></>,
+  alert: <><path d="M12 3 2 20h20L12 3Z" /><path d="M12 10v4M12 17h.01" /></>,
+  grid: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
+  trash: <><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></>,
+};
+
+function Tile({ to, icon, tone, value, label }: { to: string; icon: keyof typeof TILE_ICONS; tone?: 'ok' | 'warn' | 'bad'; value: string; label: string }) {
+  return (
+    <Link to={to} className={`tile${tone ? ` tile-${tone}` : ''}`}>
+      <span className="tile-ic" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{TILE_ICONS[icon]}</svg>
+      </span>
+      <span className="tile-body"><b>{value}</b><span>{label}</span></span>
+    </Link>
+  );
+}
+
 export function DashboardPage() {
   const { t, fmt } = useT();
   const { data: s, error } = useData<Stats>('/admin/stats', 10000);
@@ -58,11 +77,11 @@ export function DashboardPage() {
       {error && <div className="error">{error}</div>}
       {s && (
         <div className="tiles">
-          <Link to="/products" className="tile"><b>{fmt.num(s.products, 0)}</b><span>{t('dash.products')}</span></Link>
-          <Link to="/products?stock=in" className="tile"><b>{fmt.num(s.inStock, 0)}</b><span>{t('dash.inStock')}</span></Link>
-          <Link to="/products?stock=out" className="tile"><b>{fmt.num(s.outOfStock, 0)}</b><span>{t('dash.outOfStock')}</span></Link>
-          <Link to="/categories" className="tile"><b>{fmt.num(s.categories, 0)}</b><span>{t('dash.categories')}</span></Link>
-          <Link to="/products?deleted=1" className="tile"><b>{fmt.num(s.deleted, 0)}</b><span>{t('dash.deleted')}</span></Link>
+          <Tile to="/products" icon="box" value={fmt.num(s.products, 0)} label={t('dash.products')} />
+          <Tile to="/products?stock=in" icon="check" tone="ok" value={fmt.num(s.inStock, 0)} label={t('dash.inStock')} />
+          <Tile to="/products?stock=out" icon="alert" tone="warn" value={fmt.num(s.outOfStock, 0)} label={t('dash.outOfStock')} />
+          <Tile to="/categories" icon="grid" value={fmt.num(s.categories, 0)} label={t('dash.categories')} />
+          <Tile to="/products?deleted=1" icon="trash" tone="bad" value={fmt.num(s.deleted, 0)} label={t('dash.deleted')} />
         </div>
       )}
       <p className="muted">{t('dash.note')}</p>

@@ -84,3 +84,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Admin sidebar uses the site palette: navy `#0E1A2E` with a soft blue glow, brand blue `#1468DC` accent and
   active menu item. Logo sits on a white card and links to the dashboard; the "Computers" text next to it is gone.
 - 2026-11-20 — Admin login page: same navy + blue glows background, white form card, blue focus ring and button. Deployed.
+- 2026-11-20 — Admin dashboard tiles use the site card style (14px radius, soft shadow, tinted icon box, hover lift; green/amber/red
+  tones for in stock / out of stock / deleted). Admin light palette = site tokens (`--bg #F3F7FA`, `--line #E3E9F1`). Deployed.
