@@ -202,3 +202,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Info pages now in HY/RU/EN: page bodies switch with the language buttons (`.ipl[data-l]` blocks, page title follows).
   RU/EN text from old led.am/ru and /en, in `site-src/info_content_i18n.html` (block key `<page>.ru` / `<page>.en`); build asserts all 3 exist.
   Backup `led-static-backup-20261120zp.tgz`. Published.
+- 2026-11-20 — Exchange page (HY): added the RU/EN rule that single-use-packaging goods and goods unusable once opened (cartridges, cleaning products) are not exchangeable. Backup `led-static-backup-20261120zq.tgz`. Published.
