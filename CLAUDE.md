@@ -145,3 +145,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   banners get a white glow. All in `site-src/card_fx.html`. Backup `led-static-backup-20261120w.tgz`. Published.
 - 2026-11-20 — Fix: hover-effect spans are now appended at the END of buttons/cards (page scripts use `querySelector('span')`, e.g. product
   "add to cart" wrote ✓ into the effect span). Magnetic pull halved. **Effect markup must never be the first child.** Backup `led-static-backup-20261120x.tgz`. Published.
+- 2026-11-20 — Product gallery: main photo (`.stage`) gets spotlight + border glow + slow sweep + slight zoom/parallax (all off while click-zoom
+  is on); thumbnails lift, glow and zoom their image; prev/next arrows get the secondary button effect. Fix: `.fx` no longer forces
+  `position:relative` (broke absolutely placed buttons). Backup `led-static-backup-20261120y.tgz`. Published.
