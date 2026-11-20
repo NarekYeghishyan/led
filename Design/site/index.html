@@ -1823,6 +1823,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2372,7 +2387,22 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
 .rg-alt{margin:18px 0 0;font-size:14px;color:var(--muted)}
 .rg-alt a{color:var(--blue-600);font-weight:600}
 @media (max-width:1000px){.ip{grid-template-columns:1fr}.ip-nav{position:static}.ip-stats,.ip-cc{grid-template-columns:repeat(2,1fr)}.ip-2,.ip-pay{grid-template-columns:1fr}}
-@media (max-width:1000px){.ip:has(.lg-w)>.ip-nav{order:2}}
+@media (max-width:1000px){.ip:has(.lg-w)>.ip-nav,.ip:has(.ip-form.rg)>.ip-nav{order:2}}
+@media (max-width:600px){
+ .ip:has(.ip-form.rg) .ip-hero{padding:18px 20px;flex-direction:row!important;align-items:center!important;gap:14px}
+ .ip:has(.ip-form.rg) .ip-hero .ic{width:48px;height:48px;border-radius:14px}.ip:has(.ip-form.rg) .ip-hero .ic svg{width:24px;height:24px}
+ .ip:has(.ip-form.rg) .ip-hero h1{font-size:21px!important;margin:0}.ip:has(.ip-form.rg) .ip-hero p{display:none}
+ .ip-card:has(.ip-form.rg){padding:18px 16px}
+ .ip-form.rg{gap:12px}
+ .ip-form.rg .rg-h{font-size:13.5px;margin:12px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+ .ip-form.rg .rg-h:first-child{padding-top:0;border-top:0}
+ .ip-form.rg input,.ip-form.rg select{padding:13px 14px;width:100%;box-sizing:border-box;min-width:0}
+ .ip-form.rg .row{gap:10px}
+ .ip-form.rg .row .btn{flex:1 1 100%;order:-1;justify-content:center;text-align:center;min-height:50px;font-size:16px}
+ .ip-form.rg .row small{flex:1 1 100%;text-align:center}
+ .ip-form.rg .ip-ok{flex:1 1 100%;justify-content:center}
+}
+
 @media (max-width:600px){
  .ip-form input,.ip-form select,.ip-form textarea{font-size:16px}
  .lg-w{gap:14px!important}.lg-w .ip-form{gap:14px}

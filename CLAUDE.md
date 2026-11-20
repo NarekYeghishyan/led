@@ -292,3 +292,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Cart phones (≤600px): smaller title, item row = photo | name/spec (2 lines) on top, delete+qty and price on one line under it,
   full-width checkout buttons, upsell one per row. Login phones: the help sidebar moves below the form (≤1000px, `.ip:has(.lg-w)`), compact
   hero, big full-width "Log in"/"Register" buttons, 16px inputs on all info forms (no iOS zoom). Backup `led-static-backup-20261121n.tgz`. Published.
+- 2026-11-21 — Registration phones: help sidebar below the form (≤1000px), compact hero, section headings separated by lines, bigger
+  inputs, full-width "Register" button first in its row. Backup `led-static-backup-20261121o.tgz`. Published.
