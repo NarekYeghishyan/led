@@ -140,3 +140,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Product cards (`.prod`, all pages): cursor spotlight + blue border glow that follows the cursor, light sweep over the photo,
   photo parallax, badge wiggle, price turns darker blue (`site-src/card_fx.html`, added by `build_shop.py`; spans `.pc-g/.pc-b/.pc-sh` added on
   first hover). Backup `led-static-backup-20261120v.tgz`. Published.
+- 2026-11-20 — Same hover language extended to tiles (`.t` trust, `.feats>div`, `.brands a`, mega-menu `.mh`, `.c`) and banners (`.promo`,
+  `.build`, `.credit`, `.b2b`): spotlight + border glow following the cursor, light sweep (slower on banners), icon/visual parallax; dark
+  banners get a white glow. All in `site-src/card_fx.html`. Backup `led-static-backup-20261120w.tgz`. Published.
