@@ -193,3 +193,9 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Mega menu fits the screen: `.mega-in` max-height = viewport minus its top (`--mtop`, set by JS on scroll/hover), only the
   category list (`.mega-g`) scrolls, "Popular"/"Brands" row stays visible at the bottom (`<!--mega-fit-->` in card_fx.html). Backup `led-static-backup-20261120zm.tgz`. Published.
 - 2026-11-20 — Compare: column head hover glow no longer hugs the content edge (`.sp-pc.pc` padding 10px + margin -10px). Backup `led-static-backup-20261120zn.tgz`. Published.
+- 2026-11-20 — Info pages from old led.am (Armenian text, restyled): `credit.html` (Ապառիկ), `about.html`, `how-to-buy.html`, `how-to-order.html`,
+  `how-to-pay.html`, `delivery.html`, `warranty.html`, `exchange.html`, `contacts.html` (cards, Google map, form with department select — demo
+  submit). Top bar on every page = Ապառիկ · Մեր մասին · Օգնություն ▾ (6 help pages) · Կոնտակտներ; footer "Покупателям" items and old led.am
+  help/contacts links point to the new pages. Sidebar menu + breadcrumb built by JS. Sources `site-src/info_content.html` (bodies, one
+  `<!--@key|title|icon|h1|lead-->` block per page) and `site-src/info_shared.html` (CSS/JS, HY/RU/EN for chrome only; page bodies are HY).
+  Built by `build_shop.py`. Old-site client/partner logos are 404 on led.am, so not used. Backup `led-static-backup-20261120zo.tgz`. Published.
