@@ -126,3 +126,7 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-20 — Category: price slider/inputs now filter the cards (by `.pr b` price, live; empty-state text; count updates; "Reset" clears it).
   Product page: reviews rating bars renamed `.bars` → `.rbars` — the old name broke the "Կատալոգ" button's hamburger icon.
   **Don't reuse the class `.bars` — it belongs to the catalog button.** Backup `led-static-backup-20261120r.tgz`. Published.
+- 2026-11-20 — Category: all filters work on the cards: spec checkboxes in `#dynF` (now carry `data-g`/`data-v` = RU value; OR inside a group,
+  AND between groups; matched against card text, ГБ/ТБ/Вт normalised, "Встроенная"/"Без ОС" special-cased), "in stock" and "instalment"
+  toggles, price. Counts next to each value are real, toolbar chips show active filters (✕ removes), "Reset" clears all. Demo cards only.
+  Backup `led-static-backup-20261120s.tgz`. Published.

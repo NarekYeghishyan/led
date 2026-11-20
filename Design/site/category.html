@@ -903,7 +903,7 @@ function render(){const l=L();
  document.getElementById('catTitle').textContent=nm(c[0]);document.getElementById('catCount').textContent=c[2];
  document.getElementById('crGroup').textContent=nm(g[0]);document.getElementById('crLeaf').textContent=nm(c[0]);
  const groups=[['brand',BR[key].map(b=>[b,b,b])],...F[key]];
- document.getElementById('dynF').innerHTML=groups.map(([gk,vals],i)=>`<details ${i<3?'open':''} style="animation-delay:${i*40}ms"><summary>${G[gk][l]}</summary>${vals.map((v,k)=>`<label class="ck"><input type="checkbox"><span>${v[l]}</span><em>${7+((k*37+i*13)%60)}</em></label>`).join('')}</details>`).join('');
+ document.getElementById('dynF').innerHTML=groups.map(([gk,vals],i)=>`<details ${i<3?'open':''} style="animation-delay:${i*40}ms"><summary>${G[gk][l]}</summary>${vals.map((v,k)=>`<label class="ck"><input type="checkbox" data-g="${gk}" data-v="${v[0]}"><span>${v[l]}</span><em>${7+((k*37+i*13)%60)}</em></label>`).join('')}</details>`).join('');
 }
 document.getElementById('tree').addEventListener('click',e=>{const a=e.target.closest('[data-c]'),h=e.target.closest('.tg-h');e.preventDefault();
  if(a){cur=[+a.dataset.g,+a.dataset.c];render();}else if(h){h.parentElement.classList.toggle('open')}});
@@ -960,17 +960,38 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 const f=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '),num=s=>+String(s).replace(/\D/g,'')||0;
 function paint(){bar.style.left=a.value/M*100+'%';bar.style.width=(b.value-a.value)/M*100+'%';mn.value=f(a.value);mx.value=f(b.value)}
 const grid=document.querySelector('.cgrid3');let em=null,cnt=document.getElementById('catCount'),cnt0=cnt&&cnt.textContent;
+const norm=s=>' '+s.toLowerCase().replace(/[\u00a0\u2011\u2010]/g,m=>m=='\u00a0'?' ':'-').replace(/гб/g,'gb').replace(/тб/g,'tb').replace(/вт/g,'w').replace(/″|"/g,'')+' ';
+const SPECIAL={'встроенная':/iris|uhd|radeon graphics|780m|intel arc|встро/,'без ос':/freedos|без ос|no os/};
+function match(c,v){const x=c._t||(c._t=norm(c.textContent)),q=norm(v).trim();const sp=SPECIAL[q];if(sp)return sp.test(x);
+ if(/^\d+(\.\d+)? (gb|tb|w)/.test(q)){return new RegExp('(^|[^\d.])'+q.replace('.','\.').replace(' ','\s?')).test(x)}return x.includes(q)}
+const aside=document.querySelector('.filters'),tg=aside?[...aside.querySelectorAll('.tg input')]:[];
 function filt(){if(!grid)return;let n=0;const lo=+a.value,hi=+b.value>=M?Infinity:+b.value;
- grid.querySelectorAll('.prod').forEach(c=>{const pb=c.querySelector('.pr b'),p=pb?+pb.textContent.replace(/\D/g,''):0,ok=!p||(p>=lo&&p<=hi);c.style.display=ok?'':'none';if(ok)n++});
+ const groups={};aside.querySelectorAll('#dynF input:checked').forEach(i=>(groups[i.dataset.g]=groups[i.dataset.g]||[]).push(i.dataset.v));
+ const stockOnly=tg[0]&&tg[0].checked,instOnly=tg[1]&&tg[1].checked,cards=[...grid.querySelectorAll('.prod')];
+ const okBase=c=>{const pb=c.querySelector('.pr b'),p=pb?+pb.textContent.replace(/\D/g,''):0;
+  if(p&&(p<lo||p>hi))return false;if(stockOnly&&!/налич|առկա|in stock/i.test(c.querySelector('.stock')?.textContent||''))return false;
+  if(instOnly&&!c.querySelector('.mo'))return false;return true};
+ const okG=(c,skip)=>Object.entries(groups).every(([g,vs])=>g===skip||vs.some(v=>match(c,v)));
+ cards.forEach(c=>{const ok=okBase(c)&&okG(c);c.style.display=ok?'':'none';if(ok)n++});
+ aside.querySelectorAll('#dynF input').forEach(i=>{const em2=i.parentElement.querySelector('em');if(em2)em2.textContent=cards.filter(c=>okBase(c)&&okG(c,i.dataset.g)&&match(c,i.dataset.v)).length});
  if(!em){em=document.createElement('p');em.className='pr-empty';em.style.cssText='grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;margin:0';grid.appendChild(em)}
- em.textContent=document.documentElement.lang==='hy'?'Այս գնային միջակայքում ապրանքներ չկան':document.documentElement.lang==='en'?'No products in this price range':'В этом диапазоне цен товаров нет';
- em.style.display=n?'none':'';const all=lo<=0&&hi===Infinity;if(cnt)cnt.textContent=all?cnt0:n}
+ const lg=document.documentElement.lang;
+ em.textContent=lg==='hy'?'Ընտրված ֆիլտրերով ապրանքներ չկան':lg==='en'?'No products match these filters':'По выбранным фильтрам товаров нет';
+ em.style.display=n?'none':'';if(cnt)cnt.textContent=n;
+ const ch=document.querySelector('.toolbar .chips');if(ch){const lab=k=>({hy:1,en:2}[lg]||0);
+  const chips=[];if(lo>0||hi!==Infinity)chips.push(['price','',f(lo)+' — '+(hi===Infinity?'∞':f(hi))+' ֏']);
+  aside.querySelectorAll('#dynF input:checked').forEach(i=>chips.push(['ck',i.dataset.g+'|'+i.dataset.v,i.parentElement.querySelector('span').textContent]));
+  ch.innerHTML=chips.map(([k,v,txt])=>`<span data-k="${k}" data-v="${v}">${txt} <i>✕</i></span>`).join('')}}
+document.querySelector('.toolbar .chips')?.addEventListener('click',e=>{const s=e.target.closest('[data-k]');if(!s)return;
+ if(s.dataset.k==='price'){a.value=0;b.value=M;paint()}else{const [g,v]=s.dataset.v.split('|');aside.querySelectorAll('#dynF input').forEach(i=>{if(i.dataset.g===g&&i.dataset.v===v)i.checked=false})}filt()});
+aside&&aside.addEventListener('change',e=>{if(e.target.matches('#dynF input,.tg input'))filt()});
+new MutationObserver(()=>{grid&&grid.querySelectorAll('.prod').forEach(c=>c._t=null);filt()}).observe(document.getElementById('dynF'),{childList:true});
 let ft;const run=()=>{clearTimeout(ft);ft=setTimeout(filt,120)};
 a.oninput=()=>{if(+a.value>b.value-G)a.value=b.value-G;a.style.zIndex=3;b.style.zIndex=2;paint();run()};
 b.oninput=()=>{if(+b.value<+a.value+G)b.value=+a.value+G;b.style.zIndex=3;a.style.zIndex=2;paint();run()};
 mn.onchange=()=>{a.value=Math.min(num(mn.value),b.value-G);paint();filt()};mx.onchange=()=>{b.value=Math.max(Math.min(num(mx.value),M),+a.value+G);paint();filt()};
-document.getElementById('fReset')?.addEventListener('click',()=>{a.value=0;b.value=M;paint();filt()});
-new MutationObserver(()=>em&&filt()).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+document.getElementById('fReset')?.addEventListener('click',e=>{e.preventDefault();a.value=0;b.value=M;paint();aside.querySelectorAll('#dynF input').forEach(i=>i.checked=false);tg.forEach((i,k)=>i.checked=k===0);filt()});
+new MutationObserver(()=>{grid&&grid.querySelectorAll('.prod').forEach(c=>c._t=null);em&&filt()}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 paint();filt()})();</script><!--/dual-range--><!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
