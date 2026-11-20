@@ -274,3 +274,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   the brand page (`search_box.html`). Fix: order tracking progress line now runs from the first to the last dot centre and sits under the
   dots (was drawn over the current dot and misaligned). Backup `led-static-backup-20261121b.tgz`. Published.
 - 2026-11-21 — Hand cursor on range sliders (`input[type=range]`, e.g. credit/instalment term slider) via the cursor rule in `card_fx.html`. Backup `led-static-backup-20261121c.tgz`. Published.
+- 2026-11-21 — Compare: sticky product row `top:0` (its sticky container is the horizontal scroller `.sp-cmpw`; the header offset left a blank strip). Favourites: "Share list" button removed. Backup `led-static-backup-20261121d.tgz`. Published.

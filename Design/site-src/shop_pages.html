@@ -547,7 +547,7 @@ function fav(){let v=S.get('fav').map(item).reverse();
  if(fsort===1)v.sort((a,b)=>a.p-b.p);if(fsort===2)v.sort((a,b)=>b.p-a.p);
  const sum=v.reduce((s,x)=>s+x.p,0);
  root.innerHTML=head('heart',T.fav,`${v.length} ${T.items} · ${T.favTotal} ${fmt(sum)}`,
-  `<div class="sp-seg">${[T.sAdded,T.sCheap,T.sExp].map((t,i)=>`<button data-s="${i}" class="${i===fsort?'on':''}">${t}</button>`).join('')}</div><button class="sp-b" id="spShare">${ic('sp-share')}${T.share}</button><button class="sp-b p" id="spAll">${ic('cart')}${T.allCart}</button>`)+
+  `<div class="sp-seg">${[T.sAdded,T.sCheap,T.sExp].map((t,i)=>`<button data-s="${i}" class="${i===fsort?'on':''}">${t}</button>`).join('')}</div><button class="sp-b p" id="spAll">${ic('cart')}${T.allCart}</button>`)+
  `<div class="sp-fgrid">${v.map((x,i)=>{const inC=S.has('cart',x.id),cm=S.has('cmp',x.id);
   return `<div class="sp-card sp-f" data-id="${x.id}" style="animation-delay:${i*45}ms">${x.o?`<span class="drop">${T.drop} ${fmt(x.o-x.p)}</span>`:''}
    <button class="ht" aria-label="${T.del}">${ic('heart')}</button><button class="cb${cm?' on':''}" aria-label="${T.cmp}">${ic('cmp')}</button>

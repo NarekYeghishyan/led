@@ -76,7 +76,8 @@ img,video{max-width:100%}
   .top .tl.cr{font-size:12.5px}
 }
 /* compare: sticky product row sits right under the real header height (taller on phones) */
-.sp-ct thead td,.sp-ct thead th{top:var(--hdr,84px)!important}
+/* the table sits in a horizontal scroller (.sp-cmpw), which is its sticky container — any top offset left a blank strip */
+.sp-ct thead td,.sp-ct thead th{top:0!important}
 .sp-pc b,.sp-pc s,.sp-f b,.pr b,.sp-sum b{white-space:nowrap}
 @media (max-width:600px){
   /* footer: brand block full width, then two equal columns */

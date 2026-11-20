@@ -1511,6 +1511,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2187,7 +2202,7 @@ function fav(){let v=S.get('fav').map(item).reverse();
  if(fsort===1)v.sort((a,b)=>a.p-b.p);if(fsort===2)v.sort((a,b)=>b.p-a.p);
  const sum=v.reduce((s,x)=>s+x.p,0);
  root.innerHTML=head('heart',T.fav,`${v.length} ${T.items} · ${T.favTotal} ${fmt(sum)}`,
-  `<div class="sp-seg">${[T.sAdded,T.sCheap,T.sExp].map((t,i)=>`<button data-s="${i}" class="${i===fsort?'on':''}">${t}</button>`).join('')}</div><button class="sp-b" id="spShare">${ic('sp-share')}${T.share}</button><button class="sp-b p" id="spAll">${ic('cart')}${T.allCart}</button>`)+
+  `<div class="sp-seg">${[T.sAdded,T.sCheap,T.sExp].map((t,i)=>`<button data-s="${i}" class="${i===fsort?'on':''}">${t}</button>`).join('')}</div><button class="sp-b p" id="spAll">${ic('cart')}${T.allCart}</button>`)+
  `<div class="sp-fgrid">${v.map((x,i)=>{const inC=S.has('cart',x.id),cm=S.has('cmp',x.id);
   return `<div class="sp-card sp-f" data-id="${x.id}" style="animation-delay:${i*45}ms">${x.o?`<span class="drop">${T.drop} ${fmt(x.o-x.p)}</span>`:''}
    <button class="ht" aria-label="${T.del}">${ic('heart')}</button><button class="cb${cm?' on':''}" aria-label="${T.cmp}">${ic('cmp')}</button>
@@ -3143,7 +3158,8 @@ img,video{max-width:100%}
   .top .tl.cr{font-size:12.5px}
 }
 /* compare: sticky product row sits right under the real header height (taller on phones) */
-.sp-ct thead td,.sp-ct thead th{top:var(--hdr,84px)!important}
+/* the table sits in a horizontal scroller (.sp-cmpw), which is its sticky container — any top offset left a blank strip */
+.sp-ct thead td,.sp-ct thead th{top:0!important}
 .sp-pc b,.sp-pc s,.sp-f b,.pr b,.sp-sum b{white-space:nowrap}
 @media (max-width:600px){
   /* footer: brand block full width, then two equal columns */
