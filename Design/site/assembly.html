@@ -1766,6 +1766,36 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2985,16 +3015,13 @@ img,video{max-width:100%}
   .fgrid>*:first-child p{max-width:none}
 }
 
-/* category card actions on touch/phones: square compare icon + full "details" button in one row */
+/* category card actions on touch/phones: two full-width buttons, normal height (were squashed strips) */
 @media (hover:none),(max-width:760px){
- .cgrid3:not(.list) .mi-act{flex-direction:row!important;gap:8px;margin-top:12px}
- .cgrid3:not(.list) .mi-act>*{flex:none;height:40px;box-sizing:border-box}
- .cgrid3:not(.list) .mi-act .cmpb{width:40px;padding:0;gap:0}
- .cgrid3:not(.list) .mi-act .cmpb span{display:none}
- .cgrid3:not(.list) .mi-act .cmpb svg.i{width:18px;height:18px}
- .cgrid3:not(.list) .mi-act .det{flex:1 1 auto;min-width:0;font-size:13px}
- .cgrid3:not(.list) .mi-act .det span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .cgrid3:not(.list) .mi-act{flex-direction:column!important;gap:6px;margin-top:12px}
+ .cgrid3:not(.list) .mi-act>*{flex:none!important;width:100%;height:38px;box-sizing:border-box;padding:0 8px;font-size:13px;white-space:nowrap;overflow:hidden}
+ .cgrid3:not(.list) .mi-act span{overflow:hidden;text-overflow:ellipsis}
 }
+@media (max-width:420px){.cgrid3:not(.list) .mi-act>*{height:36px;font-size:12.5px}.cgrid3:not(.list) .mi-act .det svg.i{display:none}}
 /* phone pass 2 */
 @media (max-width:1000px){.ip>.ip-nav:not(.ac-nav){order:2}}
 @media (max-width:600px){

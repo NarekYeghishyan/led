@@ -11,6 +11,7 @@ stubs = main[main.index('<div hidden id="stubs">'):]
 tail = re.sub(r"<script>\s*\(function\(\)\{\s*const G=.*?</script>", "", tail, count=1, flags=re.S)
 tail = re.sub(r"<script>\s*\(function\(\)\{\s*const vb=.*?</script>", "", tail, count=1, flags=re.S)
 tail = re.sub(r"<!--dual-range-->.*?<!--/dual-range-->", "", tail, flags=re.S)
+tail = re.sub(r"<!--responsive-->.*?<!--/responsive-->", "", tail, flags=re.S)
 assert "getElementById('tree')" not in tail and "cgrid3" not in tail
 
 # brand logos (SVG) from the home page's brand tiles, for brand.html

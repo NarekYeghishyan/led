@@ -300,3 +300,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   Compare label column narrower. Checked at 390px with headless Chrome. Backup `led-static-backup-20261121p.tgz`. Published.
 - 2026-11-21 — Category cards on phones/touch: compare + "Details" were stacked and squashed to thin strips (column flex with flex:1).
   Now one row: square 40px compare icon button + full-height "Details" button (`responsive.html`). Backup `led-static-backup-20261121q.tgz`. Published.
+- 2026-11-21 — Category card buttons on phones, take 2: icon+"Details" in one row cut the Armenian word ("Մանրամ…"). Now two full-width
+  38px buttons stacked (Համեմատել, Մանրամասն), arrow hidden ≤420px. Checked at 375px in HY. `build_shop.py` now strips the old
+  `<!--responsive-->` block from category's tail before its assert (the build failed once `responsive.html` mentioned `cgrid3`).
+  Backup `led-static-backup-20261121r.tgz`. Published.
