@@ -97,3 +97,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   **Any new page built from category.html must keep `#stubs`.** Backup `led-static-backup-20261120e.tgz`.
 - 2026-11-20 — Home: clicking any product card (`.prod`) opens `/product.html` (Ctrl/middle-click → new tab); cart and
   heart buttons keep their own action. Card title turns blue on hover. Backup `led-static-backup-20261120f.tgz`.
+- 2026-11-20 — Category: whole product card opens `/product.html`, same as home (cart, heart, compare and checkbox keep
+  their own action). Backup `led-static-backup-20261120g.tgz`.
