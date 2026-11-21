@@ -130,7 +130,6 @@ export class ShopController {
     const password = String(b?.password || '');
     checkPassword(password);
     const city = String(b?.city || '').trim().slice(0, 120);
-    if (!city) throw fail(HttpStatus.BAD_REQUEST, 'no_city', 'Choose your location');
     const [taken] = await this.ds.query(`SELECT id FROM customers c WHERE ${PHONE8} = $1 LIMIT 1`, [p8]);
     if (taken) throw fail(HttpStatus.CONFLICT, 'phone_taken', 'This phone number is already registered');
     const [c] = await this.ds.query(`
