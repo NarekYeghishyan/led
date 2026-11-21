@@ -54,7 +54,7 @@ export class CustomersController {
     if (q.orders === '1') where.push('EXISTS (SELECT 1 FROM customer_orders o WHERE o.customer_id = c.id)');
     const w = where.join(' AND ');
     const [{ n }] = await this.ds.query(`SELECT COUNT(*)::int AS n FROM customers c WHERE ${w}`, args);
-    const sort = SORTS[q.sort] || 'c.registered_at';
+    const sort = SORTS[q.sort] || '"orderCount"';
     const dir = q.dir === 'asc' ? 'ASC' : 'DESC';
     const items = await this.ds.query(`
       SELECT c.id, c.legacy_id AS "legacyId", c.name, c.email, c.login, c.phone, c.city, c.type, c.company,

@@ -373,3 +373,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   `/root/led-changelog-login-as-20261122.csv`). Admin sidebar menu items have line icons (inline SVG, `.ni`). Deployed.
 - 2026-11-22 — Admin "Products" menu item, the dashboard "Products" tile and the product card's back link open `/products?stock=in` (in-stock filter by default). Deployed.
 - 2026-11-22 — Remaining 3 `login_as` rows removed from the log. Admin filters: "Show deleted" checkbox no longer stretches/wraps (`.check`). Deployed.
+- 2026-11-22 — Admin customers list sorts by number of orders (most first) by default. Deployed.
