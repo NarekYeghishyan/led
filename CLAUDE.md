@@ -362,3 +362,8 @@ stock and prices from the Access sync. Until then the templates are design refer
   order history from `customer_orders` (old led.am orders now; re-import keeps customer edits via `edited_at`). `localStorage led-user/led-adr`
   are only a display cache. Rate limits in memory. Migration `ShopAccounts1764200000000` (`source`, `addresses`, `token_version`,
   `customer_reset_codes`). DB backup `/root/led-db-backup-20261121-2311-pre-shop-accounts.dump`, static `led-static-backup-20261121zg.tgz`. Published.
+- 2026-11-21 — Admin **"Log in as customer"** (list row link + button on the customer card): `POST /api/admin/customers/:id/login-as`
+  (admin role only, not for blocked customers) sets the site cookie `led_s` in the admin's browser for 2 h (ends with the browser,
+  token has `imp` = admin e-mail) and opens `/account.html` in a new tab; the account shows a yellow "viewing as customer" banner
+  with "Exit" (logs out, back to `/admin/customers`). Doesn't change the customer's last-login; written to `change_log` (`login_as`).
+  Backup `led-static-backup-20261121zh.tgz`. Deployed.
