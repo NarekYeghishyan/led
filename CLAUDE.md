@@ -349,3 +349,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   Old MD5 passwords stored wrapped in bcrypt and upgraded on first login (`POST /api/shop/login`, for the future storefront).
   Import is re-runnable — **run it again when the site goes live** (README "Customers from the old led.am site").
   DB backup before import: `/root/led-db-backup-20261121-2002-pre-customers.dump`; dump copy `/root/led_new.sql.gz` (chmod 600).
+- 2026-11-21 — Catalog = 6 sections per the client's list: "Планшеты, смартфоны, гаджеты" is no longer a section — Планшеты, Смартфоны,
+  Гаджеты are now subcategories at the end of Периферия. Last section renamed "Сетевое оборудование" (Ցանցային սարքավորումներ / Network
+  equipment). Top menu 6 tiles (`data-m=0..5`; grid 6 columns, 3 on ≤1100px). Backup `led-static-backup-20261121zf.tgz`. Published.
