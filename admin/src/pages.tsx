@@ -508,9 +508,18 @@ const num2 = (v: unknown): string =>
   typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(2))
     : typeof v === 'string' && /^-?\d+\.\d+$/.test(v) ? Number(v).toFixed(2) : String(v);
 
+// Access dates arrive as ISO text: 2026-11-21T00:00:00 → 21.11.2026 (time kept only when it is set).
+const isoDate = (v: unknown): string | null => {
+  if (typeof v !== 'string') return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/.exec(v);
+  if (!m) return null;
+  const d = `${m[3]}.${m[2]}.${m[1]}`;
+  return m[4] === '00' && m[5] === '00' && (m[6] ?? '00') === '00' ? d : `${d} ${m[4]}:${m[5]}`;
+};
+
 const cell = (v: unknown, t: (k: TKey) => string) =>
   v === null || v === undefined || v === '' ? <span className="muted">—</span>
-    : v === true ? t('common.yes') : v === false ? t('common.no') : num2(v);
+    : v === true ? t('common.yes') : v === false ? t('common.no') : isoDate(v) ?? num2(v);
 
 // ------------------------------------------------------------------ Access tables (full copy)
 
@@ -595,6 +604,15 @@ export function TablePage() {
   const dir = params.get('dir') || 'asc';
   const sortBy = (c: string) => set({ sort: c, dir: sort === c && dir === 'asc' ? 'desc' : 'asc' });
   const cols = data?.columns || [];
+  // Default: newest rows first (first key column, descending).
+  useEffect(() => {
+    if (!sort && data?.keyColumns.length) {
+      const next = new URLSearchParams(params);
+      next.set('sort', data.keyColumns[0]);
+      next.set('dir', 'desc');
+      setParams(next, { replace: true });
+    }
+  }, [sort, data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
