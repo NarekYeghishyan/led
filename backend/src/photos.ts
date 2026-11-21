@@ -224,10 +224,13 @@ async function gemini(body: unknown, timeoutMs = 90000): Promise<GeminiReply> {
   if (!key) throw new ServiceUnavailableException('GEMINI_API_KEY is not set on the server');
   let last = 'unknown error', lastStatus = 502;
   for (const m of models()) {
-    const res = await fetch(`${GEMINI}/${m}:generateContent`, {
-      method: 'POST', signal: AbortSignal.timeout(timeoutMs),
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${GEMINI}/${m}:generateContent`, {
+        method: 'POST', signal: AbortSignal.timeout(timeoutMs),
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body),
+      });
+    } catch { last = `${m} timed out`; lastStatus = 504; continue; } // slow model: try the next one
     const d = await res.json().catch(() => ({})) as {
       error?: { message?: string };
       candidates?: { content?: { parts?: { text?: string }[] }; groundingMetadata?: { groundingChunks?: { web?: { uri?: string; title?: string } }[] } }[];
@@ -271,7 +274,7 @@ async function geminiGuess(p: Product): Promise<Candidate[]> {
       'Only URLs you are confident exist; prefer canonical product pages, not search pages. You may also include direct image URLs of the official product photo.' }] }],
     generationConfig: { temperature: 0.2, responseMimeType: 'application/json',
       responseSchema: { type: 'OBJECT', properties: { urls: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['urls'] } },
-  }, 60000);
+  }, 40000);
   let urls: string[] = [];
   try { urls = (JSON.parse(r.text).urls || []).filter((u: unknown) => typeof u === 'string' && /^https?:\/\//.test(u)).slice(0, 6); } catch { /* bad JSON */ }
   const lists = await Promise.allSettled(urls.map((u) => fromUrl(u, p.barcode)));
