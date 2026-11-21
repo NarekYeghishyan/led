@@ -1798,6 +1798,17 @@ paint();filt()})();</script><!--/dual-range-->
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2454,44 +2465,124 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
     const sync=()=>f.querySelectorAll('.rg-g').forEach(g=>{const on=g.dataset.t===sel.value;g.hidden=!on;g.querySelectorAll('input').forEach(x=>x.disabled=!on);});
     sel.addEventListener('change',sync);sync();
 });
-  /* login ⇄ forgot password */
-  const lgShow=fg=>document.querySelectorAll('.lg-w').forEach(w=>{w.querySelector('.lg-in').hidden=fg;w.querySelector('.lg-fg').hidden=!fg;});
   if(document.querySelector('.lg-w')&&location.hash==='#forgot')location.replace(P.forgot);
-  if(document.querySelector('.lg-w')){lgShow(location.hash==='#forgot');addEventListener('hashchange',()=>lgShow(location.hash==='#forgot'));
-    document.querySelectorAll('.lg-sw').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const fg=a.getAttribute('href')==='#forgot';history.replaceState(null,'',fg?'#forgot':location.pathname);lgShow(fg);}));}
   window.LEDInfoForm=f=>{if(f.dataset.v)return;f.dataset.v=1;f.addEventListener('submit',e=>{e.preventDefault();let ok=true;
     const mis=f.querySelector('.rg-mis');let mm=false;
     f.querySelectorAll('[data-same]').forEach(x=>{const o=f.querySelector(`[name="${x.dataset.same}"]`);const bad=x.value!==o.value;if(bad&&x.value){x.classList.add('bad');ok=false;mm=true;}});
     if(mis){mis.hidden=!mm;mis.textContent=mm?mis.dataset.mis:'';}
     f.querySelectorAll('[required]:not(:disabled)').forEach(x=>{if(x.closest('[hidden]'))return;const bad=!x.value.trim()||(x.minLength>0&&x.value.trim().length<x.minLength)||(x.type==='email'&&!/^\S+@\S+\.\S+$/.test(x.value));if(bad||!x.dataset.same||x.value===f.querySelector(`[name="${x.dataset.same}"]`).value)x.classList.toggle('bad',bad);if(bad)ok=false;});
-    if(!ok)return;const data=Object.fromEntries(new FormData(f));f.dispatchEvent(new CustomEvent('ok',{detail:data}));f.reset();f.querySelectorAll('.rg-type').forEach(x=>x.dispatchEvent(new Event('change')));const m=f.querySelector('.ip-ok');m.classList.add('on');setTimeout(()=>m.classList.remove('on'),5000);});};
+    if(!ok)return;const data=Object.fromEntries(new FormData(f));f.dispatchEvent(new CustomEvent('ok',{detail:data}));if(f.dataset.api)return;f.reset();f.querySelectorAll('.rg-type').forEach(x=>x.dispatchEvent(new Event('change')));const m=f.querySelector('.ip-ok');m.classList.add('on');setTimeout(()=>m.classList.remove('on'),5000);});};
   document.querySelectorAll('.ip-form').forEach(f=>LEDInfoForm(f));
 
-  /* forgot password: email → code + new password → done */
-  document.querySelectorAll('.fp-w').forEach(w=>{const f1=w.querySelector('.fp-1'),f2=w.querySelector('.fp-2'),f3=w.querySelector('.fp-3'),re=w.querySelector('.fp-re');let tm;
-    const step=i=>{f1.hidden=i!==0;f2.hidden=i!==1;f3.hidden=i!==2;w.querySelectorAll('.fp-steps span').forEach(s=>{const k=+s.dataset.i;s.classList.toggle('on',k===i);s.classList.toggle('dn',k<i);});};
-    const count=()=>{let n=60;re.disabled=true;clearInterval(tm);const tick=()=>{re.textContent=n>0?`${re.dataset.w} ${n} ${re.dataset.s}`:re.dataset.t;re.disabled=n>0;if(n--<=0)clearInterval(tm);};tick();tm=setInterval(tick,1000);};
-    f1.addEventListener('ok',e=>{w.querySelector('.fp-to').textContent=e.detail.email;step(1);count();setTimeout(()=>f2.querySelector('.fp-code').focus(),50);});
-    f1.addEventListener('reset',e=>e.preventDefault());
-    w.querySelector('.fp-chg').addEventListener('click',e=>{e.preventDefault();step(0);});
-    re.addEventListener('click',()=>{count();LEDInfoToast&&LEDInfoToast();});
-    f2.querySelector('.fp-code').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);});
-    const pw=f2.querySelector('[name=password]'),bar=f2.querySelector('.fp-meter i');
-    pw.addEventListener('input',()=>{const v=pw.value;let sc=(v.length>=6)+(v.length>=10)+/[A-Z]/.test(v)+/\d/.test(v)+/[^\w]/.test(v);bar.style.width=(sc/5*100)+'%';bar.style.background=['#E5484D','#E5484D','#F5A524','#F5A524','#30A46C','#30A46C'][sc];});
-    f2.addEventListener('ok',()=>{clearInterval(tm);step(2);});
-    step(0);});
   window.LEDInfoToast=null;
-  /* demo session: login / registration → account */
-  const goAcc=(u)=>{localStorage.setItem('led-user',JSON.stringify(u));setTimeout(()=>location.href='/account.html',900);};
-  document.querySelectorAll('.lg-in').forEach(f=>f.addEventListener('ok',e=>{let u=null;try{u=JSON.parse(localStorage.getItem('led-reg'))}catch(_){}
-    const l=e.detail.login;goAcc(u&&(u.login===l||u.email===l)?u:{login:l,fname:l.includes('@')?l.split('@')[0]:l,email:l.includes('@')?l:''});}));
-  document.querySelectorAll('.ip-form.rg').forEach(f=>f.addEventListener('ok',e=>{const u={...e.detail};delete u.password;delete u.re_password;delete u.re_email;
-    localStorage.setItem('led-reg',JSON.stringify(u));goAcc(u);}));
-  /* header "Кабинет": account when logged in */
-  if(localStorage.getItem('led-user'))document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=P.account;});
+  /* login, registration, password reset, header "Кабинет": site-src/auth.html (real /api/shop) */
 })();
 </script>
 <!--/info-shared-->
+<!--auth-->
+<style>
+.au-err{background:#FDECEC;border:1px solid #F5C2C3;color:#B42318;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.45}
+.au-err a{color:inherit;font-weight:600}
+.au-old{margin:14px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+.fp-note{margin:0;background:#FFF7E6;border:1px solid #F5DDA6;color:#8A5A00;border-radius:10px;padding:10px 14px;font-size:13.5px}
+.ip-form button[type=submit][disabled]{opacity:.6;cursor:wait!important}
+.ip-form select{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:inherit}
+</style>
+<script>
+/* Storefront accounts → /api/shop (backend/src/shop.ts). Session = httpOnly cookie, never readable here.
+   localStorage 'led-user' / 'led-adr' only cache the customer's own name/phone/addresses for checkout and 1-click prefill. */
+(function(){
+  const API='/api/shop';
+  const L=()=>({hy:1,en:2}[document.documentElement.lang]||0); /* ru, hy, en */
+  const lang=()=>['ru','hy','en'][L()];
+  const REG=[['Yerevan','Ереван','Երևան','Yerevan'],['Aragatsotn','Арагацотн','Արագածոտն','Aragatsotn'],['Ararat','Арарат','Արարատ','Ararat'],
+    ['Armavir','Армавир','Արմավիր','Armavir'],['Gegharkunik','Гегаркуник','Գեղարքունիք','Gegharkunik'],['Kotayk','Котайк','Կոտայք','Kotayk'],
+    ['Lori','Лори','Լոռի','Lori'],['Shirak','Ширак','Շիրակ','Shirak'],['Syunik','Сюник','Սյունիք','Syunik'],['Tavush','Тавуш','Տավուշ','Tavush'],
+    ['Vayots Dzor','Вайоц Дзор','Վայոց ձոր','Vayots Dzor'],['Outside Armenia','За пределами Армении','Հայաստանից դուրս','Outside Armenia']];
+  const regionName=v=>{const r=REG.find(x=>x[0]===v);return r?r[1+L()]:v||'';};
+  const E={
+    bad_login:["Неверный логин или пароль","Սխալ մուտքանուն կամ գաղտնաբառ","Wrong login or password"],
+    reset_required:["Для этого аккаунта нужно задать новый пароль — <a href=\"/forgot-password.html\">восстановить пароль</a>","Այս հաշվի համար անհրաժեշտ է նոր գաղտնաբառ՝ <a href=\"/forgot-password.html\">վերականգնել գաղտնաբառը</a>","This account needs a new password — <a href=\"/forgot-password.html\">reset your password</a>"],
+    blocked:["Аккаунт заблокирован. Позвоните нам: 010 502-802","Հաշիվն արգելափակված է։ Զանգահարեք՝ 010 502‑802","The account is blocked. Call us: 010 502-802"],
+    phone_taken:["Этот номер уже зарегистрирован. <a href=\"/login.html\">Войдите</a> или <a href=\"/forgot-password.html\">восстановите пароль</a>.","Այս համարն արդեն գրանցված է։ <a href=\"/login.html\">Մուտք գործեք</a> կամ <a href=\"/forgot-password.html\">վերականգնեք գաղտնաբառը</a>։","This number is already registered. <a href=\"/login.html\">Log in</a> or <a href=\"/forgot-password.html\">reset your password</a>."],
+    bad_phone:["Введите номер в формате +374 XX XXX XXX","Մուտքագրեք համարը +374 XX XXX XXX ձևաչափով","Enter the number as +374 XX XXX XXX"],
+    weak_password:["Пароль — не менее 6 символов","Գաղտնաբառը՝ առնվազն 6 նիշ","Password: at least 6 characters"],
+    no_city:["Выберите местоположение","Ընտրեք բնակավայրը","Choose your location"],
+    no_login:["Введите телефон или e-mail","Մուտքագրեք հեռախոսը կամ էլ. հասցեն","Enter your phone or email"],
+    bad_code:["Неверный или просроченный код","Սխալ կամ ժամկետանց կոդ","Wrong or expired code"],
+    too_many:["Слишком много попыток. Попробуйте через 15 минут.","Չափազանց շատ փորձեր։ Փորձեք 15 րոպեից։","Too many attempts. Try again in 15 minutes."],
+    bad_old_password:["Текущий пароль неверен","Ընթացիկ գաղտնաբառը սխալ է","Current password is wrong"],
+    email_taken:["Этот e-mail уже используется другим аккаунтом","Այս էլ. հասցեն արդեն օգտագործվում է այլ հաշվում","This email is used by another account"],
+    bad_email:["Неверный e-mail","Սխալ էլ. հասցե","Invalid email"],
+    no_session:["Сеанс закончился — <a href=\"/login.html\">войдите снова</a>","Սեանսն ավարտվել է՝ <a href=\"/login.html\">մուտք գործեք կրկին</a>","Session ended — <a href=\"/login.html\">log in again</a>"],
+    server:["Ошибка сервера, попробуйте ещё раз","Սերվերի սխալ, փորձեք կրկին","Server error, please try again"],
+    sms_off:["У этого аккаунта нет e-mail, а SMS пока не подключены. Позвоните нам: 010 502-802 — менеджер поможет сменить пароль.","Այս հաշիվը էլ. հասցե չունի, իսկ SMS-ները դեռ միացված չեն։ Զանգահարեք՝ 010 502‑802, մենեջերը կօգնի փոխել գաղտնաբառը։","This account has no email and SMS is not available yet. Call us: 010 502-802 — a manager will help you change the password."]
+  };
+  const msg=c=>(E[c]||E.server)[L()];
+
+  async function api(path,o={}){
+    let r;
+    try{r=await fetch(API+path,{method:o.method||'GET',credentials:'same-origin',headers:o.body?{'Content-Type':'application/json'}:{},body:o.body?JSON.stringify(o.body):undefined});}
+    catch(e){const x=new Error('network');x.code='server';x.status=0;throw x;}
+    let d=null;try{d=await r.json()}catch(e){}
+    if(!r.ok){const x=new Error(d&&d.message||r.statusText);x.code=(d&&d.code)||(r.status===429?'too_many':r.status===401?'no_session':'server');x.status=r.status;
+      if(r.status===401&&path.startsWith('/me'))cache(null);throw x;}
+    return d;
+  }
+  function cache(u){
+    if(!u){localStorage.removeItem('led-user');localStorage.removeItem('led-adr');hdr();return;}
+    localStorage.setItem('led-user',JSON.stringify({id:u.id,fname:u.name||'',name:u.name||'',phone:u.phone||'',email:u.email||'',login:u.login||'',
+      city:regionName(u.city),address:u.address||'',type:u.type||'consumer',company:u.company||u.lawName||'',law_name:u.lawName||'',taxcode:u.taxcode||''}));
+    localStorage.setItem('led-adr',JSON.stringify(u.addresses||[]));
+    sessionStorage.setItem('led-chk','1');hdr();
+  }
+  let meP=null;
+  const me=force=>{if(!meP||force)meP=api('/me').then(u=>{cache(u);return u;},e=>{meP=null;throw e;});return meP;};
+  const logout=()=>api('/logout',{method:'POST'}).catch(()=>{}).finally(()=>cache(null));
+  function hdr(){const on=!!localStorage.getItem('led-user');
+    document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=on?'/account.html':'/login.html';});}
+
+  const showErr=(f,e)=>{const x=f&&f.querySelector('.au-err');if(!x)return;x.hidden=!e;x.innerHTML=e?msg(e.code||'server'):'';};
+  /* runs fn(data) after LEDInfoForm validation passed ('ok' event); shows the API error inside the form */
+  function form(f,fn){if(!f||f.dataset.au)return;f.dataset.au=1;
+    f.addEventListener('ok',async e=>{const b=f.querySelector('button[type=submit]');showErr(f,null);if(b)b.disabled=true;
+      try{await fn(e.detail);}catch(err){showErr(f,err);}finally{if(b)b.disabled=false;}});}
+  const next=()=>{const n=new URLSearchParams(location.search).get('next');return n&&/^\/(?!\/)/.test(n)?n:'/account.html';};
+
+  window.LEDAuth={api,me,cache,logout,form,showErr,msg,lang,regions:REG,regionName};
+  hdr();
+
+  /* login */
+  document.querySelectorAll('form[data-api=login]').forEach(f=>form(f,d=>api('/login',{method:'POST',body:{login:d.login,password:d.password,remember:!!d.remember}})
+    .then(u=>{cache(u);location.href=next();})));
+  /* registration: phone + location + password */
+  document.querySelectorAll('form[data-api=register]').forEach(f=>form(f,d=>api('/register',{method:'POST',body:{phone:d.phone,city:d.city,password:d.password}})
+    .then(u=>{cache(u);location.href='/account.html#profile';})));
+  /* already logged in → login/registration pages go to the account */
+  if(document.querySelector('form[data-api=login],form[data-api=register]')&&localStorage.getItem('led-user'))me().then(()=>location.replace(next())).catch(()=>{});
+
+  /* forgot password: phone / e-mail → 6-digit code + new password → done (logged in) */
+  document.querySelectorAll('.fp-w').forEach(w=>{const f1=w.querySelector('.fp-1'),f2=w.querySelector('.fp-2'),f3=w.querySelector('.fp-3'),re=w.querySelector('.fp-re'),note=w.querySelector('.fp-note');let tm,who='';
+    const step=i=>{f1.hidden=i!==0;f2.hidden=i!==1;f3.hidden=i!==2;w.querySelectorAll('.fp-steps span').forEach(s=>{const k=+s.dataset.i;s.classList.toggle('on',k===i);s.classList.toggle('dn',k<i);});};
+    const count=()=>{let n=60;re.disabled=true;clearInterval(tm);const tick=()=>{re.textContent=n>0?`${re.dataset.w} ${n} ${re.dataset.s}`:re.dataset.t;re.disabled=n>0;if(n--<=0)clearInterval(tm);};tick();tm=setInterval(tick,1000);};
+    const send=()=>api('/password/forgot',{method:'POST',body:{login:who,lang:lang()}}).then(r=>{
+      w.querySelector('.fp-to').textContent=r.to||who;
+      if(note){const off=r.channel==='sms'&&r.to&&!r.configured;note.hidden=!off;note.textContent=off?msg('sms_off'):'';}
+      step(1);count();setTimeout(()=>f2.querySelector('.fp-code').focus(),50);});
+    form(f1,d=>{who=String(d.login||'').trim();return send();});
+    w.querySelector('.fp-chg').addEventListener('click',e=>{e.preventDefault();showErr(f2,null);step(0);});
+    re.addEventListener('click',()=>{showErr(f2,null);send().catch(err=>showErr(f2,err));});
+    f2.querySelector('.fp-code').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);});
+    const pw=f2.querySelector('[name=password]'),bar=f2.querySelector('.fp-meter i');
+    pw.addEventListener('input',()=>{const v=pw.value;let sc=(v.length>=6)+(v.length>=10)+/[A-Z]/.test(v)+/\d/.test(v)+/[^\w]/.test(v);bar.style.width=(sc/5*100)+'%';bar.style.background=['#E5484D','#E5484D','#F5A524','#F5A524','#30A46C','#30A46C'][sc];});
+    form(f2,d=>api('/password/reset',{method:'POST',body:{login:who,code:d.code,password:d.password}}).then(u=>{clearInterval(tm);cache(u);f2.reset();step(2);}));
+    step(0);});
+
+  /* other pages: check a cached session once per tab (it may have expired or been logged out elsewhere) */
+  if(localStorage.getItem('led-user')&&!sessionStorage.getItem('led-chk')&&!document.querySelector('.ac-app'))me().catch(()=>{});
+})();
+</script>
+<!--/auth-->
 <!--one-click-->
 <style>
 .oc{position:fixed;inset:0;z-index:90;background:rgba(10,18,32,.55);display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}

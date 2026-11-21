@@ -48,6 +48,7 @@ cfx = (pathlib.Path(__file__).parent / "card_fx.html").read_text(encoding="utf-8
 resp = (pathlib.Path(__file__).parent / "responsive.html").read_text(encoding="utf-8")
 oc = (pathlib.Path(__file__).parent / "oneclick.html").read_text(encoding="utf-8")
 sx = (pathlib.Path(__file__).parent / "search_box.html").read_text(encoding="utf-8")
+auth = (pathlib.Path(__file__).parent / "auth.html").read_text(encoding="utf-8")
 h = head.replace("<title>LED.AM Category Page</title>", "<title>Собери свою конфигурацию — LED Computers</title>")
 html = (h + '<main class="wrap asm" id="shop" data-page="assembly"><div id="spRoot"></div>\n' + stubs
         + "</main>" + tail.replace("</body>", shared + asm + "</body>"))
@@ -87,6 +88,7 @@ for name in ["index.html", "category.html", "product.html", "cart.html", "favori
     t = re.sub(r"<!--one-click-->.*?<!--/one-click-->", "", t, flags=re.S)
     t = re.sub(r"<!--search-box-->.*?<!--/search-box-->", "", t, flags=re.S)
     t = re.sub(r"<!--info-shared-->.*?<!--/info-shared-->", "", t, flags=re.S)
-    t = t.replace("</body>", link + mask + fx + cfx + info_js + oc + sx + resp + "</body>", 1)
+    t = re.sub(r"<!--auth-->.*?<!--/auth-->", "", t, flags=re.S)
+    t = t.replace("</body>", link + mask + fx + cfx + info_js + auth + oc + sx + resp + "</body>", 1)
     p.write_text(t, encoding="utf-8")
     print("linked", name)

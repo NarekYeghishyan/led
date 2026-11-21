@@ -82,7 +82,7 @@
   .ac-oh>b{grid-area:sum;justify-self:end;white-space:nowrap}.ac-oh>.chv{grid-area:c}
   .ac-ob{padding:10px 12px}
   .ac-it{grid-template-columns:40px minmax(0,1fr);gap:10px;font-size:14px}
-  .ac-it img{width:40px;height:40px}
+  .ac-it img,.ac-it .ac-noimg{width:40px;height:40px}
   .ac-it>b{grid-column:2;font-size:14px}
   .ac-tl{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
   .ac-tl span{flex:none;white-space:nowrap}
@@ -91,135 +91,161 @@
   .ac-adr .acts{flex-wrap:wrap;gap:8px 14px}
   .ac-gate{padding:28px 16px}
 }
+.ac-noimg{width:48px;height:48px;border-radius:10px;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;flex:none}.ac-noimg .i{width:22px;height:22px}
+.ac-hint{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:4px}
+.ac-fill{margin:12px 0 0;font-size:14px}.ac-fill a{color:var(--blue-600)}
+.ac-prof select{width:100%}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
-  /* [ru, hy, en] */
+  /* [ru, hy, en] — data from /api/shop (site-src/auth.html → window.LEDAuth) */
   const T={
     ov:["Обзор","Ընդհանուր","Overview"],orders:["Мои заказы","Իմ պատվերները","My orders"],profile:["Личные данные","Անձնական տվյալներ","Personal data"],
-    adr:["Адреса доставки","Առաքման հասցեներ","Delivery addresses"],pwd:["Смена пароля","Գաղտնաբառի փոփոխում","Change password"],out:["Выйти","Դուրս գալ","Log out"],
+    adr:["Адреса доставки","Առաքման հասցեներ","Delivery addresses"],pwd:["Пароль и вход","Գաղտնաբառ և մուտք","Password and sign-in"],out:["Выйти","Դուրս գալ","Log out"],
     fav:["Избранное","Ընտրյալներ","Favourites"],cmp:["Сравнение","Համեմատում","Compare"],cart:["Корзина","Զամբյուղ","Cart"],
     hi:["Здравствуйте","Բարև","Hello"],recent:["Последние заказы","Վերջին պատվերները","Recent orders"],all:["Все заказы →","Բոլոր պատվերները →","All orders →"],
-    order:["Заказ","Պատվեր","Order"],items:["товара","ապրանք","items"],total:["Итого","Ընդամենը","Total"],
-    st:[["Обрабатывается","Մշակվում է","Processing"],["В пути","Ճանապարհին է","On the way"],["Доставлен","Առաքված է","Delivered"],["Отменён","Չեղարկված է","Cancelled"]],
-    stAll:["Все","Բոլորը","All"],repeat:["Повторить заказ","Կրկնել պատվերը","Order again"],invoice:["Счёт (PDF)","Հաշիվ (PDF)","Invoice (PDF)"],
-    tl:[["Принят","Ընդունված","Received"],["Собран","Հավաքված","Packed"],["В пути","Ճանապարհին","Shipped"],["Доставлен","Առաքված","Delivered"]],
-    pay:["Оплата","Վճարում","Payment"],dlv:["Доставка","Առաքում","Delivery"],none:["Заказов нет","Պատվերներ չկան","No orders"],
-    fname:["Полное имя","Անուն, ազգանուն","Full name"],email:["Электронная почта","Էլ. հասցե","Email"],phone:["Телефон","Հեռախոս","Phone"],
+    order:["Заказ","Պատվեր","Order"],items:["шт.","հատ","pcs"],total:["Итого","Ընդամենը","Total"],
+    st:[["Принят","Ընդունված","Received"],["В обработке","Մշակվում է","In progress"],["Выполнен","Կատարված","Completed"]],
+    stAll:["Все","Բոլորը","All"],
+    pay:["Оплата","Վճարում","Payment"],dlv:["Получение","Ստացում","Delivery"],none:["Заказов пока нет","Պատվերներ դեռ չկան","No orders yet"],
+    fname:["Имя и фамилия","Անուն, ազգանուն","Full name"],email:["Электронная почта","Էլ. հասցե","Email"],phone:["Телефон","Հեռախոս","Phone"],
+    emailH:["Нужна для восстановления пароля и писем о заказах","Անհրաժեշտ է գաղտնաբառի վերականգնման և պատվերների նամակների համար","Used for password recovery and order emails"],
+    loc:["Местоположение","Բնակավայր","Location"],street:["Адрес","Հասցե","Address"],
     type:["Тип клиента","Հաճախորդի տեսակ","Customer type"],types:[["Частное лицо","Ֆիզիկական անձ","Private person"],["Дилер","Դիլեր","Dealer"],["Юридическое лицо","Իրավաբանական անձ","Corporation"]],
-    company:["Компания","Ընկերություն","Company"],tax:["Налоговый код","ՀՎՀՀ","Tax code"],news:["Получать новости и акции по e-mail","Ստանալ նորություններ և ակցիաներ էլ. փոստով","Get news and offers by email"],
+    typeH:["Чтобы сменить тип, позвоните нам","Տեսակը փոխելու համար զանգահարեք մեզ","Call us to change the type"],
+    company:["Компания","Ընկերություն","Company"],tax:["ИНН (ՀՎՀՀ)","ՀՎՀՀ","Tax code (TIN)"],lawAdr:["Юридический адрес","Իրավաբանական հասցե","Legal address"],
+    factAdr:["Фактический адрес","Փաստացի հասցե","Actual address"],bank:["Банковский счёт","Բանկային հաշիվ","Bank account"],
     save:["Сохранить","Պահպանել","Save"],saved:["Сохранено","Պահպանված է","Saved"],req:["* Обязательное поле","* Պարտադիր դաշտ","* Required field"],
     oldp:["Текущий пароль","Ընթացիկ գաղտնաբառ","Current password"],newp:["Новый пароль","Նոր գաղտնաբառ","New password"],rep:["Повторите пароль","Կրկնեք գաղտնաբառը","Repeat password"],
-    pwdOk:["Пароль изменён (демо)","Գաղտնաբառը փոխված է (դեմո)","Password changed (demo)"],mis:["Не совпадает","Չի համընկնում","Does not match"],
+    pwdOk:["Пароль изменён","Գաղտնաբառը փոխված է","Password changed"],mis:["Не совпадает","Չի համընկնում","Does not match"],
+    sess:["Выйти на всех устройствах","Դուրս գալ բոլոր սարքերից","Log out on all devices"],
+    sessP:["Если вы входили с чужого компьютера или телефона — завершите все сеансы.","Եթե մուտք եք գործել ուրիշի համակարգչից կամ հեռախոսից, ավարտեք բոլոր սեանսները։","If you logged in on someone else's computer or phone, end all sessions."],
     def:["Основной","Հիմնական","Default"],mkdef:["Сделать основным","Դարձնել հիմնական","Make default"],edit:["Изменить","Փոխել","Edit"],del:["Удалить","Ջնջել","Delete"],
     add:["+ Добавить адрес","+ Ավելացնել հասցե","+ Add address"],aname:["Название (Дом, Офис…)","Անվանում (Տուն, Գրասենյակ…)","Label (Home, Office…)"],
-    city:["Город","Քաղաք","City"],street:["Адрес","Հասցե","Address"],cancel:["Отмена","Չեղարկել","Cancel"],
+    city:["Город","Քաղաք","City"],cancel:["Отмена","Չեղարկել","Cancel"],noAdr:["Адресов пока нет","Հասցեներ դեռ չկան","No addresses yet"],
     gate:["Войдите в аккаунт","Մուտք գործեք","Please log in"],gated:["Личный кабинет доступен после входа.","Անձնական էջը հասանելի է մուտք գործելուց հետո։","Your account is available after you log in."],
-    login:["Войти","Մուտք","Log in"],reg:["Регистрация","Գրանցում","Register"],demo:["Демо: войдите с любым логином и паролем.","Դեմո՝ մուտք գործեք ցանկացած մուտքանունով և գաղտնաբառով։","Demo: log in with any login and password."],
-    since:["Клиент с","Հաճախորդ է","Customer since"],bonus:["Бонусные баллы","Բոնուսային միավորներ","Bonus points"],
-    cash:["Наличными","Կանխիկ","Cash"],cardp:["Картой","Քարտով","Card"],inst:["Рассрочка","Ապառիկ","Instalments"],pick:["Самовывоз, Киевян 11","Ինքնատարում, Կիևյան 11","Pick-up, Kievyan 11"],cour:["Курьер","Առաքիչ","Courier"]
+    login:["Войти","Մուտք","Log in"],reg:["Регистрация","Գրանցում","Register"],load:["Загрузка…","Բեռնվում է…","Loading…"],
+    since:["Клиент с","Հաճախորդ է՝","Customer since"],
+    pick:["Самовывоз","Ինքնատարում","Pick-up"],cour:["Доставка","Առաքում","Courier"],ship:["доставка","առաքում","delivery"],
+    paid:["Оплачен","Վճարված է","Paid"],
+    fill:["Заполните профиль: имя и e-mail помогут при заказе и восстановлении пароля.","Լրացրեք պրոֆիլը․ անունը և էլ. հասցեն կօգնեն պատվերի և գաղտնաբառի վերականգնման ժամանակ։","Complete your profile: a name and email help with orders and password recovery."]
   };
   const L=()=>({hy:1,en:2}[document.documentElement.lang]||0), t=k=>T[k][L()], tt=a=>a[L()];
-  const U='led-user', A='led-adr';
-  const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}, put=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-  const fmt=n=>n.toLocaleString('ru-RU').replace(/,/g,' ')+' ֏';
+  const A=window.LEDAuth;
+  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const fmt=(n,cur)=>(Math.round(+n||0)).toLocaleString('ru-RU').replace(/,/g,' ')+(!cur||/^(amd|֏|dram)$/i.test(cur)?' ֏':' '+esc(cur));
   const ic=h=>`<svg class="i"><use href="#${h}"/></svg>`;
-  const ORD=[
-    {n:'LED-104823',d:'2026-11-14',s:1,step:2,pay:2,dl:1,it:[['Lenovo IdeaPad Slim 3 15″','img/p2.webp',1,289000],['Logitech MX Master 3S','img/p5.webp',1,49000]]},
-    {n:'LED-104511',d:'2026-10-28',s:2,step:3,pay:1,dl:0,it:[['Samsung 990 PRO 1 TB','img/p3.webp',2,52000]]},
-    {n:'LED-103977',d:'2026-09-03',s:2,step:3,pay:0,dl:1,it:[['ASUS VivoBook 16','img/p1.webp',1,329000],['HyperX Cloud II','img/p4.webp',1,39000],['Kingston FURY 16 GB DDR5','img/p5.webp',2,26000]]},
-    {n:'LED-103402',d:'2026-07-19',s:3,step:0,pay:1,dl:1,it:[['HP Pavilion 15','img/p2.webp',1,355000]]},
-    {n:'LED-104901',d:'2026-11-19',s:0,step:0,pay:1,dl:0,it:[['Xiaomi Redmi Pad SE','img/p1.webp',1,99000]]}
-  ];
-  try{(JSON.parse(localStorage.getItem('led-orders'))||[]).forEach(o=>ORD.push(o))}catch(e){}
-  ORD.sort((a,b)=>b.d.localeCompare(a.d));
-  const sum=o=>o.it.reduce((s,x)=>s+x[2]*x[3],0), cnt=o=>o.it.reduce((s,x)=>s+x[2],0);
-  const HYM=['հունվարի','փետրվարի','մարտի','ապրիլի','մայիսի','հունիսի','հուլիսի','օգոստոսի','սեպտեմբերի','հոկտեմբերի','նոյեմբերի','դեկտեմբերի'],HYW=['կիրակի','երկուշաբթի','երեքշաբթի','չորեքշաբթի','հինգշաբթի','ուրբաթ','շաբաթ'];
-  const hyD=(x,o)=>{let s=`${x.getDate()} ${o.month==='short'?HYM[x.getMonth()].slice(0,3):HYM[x.getMonth()]}`;if(o.year)s+=` ${x.getFullYear()} թ.`;if(o.weekday)s=HYW[x.getDay()]+', '+s;if(o.hour)s+=`, ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;return s};
-  const dfmt=d=>{const o={day:'numeric',month:'long',year:'numeric'},x=new Date(d);return L()===1?hyD(x,o):x.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],o)};
-  let sec=(location.hash||'#ov').slice(1), flt=-1, adrEdit=null;
-  if(!T[sec])sec='ov';
-
+  const HYM=['հունվարի','փետրվարի','մարտի','ապրիլի','մայիսի','հունիսի','հուլիսի','օգոստոսի','սեպտեմբերի','հոկտեմբերի','նոյեմբերի','դեկտեմբերի'];
+  const dfmt=d=>{if(!d)return'';const x=new Date(d);if(L()===1)return`${x.getDate()} ${HYM[x.getMonth()]} ${x.getFullYear()} թ.`;return x.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{day:'numeric',month:'long',year:'numeric'})};
+  const ST={received:0,process:1,resolved:2};
+  const PAY={cash:["Наличными","Կանխիկ","Cash"],card:["Картой","Քարտով","Card"],bank:["Перечислением","Փոխանցումով","Bank transfer"],credit:["Рассрочка","Ապառիկ","Instalments"]};
+  let sec=(location.hash||'#ov').slice(1), flt=-1, adrEdit=null, u=null, ORD=[], state='load';
+  if(!T[sec]||!['ov','orders','profile','adr','pwd'].includes(sec))sec='ov';
+  const mapOrder=o=>{const s=ST[o.status]??0;return{n:o.legacyId||('S-'+o.id),d:o.orderedAt,s,raw:o.status,cur:o.currency,paid:o.paid,
+    tot:o.total!=null?o.total:o.items.reduce((a,x)=>a+(x.total??x.price*x.qty),0),ship:o.shipping,shipCost:o.shippingCost,
+    pay:o.paymentType,dl:()=>o.shipping?[t('cour'),o.city,o.address].filter(Boolean).join(', '):[t('pick'),o.shopAddress].filter(Boolean).join(', '),
+    it:o.items.map(x=>({nm:x.name||x.article||'—',art:x.article,q:x.qty||1,p:x.price||0,tot:x.total??(x.price||0)*(x.qty||1)}))};};
+  async function load(){
+    if(!A){state='gate';return render();}
+    try{u=await A.me();state='ok';render();
+      const o=await A.api('/me/orders');ORD=o.map(mapOrder);render();}
+    catch(e){state=e.status===401?'gate':'err';render();}
+  }
   const nav=document.getElementById('ipNav'), crumb=document.getElementById('ipCrumb');
+  const regionSel=(name,val)=>{const R=A?A.regions:[];const has=!val||R.some(r=>r[0]===val);
+    return`<select name="${name}">${has?'':`<option value="${esc(val)}" selected>${esc(val)}</option>`}${R.map(r=>`<option value="${r[0]}"${r[0]===val?' selected':''}>${esc(A.regionName(r[0]))}</option>`).join('')}</select>`;};
   function render(){
-    const u=get(U,null);
     if(crumb)crumb.innerHTML=`<a href="/">${['Главная','Գլխավոր','Home'][L()]}</a><span>/</span><b>${tt(["Личный кабинет","Անձնական էջ","My account"])}</b>`;
     document.querySelectorAll('.ac-app').forEach(app=>{
-      if(!u){
+      if(state!=='ok'){
+        nav.classList.remove('ac-nav');
         nav.innerHTML=`<div class="ip-menu"><a href="/login.html">${ic('user')}<span>${t('login')}</span></a><a href="/registration.html">${ic('doc')}<span>${t('reg')}</span></a></div>`;
-        app.innerHTML=`<div class="ip-card ac-gate"><span class="ic">${ic('shield')}</span><h2 style="justify-content:center">${t('gate')}</h2><p>${t('gated')}</p>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn p" href="/login.html">${t('login')}</a><a class="btn" href="/registration.html">${t('reg')}</a></div><p style="font-size:13px;margin-top:16px">${t('demo')}</p></div>`;
+        app.innerHTML=state==='load'?`<div class="ip-card ac-gate"><p>${t('load')}</p></div>`:
+          `<div class="ip-card ac-gate"><span class="ic">${ic('shield')}</span><h2 style="justify-content:center">${t('gate')}</h2><p>${state==='err'&&A?A.msg('server'):t('gated')}</p>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn p" href="/login.html?next=/account.html">${t('login')}</a><a class="btn" href="/registration.html">${t('reg')}</a></div></div>`;
         return;
       }
-      const ini=(u.fname||u.login||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
-      const ti=['consumer','dealer','corporate'].indexOf(u.type);
+      const who=u.name||u.phone||u.email||u.login||'';
+      const ini=(u.name||'').trim()?(u.name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase()):ic('user');
+      const ti=Math.max(0,['consumer','dealer','corporate'].indexOf(u.type));
       const M=[['ov','grid'],['orders','ix-box'],['profile','user'],['adr','pin'],['pwd','shield']];
       nav.classList.add('ac-nav');
-      nav.innerHTML=`<div class="ip-menu"><div class="ac-who"><span class="ac-av">${ini}</span><div><b>${u.fname||u.login}</b><small>${u.email||''}</small>${ti>0?`<br><span class="ac-tag">${tt(T.types[ti])}</span>`:''}</div></div>`+
+      nav.innerHTML=`<div class="ip-menu"><div class="ac-who"><span class="ac-av">${ini}</span><div><b>${esc(who)}</b><small>${esc(u.name?u.phone||u.email||'':u.email||'')}</small>${ti>0?`<br><span class="ac-tag">${tt(T.types[ti])}</span>`:''}</div></div>`+
         `<div class="ac-tabs">`+M.map(([k,i])=>`<a href="#${k}" data-s="${k}"${k===sec?' class="on"':''}>${ic(i)}<span>${t(k)}</span></a>`).join('')+`</div>`+
         `<hr><a href="/favorites.html">${ic('heart')}<span>${t('fav')}</span></a><a href="/compare.html">${ic('cmp')}<span>${t('cmp')}</span></a><a href="/cart.html">${ic('cart')}<span>${t('cart')}</span></a>`+
         `<hr><a href="#" class="ac-out">${ic('arrow')}<span>${t('out')}</span></a></div>`;
       const S=window.LEDStore, c=k=>S?S.count(k):0;
-      const orderHTML=o=>`<div class="ac-ord" data-n="${o.n}"><button class="ac-oh" type="button"><div><b>${t('order')} № ${o.n}</b><small>${dfmt(o.d)}</small></div>
-        <div class="sm"><small>${cnt(o)} ${t('items')}</small></div><span class="ac-st s${o.s}">${tt(T.st[o.s])}</span><b>${fmt(sum(o))}</b><svg class="chv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div class="ac-ob">${o.it.map(x=>`<div class="ac-it"><img src="${x[1]}" alt=""><div>${x[0]}<br><small>${x[2]} × ${fmt(x[3])}</small></div><b>${fmt(x[2]*x[3])}</b></div>`).join('')}
-        ${o.s<3?`<div class="ac-tl">${T.tl.map((s,i)=>`<span class="${i<=o.step?'on':''}">${tt(s)}</span>`).join('')}</div>`:''}
-        <small style="color:var(--muted)">${t('pay')}: ${t(['cash','cardp','inst'][o.pay])} · ${t('dlv')}: ${t(['pick','cour'][o.dl])}</small>
-        <div class="ac-oa"><a class="btn" href="/track-order.html?n=${o.n}">${['Отследить','Հետևել','Track'][L()]}</a><button class="btn p ac-rep" type="button" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('repeat')}</button></div></div></div>`;
-      const adrs=get(A,null)||[{l:['Дом','Տուն','Home'][L()],city:u.city||['Ереван','Երևան','Yerevan'][L()],a:u.address||'Կիևյան 11',def:1}];
+      const orderHTML=o=>`<div class="ac-ord" data-n="${esc(o.n)}"><button class="ac-oh" type="button"><div><b>${t('order')} № ${esc(o.n)}</b><small>${dfmt(o.d)}</small></div>
+        <div class="sm"><small>${o.it.reduce((a,x)=>a+x.q,0)} ${t('items')}</small></div><span class="ac-st s${o.s}">${tt(T.st[o.s])}</span><b>${fmt(o.tot,o.cur)}</b><svg class="chv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="ac-ob">${o.it.map(x=>`<div class="ac-it"><span class="ac-noimg">${ic('ix-box')}</span><div>${esc(x.nm)}<br><small>${x.art?esc(x.art)+' · ':''}${x.q} × ${fmt(x.p,o.cur)}</small></div><b>${fmt(x.tot,o.cur)}</b></div>`).join('')}
+        ${o.ship&&o.shipCost?`<div class="ac-it"><span class="ac-noimg">${ic('pin')}</span><div>${t('ship')}</div><b>${fmt(o.shipCost,o.cur)}</b></div>`:''}
+        <div class="ac-tl">${T.st.map((s,i)=>`<span class="${i<=o.s?'on':''}">${tt(s)}</span>`).join('')}</div>
+        <small style="color:var(--muted)">${o.pay?`${t('pay')}: ${esc(PAY[o.pay]?tt(PAY[o.pay]):o.pay)}${o.paid?' ('+t('paid')+')':''} · `:''}${t('dlv')}: ${esc(o.dl())}</small></div></div>`;
+      const adrs=Array.isArray(u.addresses)?u.addresses:[];
       const shown=ORD.filter(o=>flt<0||o.s===flt);
-      const F=(n,l,v,ty='text',ex='')=>`<label${ex}>${l} *<input name="${n}" type="${ty}" value="${(v||'').replace(/"/g,'&quot;')}" required minlength="3"${ty==='tel'?' inputmode="tel"':''}></label>`;
+      const F=(n,l,v,o={})=>`<label${o.w?' class="w"':''}>${l}${o.req?' *':''}<input name="${n}" type="${o.ty||'text'}" value="${esc(v)}"${o.req?' required minlength="'+(o.min||2)+'"':''}${o.ty==='tel'?' inputmode="tel" autocomplete="tel"':''}${o.ac?` autocomplete="${o.ac}"`:''}>${o.hint?`<small class="ac-hint">${o.hint}</small>`:''}</label>`;
+      const since=(u.registeredAt||u.createdAt||'').slice(0,4);
       app.innerHTML=
       `<section class="ac-sec${sec==='ov'?' on':''}" data-s="ov">
-        <div class="ip-card"><h2><span class="ic">${ic('user')}</span>${t('hi')}, ${(u.fname||u.login).split(' ')[0]}!</h2>
-        <p style="margin:0;color:var(--muted)">${t('since')} 2024 · ${t('bonus')}: <b style="color:var(--blue-700)">2 450</b></p></div>
+        <div class="ip-card"><h2><span class="ic">${ic('user')}</span>${t('hi')}${u.name?', '+esc(u.name.split(' ')[0]):''}!</h2>
+        <p style="margin:0;color:var(--muted)">${since?`${t('since')} ${since}`:''}</p>
+        ${!u.name||!u.email?`<p class="ac-fill"><a href="#profile" data-s="profile">${t('fill')}</a></p>`:''}</div>
         <div class="ac-stats" style="margin-top:18px">
-          <a href="#orders" data-s="orders"><span class="ic">${ic('ix-box')}</span><b>${ORD.length}</b><small>${t('orders')}</small></a>
+          <a href="#orders" data-s="orders"><span class="ic">${ic('ix-box')}</span><b>${ORD.length||u.orderCount||0}</b><small>${t('orders')}</small></a>
           <a href="/favorites.html"><span class="ic">${ic('heart')}</span><b>${c('fav')}</b><small>${t('fav')}</small></a>
           <a href="/compare.html"><span class="ic">${ic('cmp')}</span><b>${c('cmp')}</b><small>${t('cmp')}</small></a>
           <a href="/cart.html"><span class="ic">${ic('cart')}</span><b>${c('cart')}</b><small>${t('cart')}</small></a></div>
-        <div class="ip-card" style="margin-top:18px"><h2 style="justify-content:space-between"><span style="display:flex;gap:12px;align-items:center"><span class="ic">${ic('ix-box')}</span>${t('recent')}</span><a href="#orders" data-s="orders" style="font-size:14px;color:var(--blue-600)">${t('all')}</a></h2>${ORD.slice(0,2).map(orderHTML).join('')}</div>
+        <div class="ip-card" style="margin-top:18px"><h2 style="justify-content:space-between"><span style="display:flex;gap:12px;align-items:center"><span class="ic">${ic('ix-box')}</span>${t('recent')}</span>${ORD.length>2?`<a href="#orders" data-s="orders" style="font-size:14px;color:var(--blue-600)">${t('all')}</a>`:''}</h2>${ORD.length?ORD.slice(0,2).map(orderHTML).join(''):`<div class="ac-empty">${t('none')}</div>`}</div>
       </section>
       <section class="ac-sec${sec==='orders'?' on':''}" data-s="orders"><div class="ip-card"><h2><span class="ic">${ic('ix-box')}</span>${t('orders')}</h2>
-        <div class="ac-flt">${[-1,0,1,2,3].map(i=>`<button type="button" data-f="${i}" class="${i===flt?'on':''}">${i<0?t('stAll'):tt(T.st[i])}</button>`).join('')}</div>
+        <div class="ac-flt">${[-1,0,1,2].map(i=>`<button type="button" data-f="${i}" class="${i===flt?'on':''}">${i<0?t('stAll'):tt(T.st[i])}</button>`).join('')}</div>
         ${shown.length?shown.map(orderHTML).join(''):`<div class="ac-empty">${t('none')}</div>`}</div></section>
       <section class="ac-sec${sec==='profile'?' on':''}" data-s="profile"><div class="ip-card"><h2><span class="ic">${ic('user')}</span>${t('profile')}</h2>
-        <form class="ip-form ac-prof" novalidate>${F('fname',t('fname'),u.fname,'text',' class="w"')}${F('email',t('email'),u.email,'email')}${F('phone',t('phone'),u.phone,'tel')}
-        <label>${t('type')}<input value="${ti<0?tt(T.types[0]):tt(T.types[ti])}" disabled></label>
-        ${ti>0?`<label>${t('company')}<input name="company" value="${u.company||''}"></label><label>${t('tax')}<input name="taxcode" value="${u.taxcode||''}"></label>`:''}
-        <label class="w lg-rem"><input type="checkbox" name="news"${u.news!==false?' checked':''}> ${t('news')}</label>
+        <form class="ip-form ac-prof" data-api="profile" novalidate>${F('name',t('fname'),u.name,{w:1,ac:'name'})}${F('phone',t('phone'),u.phone,{ty:'tel',req:1,min:8})}
+        ${F('email',t('email'),u.email,{ty:'email',ac:'email',hint:t('emailH')})}
+        <label>${t('loc')}${regionSel('city',u.city)}</label>${F('address',t('street'),u.address,{ac:'street-address'})}
+        <label class="w">${t('type')}<input value="${tt(T.types[ti])}" disabled><small class="ac-hint">${t('typeH')}</small></label>
+        ${ti===1?F('company',t('company'),u.company,{w:1,ac:'organization'}):''}
+        ${ti===2?F('lawName',t('company'),u.lawName||u.company,{w:1,ac:'organization'})+F('taxcode',t('tax'),u.taxcode)+F('bankinfo',t('bank'),u.bankinfo)+F('lawAddress',t('lawAdr'),u.lawAddress,{w:1})+F('factualAddress',t('factAdr'),u.factualAddress,{w:1}):''}
+        <div class="au-err w" hidden></div>
         <div class="row"><small>${t('req')}</small><span class="ip-ok"><svg class="i"><use href="#check"/></svg>${t('saved')}</span><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div></form></div></section>
       <section class="ac-sec${sec==='adr'?' on':''}" data-s="adr"><div class="ip-card"><h2><span class="ic">${ic('pin')}</span>${t('adr')}</h2>
-        ${adrEdit!==null?`<form class="ip-form ac-af" novalidate>${F('l',t('aname'),(adrs[adrEdit]||{}).l,'text',' class="w"')}${F('city',t('city'),(adrs[adrEdit]||{}).city)}${F('a',t('street'),(adrs[adrEdit]||{}).a)}
-          <div class="row"><a href="#" class="ac-ac lg-sw">${t('cancel')}</a><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div></form>`:
-        `<div class="ac-adr">${adrs.map((a,i)=>`<div class="${a.def?'def':''}"><b>${a.l}${a.def?` <span class="ac-tag">${t('def')}</span>`:''}</b><p>${a.city}, ${a.a}</p><div class="acts"><a data-e="${i}">${t('edit')}</a>${a.def?'':`<a data-d="${i}">${t('mkdef')}</a><a class="del" data-x="${i}">${t('del')}</a>`}</div></div>`).join('')}<div class="new" data-e="${adrs.length}">${t('add')}</div></div>`}</div></section>
+        ${adrEdit!==null?`<form class="ip-form ac-af" novalidate>${F('l',t('aname'),(adrs[adrEdit]||{}).l,{w:1,req:1})}${F('city',t('city'),(adrs[adrEdit]||{}).city||(u.city&&A?A.regionName(u.city):''),{req:1})}${F('a',t('street'),(adrs[adrEdit]||{}).a,{req:1})}
+          <div class="au-err w" hidden></div><div class="row"><a href="#" class="ac-ac lg-sw">${t('cancel')}</a><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div></form>`:
+        `<div class="ac-adr">${adrs.map((a,i)=>`<div class="${a.def?'def':''}"><b>${esc(a.l)}${a.def?` <span class="ac-tag">${t('def')}</span>`:''}</b><p>${esc(a.city)}, ${esc(a.a)}</p><div class="acts"><a data-e="${i}">${t('edit')}</a>${a.def?'':`<a data-d="${i}">${t('mkdef')}</a>`}<a class="del" data-x="${i}">${t('del')}</a></div></div>`).join('')}<div class="new" data-e="${adrs.length}">${t('add')}</div></div>`}</div></section>
       <section class="ac-sec${sec==='pwd'?' on':''}" data-s="pwd"><div class="ip-card"><h2><span class="ic">${ic('shield')}</span>${t('pwd')}</h2>
-        <form class="ip-form" novalidate><label class="w">${t('oldp')} *<input name="old" type="password" required minlength="3" autocomplete="current-password"></label>
-        <label>${t('newp')} *<input name="password" type="password" required minlength="3" autocomplete="new-password"></label><label>${t('rep')} *<input name="re_password" type="password" required minlength="3" data-same="password" autocomplete="new-password"></label>
+        <form class="ip-form ac-pw" data-api="password" novalidate><label class="w">${t('oldp')} *<input name="old" type="password" required minlength="1" autocomplete="current-password"></label>
+        <label>${t('newp')} *<input name="password" type="password" required minlength="6" autocomplete="new-password"></label><label>${t('rep')} *<input name="re_password" type="password" required minlength="6" data-same="password" autocomplete="new-password"></label>
+        <div class="au-err w" hidden></div>
         <div class="row"><small>${t('req')}</small><span class="ip-ok"><svg class="i"><use href="#check"/></svg>${t('pwdOk')}</span><button class="btn p" type="submit" style="border:0;font:inherit;font-weight:600;cursor:pointer">${t('save')}</button></div>
-        <div class="row rg-mis" hidden data-mis="${t('mis')}"></div></form></div></section>`;
+        <div class="row rg-mis" hidden data-mis="${t('mis')}"></div></form>
+        <hr style="border:0;border-top:1px solid var(--line);margin:22px 0 16px"><p style="margin:0 0 12px;color:var(--muted);font-size:14px">${t('sessP')}</p>
+        <button class="btn ac-all" type="button" style="font:inherit;font-weight:600;cursor:pointer">${t('sess')}</button></div></section>`;
       /* wiring */
-      const go=s=>{sec=s;history.replaceState(null,'','#'+s);render();scrollTo({top:0,behavior:'smooth'});};
+      const go=s=>{sec=s;adrEdit=null;history.replaceState(null,'','#'+s);render();scrollTo({top:0,behavior:'smooth'});};
       document.querySelectorAll('[data-s]').forEach(a=>{if(a.tagName==='A')a.onclick=e=>{e.preventDefault();go(a.dataset.s);};});
-      nav.querySelector('.ac-out').onclick=e=>{e.preventDefault();localStorage.removeItem(U);location.href='/login.html';};
+      nav.querySelector('.ac-out').onclick=e=>{e.preventDefault();A.logout().finally(()=>location.href='/login.html');};
+      app.querySelector('.ac-all').onclick=()=>A.api('/logout-all',{method:'POST'}).catch(()=>{}).finally(()=>{A.cache(null);location.href='/login.html';});
       app.querySelectorAll('.ac-oh').forEach(b=>b.onclick=()=>b.parentNode.classList.toggle('open'));
       app.querySelectorAll('.ac-flt button').forEach(b=>b.onclick=()=>{flt=+b.dataset.f;render();});
-      app.querySelectorAll('.ac-rep').forEach(b=>b.onclick=()=>{if(S){S.add&&S.add('cart',{id:S.slug?S.slug(b.closest('.ac-ord').querySelector('.ac-it').textContent.split('\n')[0]):'x',q:1});S.toast&&S.toast(t('cart')+' ✓');}});
-      app.querySelectorAll('.ac-inv').forEach(b=>b.onclick=()=>print());
+      const ok=f=>{const m=f.querySelector('.ip-ok');if(m){m.classList.add('on');setTimeout(()=>m.classList.remove('on'),4000);}};
       const pf=app.querySelector('.ac-prof');
-      pf.addEventListener('ok',e=>{const d=e.detail;put(U,{...u,...d,news:!!d.news});setTimeout(render,1500);});
-      pf.addEventListener('reset',e=>e.preventDefault());
+      A.form(pf,d=>A.api('/me',{method:'PATCH',body:d}).then(x=>{u=x;A.cache(x);ok(pf);setTimeout(render,1200);}));
+      const pw=app.querySelector('.ac-pw');
+      A.form(pw,d=>A.api('/me/password',{method:'POST',body:{old:d.old,password:d.password}}).then(()=>{pw.reset();ok(pw);}));
+      const saveAdr=list=>A.api('/me',{method:'PATCH',body:{addresses:list}}).then(x=>{u=x;A.cache(x);adrEdit=null;render();});
       app.querySelectorAll('[data-e]').forEach(a=>a.onclick=()=>{adrEdit=+a.dataset.e;render();});
-      app.querySelectorAll('[data-d]').forEach(a=>a.onclick=()=>{adrs.forEach((x,i)=>x.def=i===+a.dataset.d?1:0);put(A,adrs);render();});
-      app.querySelectorAll('[data-x]').forEach(a=>a.onclick=()=>{adrs.splice(+a.dataset.x,1);put(A,adrs);render();});
+      app.querySelectorAll('[data-d]').forEach(a=>a.onclick=()=>saveAdr(adrs.map((x,i)=>({...x,def:i===+a.dataset.d?1:0}))));
+      app.querySelectorAll('[data-x]').forEach(a=>a.onclick=()=>saveAdr(adrs.filter((x,i)=>i!==+a.dataset.x)));
       const af=app.querySelector('.ac-af');
       if(af){af.querySelector('.ac-ac').onclick=e=>{e.preventDefault();adrEdit=null;render();};
-        af.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();let ok=true;af.querySelectorAll('[required]').forEach(x=>{const b=x.value.trim().length<2;x.classList.toggle('bad',b);if(b)ok=false;});if(!ok)return;
-          const d=Object.fromEntries(new FormData(af));adrs[adrEdit]={...(adrs[adrEdit]||{def:adrs.length?0:1}),...d};put(A,adrs);adrEdit=null;render();},true);}
+        af.addEventListener('submit',e=>{e.preventDefault();e.stopImmediatePropagation();let okk=true;af.querySelectorAll('[required]').forEach(x=>{const b=x.value.trim().length<2;x.classList.toggle('bad',b);if(b)okk=false;});if(!okk)return;
+          const d=Object.fromEntries(new FormData(af));const list=adrs.slice();list[adrEdit]={...(list[adrEdit]||{def:list.length?0:1}),...d};
+          saveAdr(list).catch(err=>A.showErr(af,err));},true);}
       app.querySelectorAll('.ip-form:not(.ac-af)').forEach(f=>window.LEDInfoForm&&window.LEDInfoForm(f));
     });
   }
-  render();
+  render();load();
   addEventListener('hashchange',()=>{const s=location.hash.slice(1);if(T[s]&&s!==sec){sec=s;render();}});
   new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 });

@@ -28,6 +28,14 @@ services:
       SYNC_API_KEY: ${SYNC_API_KEY}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      # customer e-mails (password reset codes); empty SMTP_HOST = not sent
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      MAIL_DEV_LOG: ${MAIL_DEV_LOG:-}
     ports:
       - "127.0.0.1:5100:3000"
 

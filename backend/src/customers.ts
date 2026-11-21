@@ -1,12 +1,11 @@
 import {
-  BadRequestException, Body, Controller, ForbiddenException, Get, NotFoundException, Param, ParseIntPipe, Patch, Post,
-  Query, Req, UnauthorizedException, UseGuards,
+  BadRequestException, Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Patch, Post,
+  Query, Req, UseGuards,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
-import { checkCustomerPassword, hashCustomerPassword } from './legacy';
+import { hashCustomerPassword } from './legacy';
 
 const SORTS: Record<string, string> = {
   name: 'c.name', registered: 'c.registered_at', lastOrder: '"lastOrderAt"', orders: '"orderCount"', spent: '"totalSpent"', id: 'c.id',
@@ -141,32 +140,5 @@ export class CustomersController {
     await this.ds.query(`INSERT INTO change_log (entity, action, external_id, name, changes) VALUES ('customer', $1, $2, $3, $4)`,
       ['updated', id, cur.name, JSON.stringify({ password: ['•••', '•••'], by: [null, req.user?.email ?? 'admin'] })]);
     return { ok: true };
-  }
-}
-
-/** Customer login for the storefront. Old led.am passwords keep working and are upgraded to bcrypt on first login. */
-@Controller('shop')
-export class ShopAuthController {
-  constructor(@InjectDataSource() private ds: DataSource, private jwt: JwtService) {}
-
-  @Post('login')
-  async login(@Body() body: { login?: string; password?: string }) {
-    const login = String(body?.login || '').trim().toLowerCase();
-    const password = String(body?.password || '');
-    if (!login || !password) throw new UnauthorizedException('Wrong login or password');
-    const rows = await this.ds.query(`
-      SELECT id, name, email, blocked, password_hash, password_scheme FROM customers
-      WHERE lower(email) = $1 OR lower(login) = $1 ORDER BY last_visit_at DESC NULLS LAST`, [login]);
-    for (const c of rows) {
-      if (!(await checkCustomerPassword(password, c.password_scheme, c.password_hash))) continue;
-      if (c.blocked) throw new ForbiddenException('Account is blocked');
-      const upgrade = c.password_scheme !== 'bcrypt' ? await hashCustomerPassword(password) : null;
-      await this.ds.query(`UPDATE customers SET last_login_at = now(),
-        password_hash = COALESCE($2, password_hash), password_scheme = CASE WHEN $2::text IS NULL THEN password_scheme ELSE 'bcrypt' END
-        WHERE id = $1`, [c.id, upgrade]);
-      const user = { sub: c.id, kind: 'customer', name: c.name, email: c.email };
-      return { token: this.jwt.sign(user, { expiresIn: '30d' }), user };
-    }
-    throw new UnauthorizedException('Wrong login or password');
   }
 }
