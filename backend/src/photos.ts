@@ -269,7 +269,7 @@ async function geminiGuess(p: Product): Promise<Candidate[]> {
     contents: [{ role: 'user', parts: [{ text:
       `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
 ` +
-      'Give up to 8 URLs of pages with photos of exactly this model: the manufacturer's global English site product page first, ' +
+      'Give up to 8 URLs of pages with photos of exactly this model: the manufacturer global English site product page first, ' +
       'then other official/brand sites and international retailers. Do NOT use Russian marketplaces (ozon, wildberries, dns-shop, citilink, ' +
       'yandex market) or amazon - they block servers. Prefer canonical product pages, not search pages. Direct official image URLs are also fine.' }] }],
     generationConfig: { temperature: 0.2, responseMimeType: 'application/json',
