@@ -285,3 +285,8 @@ button.danger { background: var(--bad, #c62828); color: #fff; }
 .cu-order .cu-sum { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
 .cu-order[open] summary { margin-bottom: 8px; }
 @media (max-width: 700px) { .cu-grid { grid-template-columns: 1fr; } .cu-block { flex-wrap: wrap; } }
+
+/* customers: "log in as" link-style button in the list */
+.link-btn{background:none!important;border:0!important;padding:2px 0!important;color:var(--accent,#1468DC)!important;cursor:pointer;font:inherit;box-shadow:none!important}
+.link-btn:hover{text-decoration:underline}
+.link-btn.small{font-size:12px}

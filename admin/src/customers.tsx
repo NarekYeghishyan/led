@@ -52,6 +52,15 @@ const COLS: { key: string; label: TKey; sort?: string; num?: boolean }[] = [
   { key: 'lastOrder', label: 'cu.col.lastOrder', sort: 'lastOrder' },
 ];
 
+/** Opens the storefront account as this customer (admin only; the API sets the site session cookie in this browser). */
+async function loginAs(id: number, onError: (m: string) => void) {
+  const w = window.open('about:blank', '_blank');   // open now, before await, so popup blockers allow it
+  try {
+    const r = await api<{ url: string }>(`/admin/customers/${id}/login-as`, { method: 'POST' });
+    if (w) w.location.href = r.url; else window.location.assign(r.url);
+  } catch (e) { w?.close(); onError((e as Error).message); }
+}
+
 export function CustomersPage() {
   const { t, fmt } = useT();
   const [params, setParams] = useSearchParams();
@@ -128,6 +137,8 @@ export function CustomersPage() {
                   {c.company && <div className="muted small">{c.company}</div>}
                   {c.blocked && <span className="tag bad">{t('cu.blocked')}</span>}
                   {!c.confirmed && <span className="tag">{t('cu.unconfirmed')}</span>}
+                  {!c.blocked && <div><button type="button" className="link-btn small" title={t('cu.loginAsHint')}
+                    onClick={() => loginAs(c.id, (m) => alert(m))}>{t('cu.loginAs')} ↗</button></div>}
                 </td>
                 <td data-label={t('cu.col.contacts')}>
                   <div>{c.email || '—'}</div><div className="muted small">{[c.phone, c.city].filter(Boolean).join(' · ')}</div>
@@ -272,6 +283,7 @@ export function CustomerPage() {
       <p><Link to="/customers">{t('cu.back')}</Link></p>
       <header className="page-head">
         <h1>{c.name || c.login || `#${c.id}`} {c.blocked && <span className="tag bad">{t('cu.blocked')}</span>}</h1>
+        {!c.blocked && <button type="button" title={t('cu.loginAsHint')} onClick={() => loginAs(c.id, setError)}>{t('cu.loginAs')} ↗</button>}
         <span className="muted small">{t('cu.col.orders')}: {c.orders.length} · {t('cu.col.spent')}: {fmt.num(spent, 0)} ֏</span>
       </header>
       <p className="muted small">
@@ -338,6 +350,7 @@ export function CustomerPage() {
               <ul className="cu-hist">
                 {c.history.map((h) => (
                   <li key={h.id}><span className="muted small">{fmt.date(h.at)} · {String(h.changes.by?.[1] ?? '')}</span>
+                    {h.action === 'login_as' && <div className="small"><b>{t('cu.h.login_as')}</b></div>}
                     {Object.entries(h.changes).filter(([k]) => k !== 'by').map(([k, [a, b]]) => (
                       <div key={k} className="small"><b>{k}</b>: {String(a ?? '—')} → {String(b ?? '—')}</div>
                     ))}

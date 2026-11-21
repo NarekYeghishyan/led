@@ -758,6 +758,7 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
   .ac-gate{padding:28px 16px}
 }
 .ac-noimg{width:48px;height:48px;border-radius:10px;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;flex:none}.ac-noimg .i{width:22px;height:22px}
+.ac-imp{display:flex;align-items:center;gap:10px;background:#FFF7E6;border:1px solid #F5DDA6;color:#8A5A00;border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:14px}.ac-imp .i{width:18px;height:18px;flex:none}.ac-imp a{margin-left:auto;color:#8A5A00;font-weight:600}
 .ac-hint{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:4px}
 .ac-fill{margin:12px 0 0;font-size:14px}.ac-fill a{color:var(--blue-600)}
 .ac-prof select{width:100%}
@@ -791,6 +792,7 @@ document.addEventListener('DOMContentLoaded',function(){
     city:["Город","Քաղաք","City"],cancel:["Отмена","Չեղարկել","Cancel"],noAdr:["Адресов пока нет","Հասցեներ դեռ չկան","No addresses yet"],
     gate:["Войдите в аккаунт","Մուտք գործեք","Please log in"],gated:["Личный кабинет доступен после входа.","Անձնական էջը հասանելի է մուտք գործելուց հետո։","Your account is available after you log in."],
     login:["Войти","Մուտք","Log in"],reg:["Регистрация","Գրանցում","Register"],load:["Загрузка…","Բեռնվում է…","Loading…"],
+    imp:["Вы вошли как этот покупатель (администратор)","Դուք մուտք եք գործել որպես այս հաճախորդը (ադմինիստրատոր)","You are viewing as this customer (admin)"],impX:["Выйти","Դուրս գալ","Exit"],
     since:["Клиент с","Հաճախորդ է՝","Customer since"],
     pick:["Самовывоз","Ինքնատարում","Pick-up"],cour:["Доставка","Առաքում","Courier"],ship:["доставка","առաքում","delivery"],
     paid:["Оплачен","Վճարված է","Paid"],
@@ -851,7 +853,7 @@ document.addEventListener('DOMContentLoaded',function(){
       const shown=ORD.filter(o=>flt<0||o.s===flt);
       const F=(n,l,v,o={})=>`<label${o.w?' class="w"':''}>${l}${o.req?' *':''}<input name="${n}" type="${o.ty||'text'}" value="${esc(v)}"${o.req?' required minlength="'+(o.min||2)+'"':''}${o.ty==='tel'?' inputmode="tel" autocomplete="tel"':''}${o.ac?` autocomplete="${o.ac}"`:''}>${o.hint?`<small class="ac-hint">${o.hint}</small>`:''}</label>`;
       const since=(u.registeredAt||u.createdAt||'').slice(0,4);
-      app.innerHTML=
+      app.innerHTML=(u.adminView?`<div class="ac-imp">${ic('shield')}<span>${t('imp')} <b>${esc(u.adminView)}</b></span><a href="#" class="ac-imp-x">${t('impX')}</a></div>`:'')+
       `<section class="ac-sec${sec==='ov'?' on':''}" data-s="ov">
         <div class="ip-card"><h2><span class="ic">${ic('user')}</span>${t('hi')}${u.name?', '+esc(u.name.split(' ')[0]):''}!</h2>
         <p style="margin:0;color:var(--muted)">${since?`${t('since')} ${since}`:''}</p>
@@ -890,6 +892,7 @@ document.addEventListener('DOMContentLoaded',function(){
       /* wiring */
       const go=s=>{sec=s;adrEdit=null;history.replaceState(null,'','#'+s);render();scrollTo({top:0,behavior:'smooth'});};
       document.querySelectorAll('[data-s]').forEach(a=>{if(a.tagName==='A')a.onclick=e=>{e.preventDefault();go(a.dataset.s);};});
+      const ix=app.querySelector('.ac-imp-x');if(ix)ix.onclick=e=>{e.preventDefault();A.logout().finally(()=>location.href='/admin/customers');};
       nav.querySelector('.ac-out').onclick=e=>{e.preventDefault();A.logout().finally(()=>location.href='/login.html');};
       app.querySelector('.ac-all').onclick=()=>A.api('/logout-all',{method:'POST'}).catch(()=>{}).finally(()=>{A.cache(null);location.href='/login.html';});
       app.querySelectorAll('.ac-oh').forEach(b=>b.onclick=()=>b.parentNode.classList.toggle('open'));
@@ -1951,6 +1954,17 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2007,6 +2021,7 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 })();
 </script>
 <!--/shop-shared-->
+
 
 
 

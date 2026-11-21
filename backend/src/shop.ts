@@ -16,8 +16,8 @@ import { randomInt } from 'crypto';
 import { checkCustomerPassword, hashCustomerPassword } from './legacy';
 import { mailConfigured, sendResetCode, smsConfigured } from './mailer';
 
-const COOKIE = 'led_s';
-const COOKIE_PATH = '/api/shop';
+export const COOKIE = 'led_s';
+export const COOKIE_PATH = '/api/shop';
 const DAY = 24 * 3600 * 1000;
 const PHONE8 = `right(regexp_replace(coalesce(c.phone, ''), '\\D', '', 'g'), 8)`;
 
@@ -56,7 +56,7 @@ function readCookie(req: Request, name: string) {
   return '';
 }
 
-type CustomerReq = Request & { customerId?: number };
+type CustomerReq = Request & { customerId?: number; adminView?: string };
 
 @Injectable()
 export class CustomerGuard implements CanActivate {
@@ -65,12 +65,13 @@ export class CustomerGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest<CustomerReq>();
     const token = readCookie(req, COOKIE);
     if (!token) throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
-    let p: { sub: number; kind: string; v: number };
+    let p: { sub: number; kind: string; v: number; imp?: string };
     try { p = this.jwt.verify(token); } catch { throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in'); }
     if (p?.kind !== 'customer') throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
     const [c] = await this.ds.query(`SELECT blocked, token_version FROM customers WHERE id = $1`, [p.sub]);
     if (!c || c.blocked || c.token_version !== (p.v ?? 0)) throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
     req.customerId = p.sub;
+    if (p.imp) req.adminView = p.imp;
     return true;
   }
 }
@@ -245,8 +246,8 @@ export class ShopController {
 
   @Get('me')
   @UseGuards(CustomerGuard)
-  me(@Req() req: CustomerReq) {
-    return this.profile(req.customerId!);
+  async me(@Req() req: CustomerReq) {
+    return { ...(await this.profile(req.customerId!)), adminView: req.adminView || null };
   }
 
   @Patch('me')

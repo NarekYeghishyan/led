@@ -1,8 +1,11 @@
 import {
-  BadRequestException, Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Patch, Post,
+  BadRequestException, Body, Controller, ForbiddenException, Get, Res, NotFoundException, Param, ParseIntPipe, Patch, Post,
   Query, Req, UseGuards,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
+import type { Request, Response } from 'express';
+import { COOKIE, COOKIE_PATH } from './shop';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
 import { hashCustomerPassword } from './legacy';
@@ -24,7 +27,7 @@ const CUSTOMER_COLS = `c.id, c.legacy_id AS "legacyId", c.name, c.email, c.login
 @Controller('admin/customers')
 @UseGuards(JwtGuard)
 export class CustomersController {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+  constructor(@InjectDataSource() private ds: DataSource, private jwt: JwtService) {}
 
   @Get()
   async list(@Query() q: Record<string, string>) {
@@ -140,5 +143,21 @@ export class CustomersController {
     await this.ds.query(`INSERT INTO change_log (entity, action, external_id, name, changes) VALUES ('customer', $1, $2, $3, $4)`,
       ['updated', id, cur.name, JSON.stringify({ password: ['•••', '•••'], by: [null, req.user?.email ?? 'admin'] })]);
     return { ok: true };
+  }
+
+  /** "Log in as this customer": sets the storefront session cookie in the admin's browser (2 h, ends with the browser).
+   *  Admin role only, logged to change_log; the site shows a banner and the customer's last-login date is not touched. */
+  @Post(':id/login-as')
+  async loginAs(@Param('id', ParseIntPipe) id: number, @Req() req: Request & { user: { email: string; role: string } },
+    @Res({ passthrough: true }) res: Response) {
+    if (req.user?.role !== 'admin') throw new ForbiddenException('Admins only');
+    const [c] = await this.ds.query(`SELECT name, blocked, token_version FROM customers WHERE id = $1`, [id]);
+    if (!c) throw new NotFoundException();
+    if (c.blocked) throw new BadRequestException('Customer is blocked — unblock first');
+    const token = this.jwt.sign({ sub: id, kind: 'customer', v: c.token_version, imp: req.user.email || 'admin' }, { expiresIn: '2h' });
+    res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', secure: req.secure, path: COOKIE_PATH });
+    await this.ds.query(`INSERT INTO change_log (entity, action, external_id, name, changes) VALUES ('customer', 'login_as', $1, $2, $3)`,
+      [id, c.name, JSON.stringify({ by: [null, req.user.email ?? 'admin'] })]);
+    return { ok: true, url: '/account.html' };
   }
 }
