@@ -654,7 +654,7 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
       <a class="act" href="#"><svg class="i"><use href="#cart"/></svg><span>Корзина</span><em>2</em></a>
     </div>
   </div>
-  <nav class="cats"><a href="#" data-m="0"><svg class="i"><use href="#tower"/></svg><span>Компьютеры</span></a><a href="#" data-m="1"><svg class="i"><use href="#laptop"/></svg><span>Ноутбуки</span></a><a href="#" data-m="2"><svg class="i"><use href="#cpu"/></svg><span>Комплектующие</span></a><a href="#" data-m="3"><svg class="i"><use href="#monitor"/></svg><span>Периферия</span></a><a href="#" data-m="4"><svg class="i"><use href="#phone"/></svg><span>Планшеты, смартфоны, гаджеты</span></a><a href="#" data-m="5"><svg class="i"><use href="#head"/></svg><span>Аксессуары</span></a><a href="#" data-m="6"><svg class="i"><use href="#wifi"/></svg><span>Сетевые устройства</span></a><a class="tool" href="#" aria-label="Собрать ПК"><svg class="i"><use href="#tool"/></svg><span class="tip">Собрать ПК</span></a><a class="hot" href="#"><svg class="i"><use href="#card"/></svg><span>Акции</span></a></nav>
+  <nav class="cats"><a href="#" data-m="0"><svg class="i"><use href="#tower"/></svg><span>Компьютеры</span></a><a href="#" data-m="1"><svg class="i"><use href="#laptop"/></svg><span>Ноутбуки</span></a><a href="#" data-m="2"><svg class="i"><use href="#cpu"/></svg><span>Комплектующие</span></a><a href="#" data-m="3"><svg class="i"><use href="#monitor"/></svg><span>Периферия</span></a><a href="#" data-m="4"><svg class="i"><use href="#phone"/></svg><span>Планшеты, смартфоны, гаджеты</span></a><a href="#" data-m="5"><svg class="i"><use href="#head"/></svg><span>Аксессуары</span></a><a href="#" data-m="6"><svg class="i"><use href="#wifi"/></svg><span>Сетевые устройства</span></a></nav>
 </div>
 <div class="mega" id="mega" hidden>
   <div class="wrap mega-in">
@@ -951,7 +951,7 @@ document.addEventListener('click',e=>{if(!ph.contains(e.target))ph.classList.rem
 document.querySelectorAll('nav.cats a[data-m]').forEach((a,i)=>{const mi=+a.dataset.m;
  a.addEventListener('mouseenter',()=>{clearTimeout(t);t=setTimeout(()=>{if(mega.hidden){hov=true;megaToggle(true)}megaShow(mi);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.toggle('act',x===a))},120)});
  a.addEventListener('mouseleave',()=>clearTimeout(t))});
-let ct;document.addEventListener('mousemove',e=>{if(!hov)return;if(e.target.closest('.mega,header.h')){clearTimeout(ct);ct=null;return}if(ct)return;ct=setTimeout(()=>{ct=null;if(!hov)return;clearTimeout(t);hov=false;megaToggle(false);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.remove('act'))},250)});
+let ct;document.addEventListener('mousemove',e=>{if(!hov)return;if(e.target.closest('.mega,nav.cats,#catBtn')){clearTimeout(ct);ct=null;return}if(ct)return;ct=setTimeout(()=>{ct=null;if(!hov)return;clearTimeout(t);hov=false;megaToggle(false);document.querySelectorAll('nav.cats a').forEach(x=>x.classList.remove('act'))},250)});
 cb.addEventListener('mouseenter',()=>{clearTimeout(t);t=setTimeout(()=>{if(mega.hidden){hov=true;megaToggle(true)}},120)});
 cb.addEventListener('mouseleave',()=>{if(!hov)clearTimeout(t)});
 cb.onclick=e=>{e.preventDefault();clearTimeout(t);if(hov){hov=false;return}megaToggle(mega.hidden)};
@@ -1952,6 +1952,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 
 
 
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
 <!--shop-shared-->
 <style>
 .act.on{background:var(--blue-50);color:var(--blue-700)}.act.on svg.i{color:var(--blue-600)}
@@ -2268,6 +2283,13 @@ footer .logo:hover img{transform:scale(1.05) rotate(-1.5deg)}
 nav.cats{align-items:stretch!important}
 nav.cats a{min-height:48px;box-sizing:border-box;align-self:stretch}
 nav.cats a.tool,nav.cats a.hot{align-self:center;min-height:40px}
+/* top menu: 7 sections as compact tiles (icon box above the name) */
+header nav.cats{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:8px!important;padding:10px 0!important}
+header nav.cats a,header nav.cats a.act{flex-direction:column!important;justify-content:flex-start;gap:7px!important;padding:10px 6px!important;text-align:center;font-size:13px!important;font-weight:600;color:#1B2A44;border-radius:12px;min-height:0}
+header nav.cats a .i,header nav.cats a.act svg.i{width:38px!important;height:38px!important;padding:9px;box-sizing:border-box;border-radius:11px;background:var(--blue-50);color:var(--blue-600)!important;transition:transform .4s cubic-bezier(.3,1.6,.5,1),background .2s,color .2s}
+header nav.cats a:hover .i,header nav.cats a.act .i{background:var(--blue-600);color:#fff!important}
+header nav.cats a.act{background-color:var(--blue-50)}
+@media (max-width:1100px){header nav.cats{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 /* ---- product page section tabs ---- */
 .ptabs a{border-radius:10px 10px 0 0;transition:color .2s,background-size .35s cubic-bezier(.2,.8,.2,1),translate .25s!important;
  background-image:linear-gradient(var(--blue-600),var(--blue-600)),radial-gradient(90px circle at 50% 100%,rgba(47,127,234,.14),transparent 70%);
