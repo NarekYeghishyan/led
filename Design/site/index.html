@@ -295,6 +295,59 @@ footer{margin-top:64px;background:var(--navy-900);color:#AAB7CB;font-size:14px}
 .credit .calc{grid-row:1/4;align-self:end;margin:0;border:0;padding:24px;background:var(--bg);border-radius:var(--r-md)}
 .credit .range{grid-row:4/6}
 .credit>.btn{justify-self:start}
+/* top builds showcase */
+.tb{--c1:#4F8EF7;--c2:#22D3EE;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:18px;backdrop-filter:blur(6px);min-width:0}
+.tb-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.tb-ttl{display:flex;align-items:center;gap:8px;font-size:15px}
+.tb-ttl:before{content:"";width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 4px rgba(74,222,128,.18);animation:tbPing 1.8s infinite}
+@keyframes tbPing{50%{box-shadow:0 0 0 7px rgba(74,222,128,0)}}
+.tb-tabs{display:flex;gap:4px;background:rgba(255,255,255,.06);border-radius:999px;padding:4px}
+.tb-tabs button{position:relative;overflow:hidden;border:0;background:none;color:#B5C3D8;font:inherit;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:color .2s,background .2s}
+.tb-tabs button:hover{color:#fff}
+.tb-tabs button.on{background:rgba(255,255,255,.12);color:#fff}
+.tb-tabs button i{position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--c1)}
+.tb-tabs button.on i{animation:tbBar var(--dur,7s) linear forwards}
+.tb.hold .tb-tabs button.on i{animation-play-state:paused}
+@keyframes tbBar{to{width:100%}}
+.tb-card{display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center;position:relative}
+.tb-card.in>*{animation:tbIn .5s cubic-bezier(.2,.8,.2,1) both}.tb-card.in>*:nth-child(2){animation-delay:.07s}
+@keyframes tbIn{from{opacity:0;transform:translateY(10px)}}
+/* PC tower */
+.tb-pc{position:relative;height:210px;display:grid;place-items:center}
+.tb-pc:before{content:"";position:absolute;inset:20% 0 0;background:radial-gradient(closest-side,var(--c1),transparent);opacity:.35;filter:blur(18px)}
+.tb-case{position:relative;width:110px;height:190px;border-radius:12px;background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 45%),#0B1424;border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 0 0 4px #0B1424,inset 0 0 0 5px rgba(255,255,255,.08),0 20px 40px -12px rgba(0,0,0,.6);display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px 0 12px 16px;transform:perspective(500px) rotateY(-14deg);transition:transform .5s}
+.tb:hover .tb-case{transform:perspective(500px) rotateY(-4deg)}
+.tb-fan{width:44px;height:44px;border-radius:50%;border:3px solid var(--c1);box-shadow:0 0 12px var(--c1),inset 0 0 10px var(--c2);background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.35) 0 14deg,transparent 14deg 60deg);animation:tbSpin 1.1s linear infinite}
+.tb-fan:nth-child(2){animation-duration:.9s}.tb-fan:nth-child(3){animation-duration:1.3s}
+@keyframes tbSpin{to{transform:rotate(360deg)}}
+.tb-gpu{position:absolute;right:10px;top:46%;width:44px;height:16px;border-radius:3px;background:linear-gradient(90deg,#1F2B40,#2A3A55);border-bottom:2px solid var(--c2);box-shadow:0 0 10px var(--c2)}
+.tb-strip{position:absolute;right:6px;top:14px;bottom:14px;width:3px;border-radius:3px;background:linear-gradient(var(--c1),var(--c2),var(--c1));background-size:100% 200%;animation:tbRgb 2.4s linear infinite}
+@keyframes tbRgb{to{background-position:0 200%}}
+.tb-badge{position:absolute;top:0;left:-4px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--c1);color:#fff;box-shadow:0 6px 16px -4px var(--c1);transform:rotate(-6deg);z-index:1}
+/* info */
+.tb-info{min-width:0}
+.tb-info small.k{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--c2);font-weight:700}
+.tb-info h4{font-size:20px;font-weight:800;margin:2px 0 10px;color:#fff}
+.tb-spec{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px;padding:0;list-style:none}
+.tb-spec li{display:flex;gap:8px;align-items:center;font-size:12.5px;color:#C6D2E4;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:6px 8px;min-width:0}
+.tb-spec li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-spec svg.i{width:15px;height:15px;color:var(--c1);flex:none}
+.tb-perf{display:grid;gap:6px;margin-bottom:12px}
+.tb-perf div{display:grid;grid-template-columns:78px 1fr 64px;gap:8px;align-items:center;font-size:11.5px;color:#8FA1BC}
+.tb-perf i{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.tb-perf em{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .9s cubic-bezier(.2,.8,.2,1) .15s}
+.tb-perf b{color:#fff;font-size:12px;text-align:right}
+.tb-buy{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
+.tb-pr b{display:block;font-size:24px;font-weight:800;color:#fff;line-height:1.1}
+.tb-pr s{font-size:12.5px;color:#7F90AA;margin-right:6px}
+.tb-pr small{font-size:12px;color:#8DB8FF}
+.tb-act{display:flex;gap:8px}
+.tb-act .btn{padding:10px 14px;font-size:13.5px}
+.tb-act .btn.g{border:1px solid rgba(255,255,255,.25);color:#fff;background:rgba(255,255,255,.04)}
+.tb-act .tb-cart{width:42px;padding:0;justify-content:center}
+.tb-dots{display:none}
+@media (max-width:560px){.tb-card{grid-template-columns:1fr}.tb-pc{height:150px}.tb-case{width:84px;height:140px;padding-left:12px;gap:5px}.tb-fan{width:32px;height:32px}.tb-gpu{width:32px}.tb-tabs{width:100%;overflow-x:auto}.tb-tabs button{flex:1}.tb-spec{grid-template-columns:1fr}.tb-act{width:100%}.tb-act .btn:not(.tb-cart){flex:1;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.tb-fan,.tb-strip,.tb-ttl:before{animation:none}}
 @media (max-width:900px){.build,.credit{grid-template-columns:1fr}.credit .calc,.credit .range{grid-column:1;grid-row:auto}.credit .calc{margin-top:20px}.build h3{font-size:28px}}
 @media (max-width:760px){.part{grid-template-columns:36px 1fr}.part .pp{grid-column:2;text-align:left}.cfg-f{flex-direction:column;align-items:stretch}.meter{max-width:none}}
 
@@ -756,12 +809,11 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
         <h3>Соберите свой ПК</h3>
         <p>Выберите комплектующие — мы проверим совместимость, соберём и протестируем компьютер.</p>
         <ul class="perks"><li><svg class="i"><use href="#check"/></svg><span>Сборка и тест бесплатно</span></li><li><svg class="i"><use href="#check"/></svg><span>Гарантия на всю сборку</span></li><li><svg class="i"><use href="#check"/></svg><span>Доставка готового ПК</span></li></ul>
-        <div class="btns"><a class="btn p" href="#">Открыть конфигуратор <svg class="i"><use href="#arrow"/></svg></a><a class="btn g" href="#">Готовые сборки</a></div>
+        <div class="btns"><a class="btn p" href="/assembly.html">Открыть конфигуратор <svg class="i"><use href="#arrow"/></svg></a><a class="btn g" href="/category.html">Готовые сборки</a></div>
       </div>
-      <div class="cfg">
-        <div class="cfg-h"><b>Ваша сборка</b><span class="ok"><svg class="i"><use href="#check"/></svg><span>Совместимо</span></span></div>
-        <div class="parts"></div>
-        <div class="cfg-f"><div><small>Итого</small><b id="cfgTotal">0 ֏</b></div><div class="meter"><small>Производительность</small><i><em id="cfgPerf"></em></i></div></div>
+      <div class="tb" id="topBuilds">
+        <div class="tb-h"><b class="tb-ttl"></b><div class="tb-tabs" role="tablist"></div></div>
+        <div class="tb-card"></div>
       </div>
     </div>
     <div class="credit">
@@ -918,22 +970,51 @@ const grid=document.querySelector('.pgrid');
 document.querySelectorAll('.tabs span').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tabs span').forEach(x=>x.classList.toggle('on',x===t));
  const cards=[...grid.children];cards.sort(()=>Math.random()-.5).forEach(c=>grid.appendChild(c));grid.classList.remove('swap');void grid.offsetWidth;grid.classList.add('swap')});
 
-/* mini configurator */
-const PARTS=[
- ['Процессор','cpu',[['Intel Core i5‑14400F',78000,40],['AMD Ryzen 7 7800X3D',168000,75],['Intel Core i9‑14900K',245000,95]]],
- ['Видеокарта','monitor',[['GeForce RTX 5060 8GB',149000,45],['GeForce RTX 5070 12GB',289000,75],['GeForce RTX 5080 16GB',540000,95]]],
- ['Память и SSD','server',[['16 ГБ DDR5 · 1 ТБ SSD',62000,45],['32 ГБ DDR5 · 2 ТБ SSD',118000,75],['64 ГБ DDR5 · 4 ТБ SSD',236000,95]]],
- ['Корпус','tower',[['LED Air 650W',48000,50],['LED Flow RGB 750W',72000,70],['LED Pro 1000W',115000,90]]]];
-const sel=PARTS.map(()=>0),wrap=document.querySelector('.parts');
+/* top ready builds (parts = assembly.html ids, "Configure" preloads them into led-asm) */
 const fmt=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
-function draw(){
- wrap.innerHTML=PARTS.map(([cat,ic,opts],i)=>{const o=opts[sel[i]];return `<div class="part" data-i="${i}"><div class="pi"><svg class="i"><use href="#${ic}"/></svg></div><div><small>${tr(cat)}</small><b>${o[0].replace(/ГБ/g,lang()==='en'?'GB':lang()==='hy'?'ԳԲ':'ГБ').replace(/ТБ/g,lang()==='en'?'TB':lang()==='hy'?'ՏԲ':'ТБ')}</b></div><div class="pp">${fmt(o[1])} ֏<span>${tr('нажмите, чтобы сменить')}</span></div></div>`}).join('');
- document.getElementById('cfgTotal').textContent=fmt(PARTS.reduce((a,p,i)=>a+p[2][sel[i]][1],0))+' ֏';
- document.getElementById('cfgPerf').style.width=Math.round(PARTS.reduce((a,p,i)=>a+p[2][sel[i]][2],0)/PARTS.length)+'%';
-}
-wrap.addEventListener('click',e=>{const el=e.target.closest('.part');if(!el)return;const i=+el.dataset.i;sel[i]=(sel[i]+1)%3;draw();wrap.children[i].classList.add('flash')});
-draw();
-document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(draw)));
+(function(){
+const box=document.getElementById('topBuilds');if(!box)return;
+const LI=()=>({hy:1,en:2}[lang()]||0);
+const T={ttl:['Топ готовых сборок','Լավագույն պատրաստի հավաքումներ','Top ready builds'],cfg:['Настроить','Կարգավորել','Configure'],
+ cart:['В корзину','Զամբյուղ','Add to cart'],mo:['от {n} ֏/мес','{n} ֏/ամիս‑ից','from {n} ֏/mo'],
+ games:['Игры 1440p','Խաղեր 1440p','Games 1440p'],work:['Работа','Աշխատանք','Work'],fps:['FPS','FPS','FPS'],
+ add:['Сборка добавлена в корзину','Հավաքումը ավելացվեց զամբյուղ','Build added to cart'],go:['Перейти','Անցնել','View']};
+const t=k=>T[k][LI()];
+const B=[
+ {k:'office',c1:'#4F8EF7',c2:'#A5C8FF',tab:['Офис','Գրասենյակ','Office'],kick:['Тихий и надёжный','Լուռ և հուսալի','Quiet & reliable'],badge:['Хит офиса','Գրասենյակի հիթ','Office hit'],
+  n:'LED Office i5',spec:['Core i5‑12400F','550 W 80+ Bronze','16 GB DDR4','500 GB NVMe'],perf:[18,'30+',70],old:229000,
+  parts:{mb:'asus-prime-b760m',cpu:'intel-i5-12400f',cool:'idcooling-se-224',ram:'kingston-ddr4-16',ssd:'kingston-nv3-500',case:'zalman-i3-neo',psu:'deepcool-pk550'},p:211500},
+ {k:'gamer',c1:'#A855F7',c2:'#22D3EE',tab:['Игровой','Խաղային','Gaming'],kick:['Самый популярный','Ամենապահանջվածը','Most popular'],badge:['№1 продаж','№1 վաճառք','#1 seller'],
+  n:'LED Gamer RTX',spec:['Core i5‑14600KF','RTX 4060 8 GB','32 GB DDR5','1 TB NVMe'],perf:[72,'120+',80],old:539000,
+  parts:{mb:'msi-pro-b760-ddr5',cpu:'intel-i5-14600kf',cool:'deepcool-ak400',ram:'kingston-ddr5-32',ssd:'samsung-990-evo-1tb',gpu:'rtx-4060',case:'deepcool-ch360',psu:'chieftec-650'},p:498000},
+ {k:'pro',c1:'#F97316',c2:'#FACC15',tab:['Ультра','Ուլտրա','Ultra'],kick:['Для стрима и 3D','Սթրիմի և 3D‑ի համար','For streaming & 3D'],badge:['Максимум','Առավելագույն','Max power'],
+  n:'LED Ultra X3D',spec:['Ryzen 7 7800X3D','RTX 4070 Super 12 GB','32 GB DDR5','2 TB NVMe'],perf:[96,'200+',95],old:869000,
+  parts:{mb:'gigabyte-b650-gaming',cpu:'amd-r7-7800x3d',cool:'arctic-lf3-240',ram:'kingston-ddr5-32',ssd:'crucial-p3-2tb',gpu:'rtx-4070-super',case:'montech-air-903',psu:'corsair-rm750e'},p:804000}];
+const IC=['cpu','monitor','server','doc'];
+let cur=1,tm;const DUR=7000;box.style.setProperty('--dur',DUR+'ms');
+const tabs=box.querySelector('.tb-tabs'),card=box.querySelector('.tb-card');
+function draw(anim){const b=B[cur],l=LI();box.style.setProperty('--c1',b.c1);box.style.setProperty('--c2',b.c2);
+ box.querySelector('.tb-ttl').textContent=t('ttl');
+ tabs.innerHTML=B.map((x,i)=>`<button role="tab" class="${i===cur?'on':''}" data-i="${i}">${x.tab[l]}<i></i></button>`).join('');
+ card.innerHTML=`<div class="tb-pc"><span class="tb-badge">${b.badge[l]}</span><div class="tb-case"><span class="tb-fan"></span><span class="tb-fan"></span><span class="tb-fan"></span>${b.parts.gpu?'<span class="tb-gpu"></span>':''}<span class="tb-strip"></span></div></div>
+ <div class="tb-info"><small class="k">${b.kick[l]}</small><h4>${b.n}</h4>
+  <ul class="tb-spec">${b.spec.map((s,i)=>`<li><svg class="i"><use href="#${IC[i]}"/></svg><span>${s}</span></li>`).join('')}</ul>
+  <div class="tb-perf"><div>${t('games')}<i><em style="--w:${b.perf[0]}%"></em></i><b>${b.perf[1]} ${t('fps')}</b></div><div>${t('work')}<i><em style="--w:${b.perf[2]}%"></em></i><b>${b.perf[2]}%</b></div></div>
+  <div class="tb-buy"><div class="tb-pr"><b>${fmt(b.p)} ֏</b><s>${fmt(b.old)} ֏</s><small>${t('mo').replace('{n}',fmt(Math.round(b.p/24/100)*100))}</small></div>
+   <div class="tb-act"><a class="btn g tb-cart" href="#" title="${t('cart')}" aria-label="${t('cart')}"><svg class="i"><use href="#cart"/></svg></a><a class="btn p tb-cfg" href="/assembly.html">${t('cfg')} <svg class="i"><use href="#arrow"/></svg></a></div></div></div>`;
+ if(anim!==false){card.classList.remove('in');void card.offsetWidth;card.classList.add('in')}
+ requestAnimationFrame(()=>requestAnimationFrame(()=>card.querySelectorAll('.tb-perf em').forEach(e=>e.style.width=e.style.getPropertyValue('--w'))));
+ clearTimeout(tm);if(!box.classList.contains('hold'))tm=setTimeout(()=>{cur=(cur+1)%B.length;draw()},DUR)}
+tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cur=+b.dataset.i;draw()});
+box.addEventListener('mouseenter',()=>{box.classList.add('hold');clearTimeout(tm)});
+box.addEventListener('mouseleave',()=>{box.classList.remove('hold');clearTimeout(tm);tm=setTimeout(()=>{cur=(cur+1)%B.length;draw()},DUR/2)});
+card.addEventListener('click',e=>{const b=B[cur];
+ if(e.target.closest('.tb-cfg')){const st={};Object.entries(b.parts).forEach(([k,id])=>st[k]={id,q:1});try{localStorage.setItem('led-asm',JSON.stringify(st))}catch(_){} }
+ else if(e.target.closest('.tb-cart')){e.preventDefault();if(window.LEDStore){LEDStore.add('cart',{id:'build-'+b.k,t:b.n+' · '+b.spec[0]+(b.parts.gpu?' / '+b.spec[1]:''),img:'/img/p1.webp',spec:b.spec.join(' · '),p:b.p});
+  LEDStore.toast(t('add'),t('go'),()=>location.href=LEDStore.URL.cart)}}});
+draw(false);
+document.querySelectorAll('.lang button').forEach(x=>x.addEventListener('click',()=>setTimeout(()=>draw(false))));
+})();
 
 /* footer LED dot-matrix */
 (function(){const ft=document.querySelector('footer'),c=document.getElementById('ftfx'),g=c.getContext('2d');let w,h,m={x:-999,y:-999},t=0;

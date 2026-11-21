@@ -319,3 +319,9 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Home hero side: servers card replaced by a gaming card (`.promo.gm`, links to `/category.html`): dark purple neon gradient, scanlines, RGB
   strip at the bottom, falling neon lines, animated equalizer + "240 FPS"/"RTX 50 · 1 ms" HUD chips, pink gamepad icon. Animations off with reduced motion.
   Backup `led-static-backup-20261121w.tgz`. Published.
+- 2026-11-21 — Home configurator block: the right side is now "Top ready builds" (`#topBuilds`) instead of the click-to-swap mini
+  configurator. 3 builds (Office / Gaming / Ultra) as tabs that auto-rotate every 7 s (progress line on the tab, pauses on hover); each
+  card has an animated glass PC tower (spinning RGB fans, colour per build), badge, 4 spec chips, games/work bars, price + old price +
+  monthly, cart button (adds the build to the shared cart) and "Configure" → `/assembly.html` with the build's parts preloaded into
+  `led-asm` (ids = assembly_page.html parts). Left buttons now link to `/assembly.html` and `/category.html`. HY/RU/EN.
+  Backup `led-static-backup-20261121x.tgz`. Published.
