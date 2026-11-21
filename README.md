@@ -92,6 +92,8 @@ quality* (clean background, no watermark/banner); its pick is preselected. "Save
 Nothing is written until the admin presses Save. Photos can be reordered ("make main") and removed.
 
 Candidate sources (env in `/opt/led-computers/.env`, see `deploy/.env.example`):
+- **default (only `GEMINI_API_KEY`)** — Gemini suggests official product-page URLs from its own knowledge (manufacturer,
+  then big retailers); each is really fetched, wrong ones are dropped. Used when none of the search keys below is set;
 - a pasted product-page or image link — always works (page: og:image, JSON-LD Product.image, gallery images with the model code);
 - `GOOGLE_CSE_KEY` + `GOOGLE_CSE_CX` — Google Custom Search, image mode (100 free queries/day);
 - `BRAVE_SEARCH_KEY` — Brave Search images;

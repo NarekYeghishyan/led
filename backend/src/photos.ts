@@ -256,6 +256,30 @@ async function geminiSearch(p: Product, q: string): Promise<Candidate[]> {
   return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'gemini' })) : []));
 }
 
+/**
+ * Works with the free Gemini key (no search tools): Gemini suggests official product-page URLs from its own knowledge
+ * (manufacturer site first, then big retailers). Every URL is then really fetched through the SSRF guard, so a wrong
+ * or invented URL just fails and is dropped. Used when no search API is configured.
+ */
+async function geminiGuess(p: Product): Promise<Candidate[]> {
+  const r = await gemini({
+    contents: [{ role: 'user', parts: [{ text:
+      `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
+` +
+      'Give up to 6 URLs of web pages that show exactly this model with product photos: the official manufacturer product page first ' +
+      '(e.g. logitechg.com, tp-link.com, asus.com, hp.com), then large retailers (amazon.com, bestbuy.com, newegg.com, bhphotovideo.com). ' +
+      'Only URLs you are confident exist; prefer canonical product pages, not search pages. You may also include direct image URLs of the official product photo.' }] }],
+    generationConfig: { temperature: 0.2, responseMimeType: 'application/json',
+      responseSchema: { type: 'OBJECT', properties: { urls: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['urls'] } },
+  }, 60000);
+  let urls: string[] = [];
+  try { urls = (JSON.parse(r.text).urls || []).filter((u: unknown) => typeof u === 'string' && /^https?:\/\//.test(u)).slice(0, 6); } catch { /* bad JSON */ }
+  const lists = await Promise.allSettled(urls.map((u) => fromUrl(u, p.barcode)));
+  const out = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'gemini' })) : []));
+  if (!out.length) throw new BadRequestException('AI could not find a reachable product page. Paste a product-page link.');
+  return out;
+}
+
 interface Ranked { index: number; match: number; quality: number; reason: string }
 
 async function rank(p: Product, imgs: { b64: string; mime: string }[]): Promise<{ best: number; items: Ranked[] }> {
@@ -322,14 +346,15 @@ export class PhotosController {
       const q = searchQuery(p);
       const manual = String(body?.url || '').trim();
       const errors: string[] = [];
-      const sources = manual ? [fromUrl(manual, p.barcode)] : [googleCse(q), brave(q), geminiSearch(p, q)];
+      const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
+      const sources = manual ? [fromUrl(manual, p.barcode)]
+        : searchApi ? [googleCse(q), brave(q), geminiSearch(p, q)] : [geminiGuess(p)];
       const lists = await Promise.allSettled(sources);
       lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
       const found = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []));
       if (!found.length) {
         if (manual && errors.length) throw new BadRequestException(errors[0]);
-        const configured = process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1';
-        return { query: q, candidates: [], best: -1, needsSearchKey: !configured, errors };
+        return { query: q, candidates: [], best: -1, needsSearchKey: false, errors };
       }
 
       // download, validate, de-duplicate
