@@ -14,6 +14,10 @@ Design/*
 *.laccdb
 *.csv
 
+# old led.am MySQL dumps (real customer data — never commit)
+*.sql
+*.sql.gz
+
 # agent secrets and state
 agent/config.ini
 agent/state.sqlite

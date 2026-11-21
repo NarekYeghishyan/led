@@ -6,7 +6,7 @@ import {
 import { useI18n, type TKey } from './i18n';
 
 /** Loads data and reloads it every `refreshMs` (live view of the store). */
-function useData<T>(path: string, refreshMs = 0) {
+export function useData<T>(path: string, refreshMs = 0) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -20,7 +20,7 @@ function useData<T>(path: string, refreshMs = 0) {
 }
 
 /** Translations + locale-aware formatters. */
-function useT() {
+export function useT() {
   const { t, locale } = useI18n();
   return { t, fmt: makeFmt(locale, t) };
 }

@@ -32,7 +32,9 @@ export class JwtGuard implements CanActivate {
     const [type, token] = String(req.headers.authorization || '').split(' ');
     if (type !== 'Bearer' || !token) throw new UnauthorizedException();
     try {
-      req.user = this.jwt.verify(token);
+      const user = this.jwt.verify(token);
+      if (user?.kind === 'customer') throw new Error('customer token'); // storefront tokens never open the admin API
+      req.user = user;
       return true;
     } catch {
       throw new UnauthorizedException();

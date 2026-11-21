@@ -5,6 +5,7 @@ import { api, ApiError, auth } from './api';
 import { I18nProvider, LangSwitch, useI18n } from './i18n';
 import { ThemeSwitch } from './theme';
 import { CategoriesPage, DashboardPage, ImportPage, LogsPage, TablePage, TablesPage, ProductPage, ProductsPage, SyncPage } from './pages';
+import { CustomerPage, CustomersPage } from './customers';
 import './styles.css';
 
 function Login() {
@@ -79,6 +80,7 @@ function Layout() {
         <nav>
           <NavLink to="/" end>{t('nav.dashboard')}</NavLink>
           <NavLink to="/products">{t('nav.products')}</NavLink>
+          <NavLink to="/customers">{t('nav.customers')}</NavLink>
           <NavLink to="/categories">{t('nav.categories')}</NavLink>
           <NavLink to="/sync">{t('nav.sync')}</NavLink>
           <NavLink to="/tables">{t('nav.tables')}</NavLink>
@@ -103,6 +105,8 @@ createRoot(document.getElementById('root')!).render(
             <Route index element={<DashboardPage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/:id" element={<ProductPage />} />
+            <Route path="customers" element={<CustomersPage />} />
+            <Route path="customers/:id" element={<CustomerPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="sync" element={<SyncPage />} />
             <Route path="import" element={<ImportPage />} />

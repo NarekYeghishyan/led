@@ -12,6 +12,8 @@ import { ChangeLog1763900000000 } from './migrations/1763900000000-change-log';
 import { Mirror1764000000000 } from './migrations/1764000000000-mirror';
 import { SyncController, SyncService } from './sync';
 import { ImportController } from './import';
+import { CustomersController, ShopAuthController } from './customers';
+import { Customers1764100000000 } from './migrations/1764100000000-customers';
 
 for (const name of ['DATABASE_URL', 'JWT_SECRET', 'SYNC_API_KEY']) {
   if (!process.env[name]) throw new Error(`Missing env ${name}`);
@@ -28,14 +30,14 @@ class HealthController {
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: ENTITIES,
-      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000],
+      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000],
       migrationsRun: true,
       synchronize: false,
     }),
     TypeOrmModule.forFeature([AdminUser]),
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '12h' } }),
   ],
-  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController],
+  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopAuthController],
   providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard],
 })
 class AppModule {}
