@@ -31,6 +31,7 @@ export interface ProductRow {
   unit: string | null; price: number | null; quantity: number; discontinued: boolean;
   inPriceList: boolean; isVisible: boolean; deletedAt: string | null; syncedAt: string | null;
   categoryExternalId: number | null; categoryName: string | null; currencyName: string | null;
+  priceList: number | null; dealerPrice1: number | null;
 }
 export interface Paged<T> { items: T[]; total: number; page: number; limit: number }
 export interface Category { id: number; externalId: number; name: string; productCount: number; deletedAt: string | null }

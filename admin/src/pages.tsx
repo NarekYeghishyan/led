@@ -98,6 +98,8 @@ const COLS: { key: string; label: TKey; sort?: string; num?: boolean }[] = [
   { key: 'categoryName', label: 'col.category' },
   { key: 'brand', label: 'col.brand' },
   { key: 'price', label: 'col.price', sort: 'price', num: true },
+  { key: 'priceList', label: 'f.priceListPrice', sort: 'priceList', num: true },
+  { key: 'dealerPrice1', label: 'f.dealerPrice1', sort: 'dealerPrice1', num: true },
   { key: 'quantity', label: 'col.stock', sort: 'quantity', num: true },
   { key: 'syncedAt', label: 'col.updated', sort: 'syncedAt' },
 ];
@@ -182,6 +184,8 @@ export function ProductsPage() {
                 <td data-label={t('col.category')}>{p.categoryName || (p.categoryExternalId ?? '—')}</td>
                 <td data-label={t('col.brand')}>{p.brand || '—'}</td>
                 <td data-label={t('col.price')} className="num">{fmt.num(p.price)} <span className="muted">{p.currencyName || ''}</span></td>
+                <td data-label={t('f.priceListPrice')} className="num">{p.priceList === null ? '—' : fmt.num(p.priceList)}</td>
+                <td data-label={t('f.dealerPrice1')} className="num">{p.dealerPrice1 === null ? '—' : fmt.num(p.dealerPrice1)}</td>
                 <td data-label={t('col.stock')} className={`num ${p.quantity > 0 ? 'in' : 'out'}`}>{fmt.num(p.quantity, 3)}</td>
                 <td data-label={t('col.updated')} className="muted">{fmt.ago(p.syncedAt)}</td>
               </tr>

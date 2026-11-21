@@ -6,7 +6,7 @@ import { Category, ChangeLog, Currency, Product, SyncLog } from './entities';
 import { agentState } from './sync';
 
 const SORTS: Record<string, string> = {
-  name: 'p.name', price: 'p.price', quantity: 'p.quantity', externalId: 'p.external_id', syncedAt: 'p.synced_at',
+  name: 'p.name', price: 'p.price', quantity: 'p.quantity', externalId: 'p.external_id', syncedAt: 'p.synced_at', priceList: '"priceList"', dealerPrice1: '"dealerPrice1"',
 };
 
 @Controller('admin')
@@ -21,12 +21,15 @@ export class AdminController {
     const qb = this.ds.getRepository(Product).createQueryBuilder('p')
       .leftJoin(Category, 'c', 'c.external_id = p.category_external_id')
       .leftJoin(Currency, 'cur', 'cur.external_id = p.currency_external_id')
+      // Price-list and dealer price come from the admin-only Access mirror (never sent to /api/shop).
+      .leftJoin('mirror_rows', 'm', "m.tbl = 'Товары' AND m.key = p.external_id::text")
       .select([
         'p.id AS id', 'p.external_id AS "externalId"', 'p.barcode AS barcode', 'p.name AS name',
         'p.brand AS brand', 'p.unit AS unit', 'p.price::float AS price', 'p.quantity::float AS quantity',
         'p.discontinued AS discontinued', 'p.in_price_list AS "inPriceList"', 'p.is_visible AS "isVisible"',
         'p.deleted_at AS "deletedAt"', 'p.synced_at AS "syncedAt"',
         'p.category_external_id AS "categoryExternalId"', 'c.name AS "categoryName"', 'cur.name AS "currencyName"',
+        `(CASE WHEN m.data->>'ЦенаПрайса' ~ '^-?[0-9]+([.][0-9]+)?$' THEN (m.data->>'ЦенаПрайса')::float END) AS "priceList"`, `(CASE WHEN m.data->>'Диллерская цена1' ~ '^-?[0-9]+([.][0-9]+)?$' THEN (m.data->>'Диллерская цена1')::float END) AS "dealerPrice1"`,
       ]);
 
     if (q.deleted !== '1') qb.andWhere('p.deleted_at IS NULL');

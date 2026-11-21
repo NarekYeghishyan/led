@@ -375,3 +375,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-22 — Remaining 3 `login_as` rows removed from the log. Admin filters: "Show deleted" checkbox no longer stretches/wraps (`.check`). Deployed.
 - 2026-11-22 — Admin customers list sorts by number of orders (most first) by default. Deployed.
 - 2026-11-22 — Admin customers list shows only customers with orders by default ("with orders" checkbox on; unticked = `?orders=0`, all customers). Deployed.
+- 2026-11-22 — Admin products list: columns «Цена прайса» and «Диллерская цена 1» after «Цена» (sortable; joined from `mirror_rows` `Товары`, admin only). Deployed.
