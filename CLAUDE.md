@@ -371,4 +371,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   Read from the Access mirror (`mirror_rows`, table `Товары`) in `GET /api/admin/products/:id` — no agent change. Admin only, **never in `/api/shop`**. Deployed.
 - 2026-11-22 — "Log in as customer" is no longer written to `change_log` (owner's request); old `login_as` rows deleted (copy in
   `/root/led-changelog-login-as-20261122.csv`). Admin sidebar menu items have line icons (inline SVG, `.ni`). Deployed.
-- 2026-11-22 — Admin "Products" menu item and the product card's back link open `/products?stock=in` (in-stock filter by default). Deployed.
+- 2026-11-22 — Admin "Products" menu item , the dashboard "Products" tile and the product card's back link open `/products?stock=in` (in-stock filter by default). Deployed.

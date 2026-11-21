@@ -77,7 +77,7 @@ export function DashboardPage() {
       {error && <div className="error">{error}</div>}
       {s && (
         <div className="tiles">
-          <Tile to="/products" icon="box" value={fmt.num(s.products, 0)} label={t('dash.products')} />
+          <Tile to="/products?stock=in" icon="box" value={fmt.num(s.products, 0)} label={t('dash.products')} />
           <Tile to="/products?stock=in" icon="check" tone="ok" value={fmt.num(s.inStock, 0)} label={t('dash.inStock')} />
           <Tile to="/products?stock=out" icon="alert" tone="warn" value={fmt.num(s.outOfStock, 0)} label={t('dash.outOfStock')} />
           <Tile to="/categories" icon="grid" value={fmt.num(s.categories, 0)} label={t('dash.categories')} />
