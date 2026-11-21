@@ -89,28 +89,48 @@ nav.cats .sp{flex:1}
 
 
 /* gaming promo */
-.promo.gm{background:radial-gradient(120% 90% at 100% 0%,#7B2FF7 0%,transparent 55%),radial-gradient(90% 80% at 0% 100%,#00C2FF55 0%,transparent 60%),linear-gradient(140deg,#0B0718,#1A0F3A 55%,#120A2A);text-decoration:none;color:#fff;border:1px solid rgba(160,110,255,.35)}
-.promo.gm::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 4px);pointer-events:none}
-.promo.gm::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#FF2E88,#7B2FF7,#00C2FF,#2BFFB0,#FF2E88);background-size:200% 100%;animation:gmRgb 4s linear infinite}
-@keyframes gmRgb{to{background-position:200% 0}}
-.promo.gm .ic{background:linear-gradient(135deg,#FF2E88,#7B2FF7);box-shadow:0 0 24px rgba(255,46,136,.55)}
+.promo.gm{background:linear-gradient(180deg,#07021A 0%,#1B0838 48%,#3A0B4F 62%,#0A0420 63%);text-decoration:none;color:#fff;border:1px solid rgba(255,46,200,.4);box-shadow:0 0 0 1px rgba(0,229,255,.12),0 18px 40px -18px rgba(255,46,200,.55);isolation:isolate;cursor:crosshair}
+.promo.gm>*{position:relative;z-index:2}.promo.gm>.ic{position:absolute}
+.promo.gm .gm-l{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.gm-sun{position:absolute;right:14%;bottom:calc(30% - 4px);width:110px;height:110px;border-radius:50%;background:linear-gradient(#FFE66D,#FF6EC7 55%,#B026FF);box-shadow:0 0 60px rgba(255,110,199,.7);-webkit-mask:repeating-linear-gradient(180deg,#000 0 9px,transparent 9px 12px) bottom/100% 55% no-repeat,linear-gradient(#000,#000) top/100% 46% no-repeat;mask:repeating-linear-gradient(180deg,#000 0 9px,transparent 9px 12px) bottom/100% 55% no-repeat,linear-gradient(#000,#000) top/100% 46% no-repeat}
+.gm-stars{position:absolute;inset:0 0 40% 0;background-image:radial-gradient(1px 1px at 12% 20%,#fff,transparent),radial-gradient(1px 1px at 32% 55%,#fff,transparent),radial-gradient(1.5px 1.5px at 48% 12%,#9FF,transparent),radial-gradient(1px 1px at 70% 40%,#fff,transparent),radial-gradient(1px 1px at 88% 15%,#FCF,transparent),radial-gradient(1px 1px at 58% 70%,#fff,transparent);animation:gmTw 3s ease-in-out infinite alternate}
+@keyframes gmTw{to{opacity:.4}}
+.gm-floor{position:absolute;left:-50%;right:-50%;bottom:0;height:30%;transform-origin:top;transform:perspective(140px) rotateX(58deg);background:linear-gradient(90deg,rgba(255,46,200,.9) 1px,transparent 1px) 0 0/34px 100%,linear-gradient(0deg,rgba(0,229,255,.9) 1px,transparent 1px) 0 0/100% 22px;animation:gmRun .9s linear infinite;-webkit-mask:linear-gradient(transparent,#000 35%);mask:linear-gradient(transparent,#000 35%)}
+@keyframes gmRun{to{background-position:0 0,0 22px}}
+.gm-hz{position:absolute;left:0;right:0;bottom:30%;height:2px;background:#FF6EC7;box-shadow:0 0 14px 3px rgba(255,110,199,.8)}
+.gm-scan{position:absolute;inset:0;box-shadow:inset 260px 0 120px -60px rgba(7,2,26,.75);background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+.gm-br i{position:absolute;width:16px;height:16px;border:2px solid #00E5FF;filter:drop-shadow(0 0 4px #00E5FF);transition:.35s}
+.gm-br i:nth-child(1){left:10px;top:10px;border-right:0;border-bottom:0}.gm-br i:nth-child(2){right:10px;top:10px;border-left:0;border-bottom:0}
+.gm-br i:nth-child(3){left:10px;bottom:10px;border-right:0;border-top:0}.gm-br i:nth-child(4){right:10px;bottom:10px;border-left:0;border-top:0}
+.promo.gm:hover .gm-br i:nth-child(1){transform:translate(4px,4px)}.promo.gm:hover .gm-br i:nth-child(2){transform:translate(-4px,4px)}.promo.gm:hover .gm-br i:nth-child(3){transform:translate(4px,-4px)}.promo.gm:hover .gm-br i:nth-child(4){transform:translate(-4px,-4px)}
+.gm-x{position:absolute;left:var(--gx,70%);top:var(--gy,40%);width:34px;height:34px;margin:-17px 0 0 -17px;border:2px solid #FF2E88;border-radius:50%;opacity:0;transition:opacity .25s,transform .25s;filter:drop-shadow(0 0 6px #FF2E88)}
+.gm-x:before,.gm-x:after{content:"";position:absolute;background:#FF2E88;left:50%;top:-8px;bottom:-8px;width:2px;margin-left:-1px;-webkit-mask:linear-gradient(#000 0 8px,transparent 8px calc(100% - 8px),#000 0);mask:linear-gradient(#000 0 8px,transparent 8px calc(100% - 8px),#000 0)}
+.gm-x:after{transform:rotate(90deg)}
+.promo.gm:hover .gm-x{opacity:1;animation:gmLock 1.2s ease-in-out infinite}
+@keyframes gmLock{50%{transform:scale(.8) rotate(45deg)}}
+.gm-top{display:flex;align-items:center;gap:10px;font:700 11px/1 ui-monospace,Consolas,monospace;letter-spacing:1px;margin-bottom:auto;padding-right:76px;flex-wrap:wrap}
+.gm-top .lv{color:#FFE66D;text-shadow:0 0 8px rgba(255,230,109,.8)}
+.gm-bars{display:grid;gap:4px;width:92px}
+.gm-bars i{display:block;height:6px;border:1px solid rgba(255,255,255,.35);border-radius:1px;padding:1px;box-sizing:content-box}
+.gm-bars i:before{content:"";display:block;height:100%;width:var(--v);background:linear-gradient(90deg,#FF2E88,#FF8A3D);box-shadow:0 0 6px #FF2E88;animation:gmHp 2.6s ease-in-out infinite alternate}
+.gm-bars i.xp:before{background:linear-gradient(90deg,#00E5FF,#2BFFB0);box-shadow:0 0 6px #00E5FF;animation:gmXp 4s linear infinite}
+@keyframes gmHp{to{width:calc(var(--v) - 22%)}}@keyframes gmXp{from{width:8%}to{width:100%}}
+.gm-top .fps{color:#2BFFB0;border:1px solid rgba(43,255,176,.5);padding:4px 7px;border-radius:4px;background:rgba(43,255,176,.08)}
+.gm-top .fps b{display:inline-block;min-width:3ch;text-align:right}
+.promo.gm .ic{background:linear-gradient(135deg,#FF2E88,#7B2FF7);box-shadow:0 0 24px rgba(255,46,136,.6),inset 0 0 0 2px rgba(255,255,255,.25);animation:gmBob 2.4s ease-in-out infinite}
+@keyframes gmBob{50%{transform:translateY(-5px) rotate(-6deg)}}
 .promo.gm .ic svg{width:34px;height:34px}
-.promo.gm small{color:#FF5FA8;letter-spacing:3px;text-shadow:0 0 10px rgba(255,46,136,.7)}
-.promo.gm h3{text-shadow:0 0 18px rgba(123,47,247,.6)}
-.gm-go{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:#7FE7FF;margin-top:4px}
+.promo.gm small{color:#00E5FF;letter-spacing:4px;font-family:ui-monospace,Consolas,monospace;text-shadow:0 0 10px rgba(0,229,255,.8)}
+.promo.gm h3{text-shadow:2px 0 0 rgba(255,46,136,.85),-2px 0 0 rgba(0,229,255,.85),0 0 18px rgba(123,47,247,.7)}
+.promo.gm:hover h3{animation:gmGl .35s steps(2) infinite}
+@keyframes gmGl{0%{text-shadow:3px 0 #FF2E88,-3px 0 #00E5FF;transform:translateX(0)}50%{text-shadow:-3px 1px #FF2E88,3px -1px #00E5FF;transform:translateX(1px)}}
+.gm-go{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#FFE66D;margin-top:6px;text-shadow:0 0 8px rgba(255,230,109,.6)}
+.gm-go:before{content:"▶";font-size:11px;animation:gmBl 1s steps(1) infinite}
+@keyframes gmBl{50%{opacity:0}}
 .promo.gm:hover .gm-go{color:#fff}
-.gm-fx i{position:absolute;width:2px;height:60%;top:-10%;background:linear-gradient(transparent,#00C2FF,transparent);opacity:.5;transform:skewX(-25deg);animation:gmLine 3.2s linear infinite}
-.gm-fx i:nth-child(1){left:38%}.gm-fx i:nth-child(2){left:58%;animation-delay:1.1s;background:linear-gradient(transparent,#FF2E88,transparent)}.gm-fx i:nth-child(3){left:76%;animation-delay:2.2s}
-@keyframes gmLine{0%{transform:translateY(-30%) skewX(-25deg);opacity:0}40%{opacity:.6}100%{transform:translateY(120%) skewX(-25deg);opacity:0}}
-.gm-hud{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:auto}
-.gm-hud .eq{display:flex;align-items:flex-end;gap:3px;height:34px}
-.gm-hud .eq i{width:5px;border-radius:2px;background:linear-gradient(#2BFFB0,#00C2FF 50%,#7B2FF7);animation:gmEq 1.1s ease-in-out infinite alternate;height:40%}
-.gm-hud .eq i:nth-child(2n){animation-delay:.2s}.gm-hud .eq i:nth-child(3n){animation-delay:.45s}.gm-hud .eq i:nth-child(4n){animation-delay:.7s}
-@keyframes gmEq{to{height:100%}}
-.gm-hud em{font-style:normal;font-size:12px;font-weight:700;padding:4px 9px;border-radius:7px;background:rgba(43,255,176,.12);border:1px solid rgba(43,255,176,.45);color:#2BFFB0;font-family:ui-monospace,Consolas,monospace}
-.gm-hud em b{font-size:14px}
-.gm-hud em.r{background:rgba(255,46,136,.12);border-color:rgba(255,46,136,.5);color:#FF7DB8}
-@media (prefers-reduced-motion:reduce){.promo.gm::after,.gm-fx i,.gm-hud .eq i{animation:none}}
+.promo.gm::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;z-index:3;background:linear-gradient(90deg,#FF2E88,#7B2FF7,#00C2FF,#2BFFB0,#FF2E88);background-size:200% 100%;animation:gmRgb 4s linear infinite}
+@keyframes gmRgb{to{background-position:200% 0}}
+@media (prefers-reduced-motion:reduce){.promo.gm *,.promo.gm::after{animation:none!important}}
 
 /* quick links under hero */
 .qk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.55fr);gap:16px;margin-top:20px}
@@ -773,7 +793,7 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
     </div>
     <div class="hside">
       <div class="promo b"><div class="ic"><svg class="i"><use href="#cpu"/></svg></div><div class="pv chain" aria-hidden="true"><span><svg class="i"><use href="#cpu"/></svg></span><i></i><span><svg class="i"><use href="#monitor"/></svg></span><i></i><span><svg class="i"><use href="#server"/></svg></span><i></i><span><svg class="i"><use href="#tower"/></svg></span><em>от 349 000 ֏</em></div><small>Конфигуратор ПК</small><h3>Идеальная сборка под ваши задачи</h3><a href="/assembly.html">Подобрать комплектующие <svg class="i" style="width:16px"><use href="#arrow"/></svg></a></div>
-      <a class="promo gm" href="/category.html"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v3a3 3 0 0 1-5.4 1.8L15 15H9l-1.6 1.8A3 3 0 0 1 2 15v-3a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".6" fill="currentColor"/><circle cx="18" cy="13.5" r=".6" fill="currentColor"/></svg></div><div class="gm-fx" aria-hidden="true"><i></i><i></i><i></i></div><div class="pv gm-hud" aria-hidden="true"><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><em><b>240</b> FPS</em><em class="r">RTX 50 · 1 ms</em></div><small>Gaming</small><h3>Игровые компьютеры и периферия</h3><span class="gm-go">Играть на максимум <svg class="i" style="width:16px"><use href="#arrow"/></svg></span></a>    </div>
+      <a class="promo gm" href="/category.html"><div class="gm-l" aria-hidden="true"><div class="gm-stars"></div><span class="gm-sun"></span><div class="gm-floor"></div><div class="gm-hz"></div><div class="gm-scan"></div><div class="gm-br"><i></i><i></i><i></i><i></i></div><span class="gm-x"></span></div><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a4 4 0 0 1 4 4v3a3 3 0 0 1-5.4 1.8L15 15H9l-1.6 1.8A3 3 0 0 1 2 15v-3a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".6" fill="currentColor"/><circle cx="18" cy="13.5" r=".6" fill="currentColor"/></svg></div><div class="gm-top" aria-hidden="true"><span class="lv">LVL 99</span><span class="gm-bars"><i style="--v:92%"></i><i class="xp"></i></span><span class="fps"><b id="gmFps">240</b> FPS</span></div><small>Gaming</small><h3>Игровые компьютеры и периферия</h3><span class="gm-go">Играть на максимум <svg class="i" style="width:16px"><use href="#arrow"/></svg></span></a>    </div>
   </div>
 
   <div class="qk">
@@ -970,6 +990,10 @@ const grid=document.querySelector('.pgrid');
 document.querySelectorAll('.tabs span').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tabs span').forEach(x=>x.classList.toggle('on',x===t));
  const cards=[...grid.children];cards.sort(()=>Math.random()-.5).forEach(c=>grid.appendChild(c));grid.classList.remove('swap');void grid.offsetWidth;grid.classList.add('swap')});
 
+/* gaming card: crosshair + live fps */
+(function(){const g=document.querySelector('.promo.gm');if(!g)return;const f=document.getElementById('gmFps');
+g.addEventListener('mousemove',e=>{const r=g.getBoundingClientRect();g.style.setProperty('--gx',(e.clientX-r.left)+'px');g.style.setProperty('--gy',(e.clientY-r.top)+'px')});
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches)setInterval(()=>{f.textContent=232+Math.round(Math.random()*16)},450)})();
 /* top ready builds (parts = assembly.html ids, "Configure" preloads them into led-asm) */
 const fmt=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
 (function(){

@@ -325,3 +325,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   monthly, cart button (adds the build to the shared cart) and "Configure" → `/assembly.html` with the build's parts preloaded into
   `led-asm` (ids = assembly_page.html parts). Left buttons now link to `/assembly.html` and `/category.html`. HY/RU/EN.
   Backup `led-static-backup-20261121x.tgz`. Published.
+- 2026-11-21 — Home gaming card (`.promo.gm`) redone as a retro game screen: synthwave striped sun, a neon perspective grid floor
+  scrolling toward you, stars, scanlines, cyan HUD corner brackets (close in on hover), HUD row (LVL 99, HP/XP bars, live-flickering FPS
+  `#gmFps`), bobbing gamepad icon, RGB-split title that glitches on hover, blinking ▶ "press start" link, pink crosshair that follows the
+  mouse. Old eq/HUD chips/falling lines removed. Motion off with reduced motion. Backup `led-static-backup-20261121y.tgz`. Published.
