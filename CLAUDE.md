@@ -393,3 +393,8 @@ stock and prices from the Access sync. Until then the templates are design refer
   Tested on 16357 (Ugreen) and 14123 (TP-Link): **no usable page** — guessed URLs are often wrong (404), and Amazon/Newegg/Ugreen/RU shops block
   servers (401/403/429/503). Free Gemini key alone can't search reliably; real search needs `BRAVE_SEARCH_KEY` (Google CSE is closed to new
   customers) or Gemini billing + `GEMINI_SEARCH=1`. Pasting a link still works. Deployed.
+- 2026-11-22 — AI photos switched to **OpenAI** (`OPENAI_API_KEY` in `/opt/led-computers/.env`, from `access.txt`; `OPENAI_MODEL` default
+  gpt-5.4-mini). OpenAI web search finds product pages + direct official image URLs, OpenAI vision scores them (`rankOpenAI`); Gemini is only a
+  fallback when no OpenAI key. Works without a pasted link: 16357 (Ugreen 70601) and 14123 (TP-Link UB500) both got a correct pick in ~11 s.
+  Sites that block servers (ugreen.com, Amazon, RU marketplaces) are skipped, not bypassed. Server compose has the new env lines;
+  backups `/root/led-env-backup-*`, `/root/led-compose-backup-*`. Deployed.
