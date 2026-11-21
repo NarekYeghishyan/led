@@ -96,8 +96,9 @@ export class ShopController {
   constructor(@InjectDataSource() private ds: DataSource, private jwt: JwtService) {}
 
   private async startSession(req: Request, res: Response, id: number, remember = true) {
-    const [c] = await this.ds.query(`UPDATE customers SET last_login_at = now(), last_visit_at = now() WHERE id = $1
-      RETURNING token_version`, [id]);
+    await this.ds.query(`UPDATE customers SET last_login_at = now(), last_visit_at = now() WHERE id = $1`, [id]);
+    // TypeORM returns [rows, count] for UPDATE … RETURNING, so read it with a SELECT
+    const [c] = await this.ds.query(`SELECT token_version FROM customers WHERE id = $1`, [id]);
     const token = this.jwt.sign({ sub: id, kind: 'customer', v: c.token_version }, { expiresIn: '30d' });
     res.cookie(COOKIE, token, {
       httpOnly: true, sameSite: 'lax', secure: req.secure, path: COOKIE_PATH, ...(remember ? { maxAge: 30 * DAY } : {}),
@@ -233,8 +234,9 @@ export class ShopController {
       throw fail(HttpStatus.BAD_REQUEST, 'bad_code', 'Wrong or expired code');
     }
     await this.ds.query(`UPDATE customer_reset_codes SET used_at = now() WHERE id = $1`, [r.id]);
-    const [c] = await this.ds.query(`UPDATE customers SET password_hash = $2, password_scheme = 'bcrypt', token_version = token_version + 1,
-      updated_at = now() WHERE id = $1 RETURNING name`, [r.customer_id, await hashCustomerPassword(password)]);
+    await this.ds.query(`UPDATE customers SET password_hash = $2, password_scheme = 'bcrypt', token_version = token_version + 1,
+      updated_at = now() WHERE id = $1`, [r.customer_id, await hashCustomerPassword(password)]);
+    const [c] = await this.ds.query(`SELECT name FROM customers WHERE id = $1`, [r.customer_id]);
     await this.changeLog(r.customer_id, c.name, { password: ['•••', 'reset by code'] });
     return this.startSession(req, res, r.customer_id);
   }
