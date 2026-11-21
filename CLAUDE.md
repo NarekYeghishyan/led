@@ -338,3 +338,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Catalog popup: clicking a section on the left (`.mega-l` button) opens `/category.html` with a mouse; on touch screens a tap still just
   switches the section (no hover there). Backup `led-static-backup-20261121zc.tgz`. Published.
 - 2026-11-21 — Catalog popup on phones (≤600px): heading stacks — title, then "All products →" on its own line (it overlapped the title and the arrow wrapped). Backup `led-static-backup-20261121zd.tgz`. Published.
+- 2026-11-21 — Home configurator block: "Ready builds" button removed (only "Open configurator" left). Backup `led-static-backup-20261121ze.tgz`. Published.
