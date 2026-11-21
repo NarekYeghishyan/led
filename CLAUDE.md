@@ -389,3 +389,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   Search grounding is not allowed, so web search needs `GOOGLE_CSE_KEY`+`GOOGLE_CSE_CX` or `BRAVE_SEARCH_KEY` (not set yet) or billing +
   `GEMINI_SEARCH=1`; until then paste a product-page/image link and AI picks from it. Server compose now has the `media` volume.
   Backups `/root/led-compose-backup-20261122-0125.yml`, `/root/led-env-backup-20261122-0125`. Deployed.
+- 2026-11-22 — AI photos without a search key: Gemini now suggests product-page URLs from memory and the server tries them (`geminiGuess`).
+  Tested on 16357 (Ugreen) and 14123 (TP-Link): **no usable page** — guessed URLs are often wrong (404), and Amazon/Newegg/Ugreen/RU shops block
+  servers (401/403/429/503). Free Gemini key alone can't search reliably; real search needs `BRAVE_SEARCH_KEY` (Google CSE is closed to new
+  customers) or Gemini billing + `GEMINI_SEARCH=1`. Pasting a link still works. Deployed.
