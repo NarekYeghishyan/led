@@ -82,6 +82,7 @@ for name in ["index.html", "category.html", "product.html", "cart.html", "favori
     t = re.sub(r"<!--phone-mask-->.*?<!--/phone-mask-->", "", t, flags=re.S)
     t = re.sub(r"<!--btn-fx-->.*?<!--/btn-fx-->", "", t, flags=re.S)
     t = re.sub(r"<!--card-fx-->.*?<!--/card-fx-->", "", t, flags=re.S)
+    t = re.sub(r"<!--mega-fit-->.*?<!--/mega-fit-->", "", t, flags=re.S)
     t = re.sub(r"<!--responsive-->.*?<!--/responsive-->", "", t, flags=re.S)
     t = re.sub(r"<!--one-click-->.*?<!--/one-click-->", "", t, flags=re.S)
     t = re.sub(r"<!--search-box-->.*?<!--/search-box-->", "", t, flags=re.S)

@@ -332,3 +332,6 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Top menu: wrench and "Акции" removed; the 7 sections are compact tiles (38px tinted icon box above the name, 7 columns,
   4 on ≤1100px; CSS in `card_fx.html`). Hover-opened catalog menu now closes 250 ms after the mouse leaves the menu row / catalog button /
   popup (was the whole header). Backup `led-static-backup-20261121z.tgz`. Published.
+- 2026-11-21 — Catalog popup: hover-opened popup now closes when the mouse leaves the visible panel (`.mega-in`), not the full-width `.mega`
+  wrapper (empty sides kept it open). Mega links no longer slide on hover (pushed past the edge → horizontal scrollbar); `.mega-g` overflow-x
+  hidden. Build fix: `<!--mega-fit-->` block is now stripped before re-adding (was duplicated 122× per page). Backups `led-static-backup-20261121za/zb.tgz`. Published.
