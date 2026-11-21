@@ -339,3 +339,10 @@ stock and prices from the Access sync. Until then the templates are design refer
   switches the section (no hover there). Backup `led-static-backup-20261121zc.tgz`. Published.
 - 2026-11-21 — Catalog popup on phones (≤600px): heading stacks — title, then "All products →" on its own line (it overlapped the title and the arrow wrapped). Backup `led-static-backup-20261121zd.tgz`. Published.
 - 2026-11-21 — Home configurator block: "Ready builds" button removed (only "Open configurator" left). Backup `led-static-backup-20261121ze.tgz`. Published.
+- 2026-11-21 — Admin **Customers** (`/admin/customers`): 4 251 registered users from the old led.am MySQL dump
+  (`Design/led_new.sql`, private, `*.sql` in .gitignore) with 2 457 orders / 4 069 lines (3 648 linked to Access products by code)
+  and 787 favourites. List (search name/email/phone/company/tax code, type/status filters, sort by orders/spent), card with
+  editable profile + company details, block/unblock with reason, set password, orders with items, favourites, edit history.
+  Old MD5 passwords stored wrapped in bcrypt and upgraded on first login (`POST /api/shop/login`, for the future storefront).
+  Import is re-runnable — **run it again when the site goes live** (README "Customers from the old led.am site").
+  DB backup before import: `/root/led-db-backup-20261121-2002-pre-customers.dump`; dump copy `/root/led_new.sql.gz` (chmod 600).

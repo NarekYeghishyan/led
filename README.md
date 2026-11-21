@@ -81,3 +81,32 @@ Pushing to `main` builds `ghcr.io/narekyeghishyan/led-api` and `led-admin` with 
 cd /opt/led-computers   # docker-compose.yml + .env from deploy/
 docker compose pull && docker compose up -d
 ```
+
+## Customers from the old led.am site
+
+The admin panel's **Customers** page holds the registered users of the old site with their orders, order lines and
+favourites (tables `customers`, `customer_orders`, `customer_order_items`, `customer_favorites`). Admins can edit a
+profile, block or unblock a customer, and set a new password; every edit goes to `change_log` (entity `customer`).
+
+- **Passwords.** The old site stored MD5 hashes (a few use MySQL `PASSWORD()`). The import keeps them only wrapped in bcrypt,
+  so customers log in with their old password (`POST /api/shop/login`), and on that first login it is replaced with a plain
+  bcrypt hash. The one customer whose old hash can't be checked has `password_scheme = 'reset'`. Customer tokens are
+  rejected by the admin API.
+- **Order lines** keep a snapshot (article code, name, price, qty) and link to the current product by code
+  (`product_external_id` = Access `КодТовара`). Nothing is written to Access.
+- Only registered users' orders are imported. Guest orders are skipped.
+
+**Run / re-run the import** (do it once more when the new site goes live — it is safe to repeat; it adds new users and
+orders, refreshes old ones, and keeps admin edits, the blocked flag and upgraded passwords):
+
+```bash
+# from the PC: the dump is private (ignored by git) — copy it to /root, never to a web folder
+gzip -c Design/led_new.sql > led_new.sql.gz && scp led_new.sql.gz mynewserver:/root/
+# on the server: back up first
+cd /opt/led-computers
+docker compose exec -T db pg_dump -U led -Fc led > /root/led-db-backup-$(date +%Y%m%d-%H%M).dump
+gunzip -c /root/led_new.sql.gz > /root/led_new.sql && docker compose cp /root/led_new.sql api:/tmp/led_new.sql
+docker compose exec -T api node dist/legacy-cli.js /tmp/led_new.sql      # ~1.5 min, prints counts
+docker compose exec -T -u root api rm -f /tmp/led_new.sql
+```
+Each run is recorded in `customer_import_log`; the Customers page shows the last one.
