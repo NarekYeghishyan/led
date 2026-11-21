@@ -211,6 +211,7 @@ interface ProductFull {
   syncedAt: string | null; createdAt: string; categoryExternalId: number | null; currencyExternalId: number | null;
   category: { name: string } | null; currency: { name: string } | null;
   slug: string | null; isVisible: boolean; images: string[]; webDescription: string | null;
+  priceList: number | null; dealerPrice1: number | null; dealerPrice2: number | null;
 }
 
 export function ProductPage() {
@@ -227,14 +228,17 @@ export function ProductPage() {
     [t('f.category'), p.category?.name ?? p.categoryExternalId ?? '—'],
     [t('f.brand'), p.brand || '—'],
     [t('f.unit'), p.unit || '—'],
+    [t('f.priceListPrice'), p.priceList === null ? '—' : num2(p.priceList)],
     [t('f.price'), `${fmt.num(p.price)} ${p.currency?.name ?? ''}`],
+    [t('f.dealerPrice1'), p.dealerPrice1 === null ? '—' : num2(p.dealerPrice1)],
+    [t('f.dealerPrice2'), p.dealerPrice2 === null ? '—' : num2(p.dealerPrice2)],
     [t('f.stock'), fmt.num(p.quantity, 3)],
     [t('f.priceList'), yn(p.inPriceList)],
     [t('f.discontinued'), yn(p.discontinued)],
     [t('f.weight'), fmt.num(p.weight, 3)],
     [t('f.volume'), fmt.num(p.volume, 3)],
     [t('f.note'), p.note || '—'],
-    ...Object.entries(p.raw || {}).map(([k, v]) => [k, v === null || v === '' ? '—' : num2(v)] as [string, ReactNode]),
+    ...Object.entries(p.raw || {}).filter(([k]) => k !== 'ЦенаПрайса').map(([k, v]) => [k, v === null || v === '' ? '—' : num2(v)] as [string, ReactNode]),
   ];
   return (
     <>

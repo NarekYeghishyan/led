@@ -17,7 +17,7 @@ deploy/    docker-compose, .env example, host nginx config for led.creativeweb.a
 4. A row is marked as sent only after the API accepts it. If the internet goes down, the changes are sent later.
 5. At start and every hour, the agent compares its ids with `GET /api/sync/ids/{entity}` and deletes site rows that are gone from Access. If Access returns 0 rows or fewer than half, it refuses to delete them.
 
-Fields from Access are read-only on the website. Web fields (images, SEO, visibility) are never overwritten by the sync. Internal columns (`ЦенаНаНас`, `Надбавка`, dealer prices, `Бух*`, `Log`) are never sent.
+Fields from Access are read-only on the website. Web fields (images, SEO, visibility) are never overwritten by the sync. Internal columns (`ЦенаНаНас`, `Надбавка`, dealer prices, `Бух*`, `Log`) are never sent to the storefront. Exception (owner's decision 2026-11-22): the admin product card shows `ЦенаПрайса` and `Диллерская цена1/2`, read from the admin-only Access mirror — never expose them in `/api/shop`.
 
 ## Local development
 

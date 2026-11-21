@@ -367,3 +367,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   token has `imp` = admin e-mail) and opens `/account.html` in a new tab; the account shows a yellow "viewing as customer" banner
   with "Exit" (logs out, back to `/admin/customers`). Doesn't change the customer's last-login; written to `change_log` (`login_as`).
   Backup `led-static-backup-20261121zh.tgz`. Deployed.
+- 2026-11-22 — Admin product card (`/admin/products/:id`): rows «Цена прайса» (above «Цена»), «Диллерская цена 1» and «Диллерская цена 2» (below).
+  Read from the Access mirror (`mirror_rows`, table `Товары`) in `GET /api/admin/products/:id` — no agent change. Admin only, **never in `/api/shop`**. Deployed.

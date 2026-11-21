@@ -56,7 +56,12 @@ export class AdminController {
       : await this.ds.getRepository(Category).findOneBy({ externalId: p.categoryExternalId });
     const currency = p.currencyExternalId === null ? null
       : await this.ds.getRepository(Currency).findOneBy({ externalId: p.currencyExternalId });
-    return { ...p, category, currency };
+    // Price-list and dealer prices: admin only, read from the Access mirror (never sent to /api/shop).
+    const [m] = await this.ds.query(
+      `SELECT data->'ЦенаПрайса' AS pl, data->'Диллерская цена1' AS d1, data->'Диллерская цена2' AS d2
+       FROM mirror_rows WHERE tbl = 'Товары' AND key = $1`, [String(p.externalId)]);
+    const n = (v: unknown) => (v === null || v === undefined || v === '' ? null : Number(v));
+    return { ...p, category, currency, priceList: n(m?.pl), dealerPrice1: n(m?.d1), dealerPrice2: n(m?.d2) };
   }
 
   @Get('categories')
