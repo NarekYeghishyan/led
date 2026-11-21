@@ -381,3 +381,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-22 — Admin Access tables (`/tables/:name`): dates shown as `21.11.2026` (time only when not midnight); default sort = first key column, newest first. Deployed.
 - 2026-11-22 — Admin products: currency shown as a symbol ($ € ₽ ֏) instead of the Access name («Доллары»), list and product card. Deployed.
 - 2026-11-22 — Registration: location (Բնակավայր) field removed; `/api/shop/register` no longer requires `city`. Backup `led-static-backup-20261122a.tgz`. Published.
+- 2026-11-22 — Auth forms: error box (`.au-err`) full width. Backup `led-static-backup-20261122b.tgz`. Published.
