@@ -81,7 +81,7 @@ export function CustomersPage() {
     return () => clearTimeout(tm);
   }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const sort = params.get('sort') || 'orders';
+  const sort = params.get('sort') || 'registered';
   const dir = params.get('dir') || 'desc';
   const page = Number(params.get('page') || 1);
   const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
