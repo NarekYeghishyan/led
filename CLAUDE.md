@@ -335,3 +335,5 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Catalog popup: hover-opened popup now closes when the mouse leaves the visible panel (`.mega-in`), not the full-width `.mega`
   wrapper (empty sides kept it open). Mega links no longer slide on hover (pushed past the edge → horizontal scrollbar); `.mega-g` overflow-x
   hidden. Build fix: `<!--mega-fit-->` block is now stripped before re-adding (was duplicated 122× per page). Backups `led-static-backup-20261121za/zb.tgz`. Published.
+- 2026-11-21 — Catalog popup: clicking a section on the left (`.mega-l` button) opens `/category.html` with a mouse; on touch screens a tap still just
+  switches the section (no hover there). Backup `led-static-backup-20261121zc.tgz`. Published.

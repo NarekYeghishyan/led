@@ -965,7 +965,7 @@ let megaShow=function(i){cur=i;const c=CAT[i],l=L();
  document.getElementById('megaGrid').innerHTML=c[2].map((s,k)=>`<a href="#" style="animation-delay:${k*25}ms"><i></i>${s[l]}</a>`).join('');
  document.getElementById('megaPromo').innerHTML=`<div class="big"><svg class="i"><use href="#${c[0]}"/></svg></div><small>${UI.promo[l]}</small><b>${c[3][l]}</b><a href="#">${UI.see[l]} →</a>`}
 function megaBuild(){const l=L();ml.innerHTML=CAT.map((c,i)=>`<button role="tab" data-i="${i}"><span class="mi"><svg class="i"><use href="#${c[0]}"/></svg></span>${c[1][l]}</button>`).join('');
- ml.querySelectorAll('button').forEach(b=>{b.onmouseenter=b.onclick=b.onfocus=()=>megaShow(+b.dataset.i)});megaShow(cur)}
+ ml.querySelectorAll('button').forEach(b=>{b.onmouseenter=b.onfocus=()=>megaShow(+b.dataset.i);b.onclick=()=>{if(matchMedia('(hover:hover)').matches)location.href='/category.html';else megaShow(+b.dataset.i)}});megaShow(cur)}
 function megaToggle(open){mega.hidden=mbg.hidden=!open;cb.setAttribute('aria-expanded',open)}
 cb.onclick=e=>{e.preventDefault();megaToggle(mega.hidden)};
 mbg.onclick=()=>megaToggle(false);document.getElementById('megaX').onclick=()=>megaToggle(false);addEventListener('keydown',e=>{if(e.key==='Escape')megaToggle(false)});
@@ -1042,6 +1042,17 @@ document.addEventListener('click',e=>{const c=e.target.closest('.prod');if(!c||e
  e.preventDefault();if(e.ctrlKey||e.metaKey)open('/product.html','_blank');else location.href='/product.html'});
 document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.prod')&&!e.target.closest('.cart,.fav,button,label,input,a[href]:not([href="#"])'))open('/product.html','_blank')});
 </script>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
