@@ -316,3 +316,6 @@ stock and prices from the Access sync. Until then the templates are design refer
   `build_shop.py`. Backup `led-static-backup-20261121u.tgz`. Published.
 - 2026-11-21 — Home: quick-links row under the hero (`.qk`): Акции (orange, HOT), Серверы и сетевое оборудование (navy), Новинки (green) cards +
   stats card (20+ лет / 10 000+ / 0%, number + label). 4 columns; stats full width ≤1200px; one column on phones. Backup `led-static-backup-20261121v.tgz`. Published.
+- 2026-11-21 — Home hero side: servers card replaced by a gaming card (`.promo.gm`, links to `/category.html`): dark purple neon gradient, scanlines, RGB
+  strip at the bottom, falling neon lines, animated equalizer + "240 FPS"/"RTX 50 · 1 ms" HUD chips, pink gamepad icon. Animations off with reduced motion.
+  Backup `led-static-backup-20261121w.tgz`. Published.
