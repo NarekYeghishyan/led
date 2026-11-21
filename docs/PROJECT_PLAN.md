@@ -181,6 +181,18 @@ The first deliverable is the **admin panel showing live Access data**. The publi
 
 **Admin panel rule:** fields from Access (name, price, stock, barcode, category) are **read-only** in the panel and marked "from Access". Only web fields (images, descriptions, SEO, visibility) can be edited. This prevents conflicts with the store.
 
+**Customers (done 2026-11-21).** Registered users of the old led.am site (MySQL dump) are in PostgreSQL: `customers`,
+`customer_orders`, `customer_order_items`, `customer_favorites`, `customer_import_log`. Decisions:
+- Only registered users and their orders; guest orders are not imported. Inactive (unconfirmed) users are imported too.
+- Old MD5 / MySQL `PASSWORD()` hashes are kept only wrapped in bcrypt (`password_scheme` = `legacy-md5` / `legacy-mysql41`),
+  so old passwords keep working; first login via `POST /api/shop/login` turns them into plain bcrypt. `reset` = must set a new one.
+- Order lines keep a snapshot (code, name, price, qty) and link to products by code (`product_external_id` = Access `КодТовара`).
+  Customers/orders live only in PostgreSQL — never written to Access.
+- Admins edit profiles, block/unblock, set passwords; edits set `edited_at` and go to `change_log` (entity `customer`).
+- The import (`node dist/legacy-cli.js <dump.sql>`) is re-runnable and must be run **once more at go-live**. It keeps admin
+  edits, the blocked flag and upgraded passwords. When the storefront gets accounts/checkout (step 10), it must use these
+  tables (new orders with `source = 'site'`) and `/api/shop/login`, not a second user table.
+
 **Admin roles:** `admin` (everything, users, settings), `manager` (content, products' web fields, orders).
 
 ## 7. Phases and milestones

@@ -65,6 +65,9 @@ stock and prices from the Access sync. Until then the templates are design refer
 - Access is read-only, always. Never send cost/margin columns (see README).
 - Back up before changing anything on the server; don't touch other projects there.
 - Update this file (Log + any changed URL/process) at the end of every work session, on either side.
+- Customer data (old led.am users, orders) is personal data: dumps (`*.sql`) never go to git or a web folder; on the server only
+  `/root`, chmod 600. Back up the DB (`pg_dump`) before every customer import. Site accounts/orders must use the `customers`
+  tables and `/api/shop/login` (see docs/PROJECT_PLAN.md "Customers"), never a new user table; customer tokens must never open `/api/admin`.
 
 ## Log
 - 2026-11-20 — Claude desktop made home (`index.html`) and category (`category.html`) templates in
