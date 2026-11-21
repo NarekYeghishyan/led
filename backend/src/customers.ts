@@ -51,7 +51,7 @@ export class CustomersController {
     if (q.status === 'blocked') where.push('c.blocked');
     if (q.status === 'active') where.push('NOT c.blocked AND c.confirmed');
     if (q.status === 'unconfirmed') where.push('NOT c.confirmed');
-    if (q.orders !== '0') where.push('EXISTS (SELECT 1 FROM customer_orders o WHERE o.customer_id = c.id)');
+    if (q.orders === '1') where.push('EXISTS (SELECT 1 FROM customer_orders o WHERE o.customer_id = c.id)');
     const w = where.join(' AND ');
     const [{ n }] = await this.ds.query(`SELECT COUNT(*)::int AS n FROM customers c WHERE ${w}`, args);
     const sort = SORTS[q.sort] || 'c.registered_at';
