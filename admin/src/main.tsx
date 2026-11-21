@@ -79,7 +79,7 @@ function Layout() {
         </div>
         <nav>
           <NavLink to="/" end><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/></svg>{t('nav.dashboard')}</NavLink>
-          <NavLink to="/products"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></svg>{t('nav.products')}</NavLink>
+          <NavLink to="/products?stock=in"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></svg>{t('nav.products')}</NavLink>
           <NavLink to="/customers"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/></svg>{t('nav.customers')}</NavLink>
           <NavLink to="/categories"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l2-3h5l2 3h9v13H3z"/></svg>{t('nav.categories')}</NavLink>
           <NavLink to="/sync"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/></svg>{t('nav.sync')}</NavLink>

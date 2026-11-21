@@ -242,7 +242,7 @@ export function ProductPage() {
   ];
   return (
     <>
-      <p><Link to="/products">{t('product.back')}</Link></p>
+      <p><Link to="/products?stock=in">{t('product.back')}</Link></p>
       <header className="page-head">
         <h1>{p.name || `#${p.externalId}`}</h1>
         {p.deletedAt && <span className="tag">{t('product.removed', { date: fmt.date(p.deletedAt) })}</span>}
