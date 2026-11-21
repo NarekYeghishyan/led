@@ -37,6 +37,8 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       MAIL_DEV_LOG: ${MAIL_DEV_LOG:-}
       # AI photo finder (admin product page)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-}
       GEMINI_SEARCH: ${GEMINI_SEARCH:-}

@@ -7,7 +7,8 @@
  *  3. Gemini (vision) looks at all candidates together with the product name/code and picks the best one.
  *  4. Saving downloads the chosen image again and stores it in MEDIA_DIR, served at /api/media/...
  *
- * Env: GEMINI_API_KEY (required), GEMINI_MODEL (default gemini-flash-latest),
+ * Env: OPENAI_API_KEY (+ OPENAI_MODEL, default gpt-5.4-mini) — if set, OpenAI does web search + ranking;
+ *      otherwise GEMINI_API_KEY, GEMINI_MODEL (default gemini-flash-latest),
  *      GOOGLE_CSE_KEY + GOOGLE_CSE_CX, BRAVE_SEARCH_KEY, GEMINI_SEARCH=1 (needs a paid Gemini plan), MEDIA_DIR.
  */
 import {
@@ -285,17 +286,28 @@ async function geminiGuess(p: Product): Promise<Candidate[]> {
 
 interface Ranked { index: number; match: number; quality: number; reason: string }
 
-async function rank(p: Product, imgs: { b64: string; mime: string }[]): Promise<{ best: number; items: Ranked[] }> {
-  const parts: unknown[] = [{
-    text: `You choose the main photo for an online computer store product card.
+function rankPrompt(p: Product, n: number) {
+  return `You choose the main photo for an online computer store product card.
 Product: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, code/model ${p.barcode}` : ''}.
-Below are ${imgs.length} candidate images, numbered from 0.
+Below are ${n} candidate images, numbered from 0.
 For each image rate:
 - match (0-100): is it EXACTLY this product (same model, version and colour from the name)? A different model, accessory, box only, or a generic picture is low.
 - quality (0-100): clear product shot on a clean/white background, product fills the frame, sharp, no watermark, no added text/banners/collage, no people.
 Then pick "best" = index of the image that is exactly this product with the best quality, or -1 if none is exactly this product.
-Give "reason" in Russian, max 15 words.`,
-  }];
+Give "reason" in Russian, max 15 words.`;
+}
+
+function parseRank(text: string, n: number): { best: number; items: Ranked[] } {
+  try {
+    const j = JSON.parse(text) as { best: number; items: Ranked[] };
+    return { best: Number.isInteger(j.best) && j.best >= 0 && j.best < n ? j.best : -1, items: Array.isArray(j.items) ? j.items : [] };
+  } catch {
+    throw new HttpException('AI returned an unreadable answer, try again', 502);
+  }
+}
+
+async function rankGemini(p: Product, imgs: { b64: string; mime: string }[]): Promise<{ best: number; items: Ranked[] }> {
+  const parts: unknown[] = [{ text: rankPrompt(p, imgs.length) }];
   imgs.forEach((im, i) => { parts.push({ text: `Image ${i}:` }); parts.push({ inline_data: { mime_type: im.mime, data: im.b64 } }); });
   const r = await gemini({
     contents: [{ role: 'user', parts }],
@@ -311,13 +323,77 @@ Give "reason" in Russian, max 15 words.`,
       },
     },
   });
-  try {
-    const j = JSON.parse(r.text) as { best: number; items: Ranked[] };
-    return { best: Number.isInteger(j.best) && j.best >= 0 && j.best < imgs.length ? j.best : -1, items: Array.isArray(j.items) ? j.items : [] };
-  } catch {
-    throw new HttpException('Gemini returned an unreadable answer, try again', 502);
-  }
+  return parseRank(r.text, imgs.length);
 }
+
+// ------------------------------------------------------------------ OpenAI (used instead of Gemini when OPENAI_API_KEY is set)
+
+const useOpenAI = () => !!process.env.OPENAI_API_KEY;
+
+async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promise<{ text: string; urls: string[] }> {
+  let res: Response;
+  try {
+    res = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST', signal: AbortSignal.timeout(timeoutMs),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-5.4-mini', ...body }),
+    });
+  } catch { throw new HttpException('OpenAI did not answer in time, try again', 504); }
+  const d = await res.json().catch(() => ({})) as {
+    error?: { message?: string };
+    output?: { type: string; content?: { text?: string; annotations?: { url?: string }[] }[] }[];
+  };
+  if (!res.ok) {
+    if (res.status === 429) throw new HttpException('OpenAI: rate limit or no credit on the account. Try again later.', 429);
+    throw new HttpException(`OpenAI: ${d.error?.message || res.statusText}`.slice(0, 300), 502);
+  }
+  const content = (d.output || []).filter((o) => o.type === 'message').flatMap((o) => o.content || []);
+  return {
+    text: content.map((c) => c.text || '').join(''),
+    urls: content.flatMap((c) => (c.annotations || []).map((a) => a.url || '')).filter(Boolean),
+  };
+}
+
+/** OpenAI web search finds product pages (and direct image URLs); their declared images become candidates. */
+async function openaiSearch(p: Product): Promise<Candidate[]> {
+  const r = await openai({
+    tools: [{ type: 'web_search' }],
+    input: `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
+Search the web and give up to 6 URLs of pages with product photos of EXACTLY this model: the official manufacturer product page first,
+then other official brand stores and large retailers. Prefer pages that are not Russian marketplaces or Amazon (they block servers).
+Reply with URLs only, one per line.`,
+  }, 90000);
+  const found = [...r.urls, ...(r.text.match(/https?:\/\/[^\s)\]>"']+/g) || [])]
+    .map((u) => u.replace(/[.,;]+$/, '').replace(/[?&]utm_source=openai$/, ''));
+  const pages = [...new Set(found)].slice(0, 6);
+  if (!pages.length) throw new BadRequestException('AI web search found no product pages');
+  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, p.barcode)));
+  const out = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'openai' })) : []));
+  if (!out.length) throw new BadRequestException('Product pages found by AI could not be read. Paste a product-page link.');
+  return out;
+}
+
+async function rankOpenAI(p: Product, imgs: { b64: string; mime: string }[]): Promise<{ best: number; items: Ranked[] }> {
+  const content: unknown[] = [{ type: 'input_text', text: rankPrompt(p, imgs.length) }];
+  imgs.forEach((im, i) => {
+    content.push({ type: 'input_text', text: `Image ${i}:` });
+    content.push({ type: 'input_image', image_url: `data:${im.mime};base64,${im.b64}`, detail: 'low' });
+  });
+  const r = await openai({
+    input: [{ role: 'user', content }],
+    text: { format: { type: 'json_schema', name: 'photo_rank', strict: true, schema: {
+      type: 'object', additionalProperties: false, required: ['best', 'items'],
+      properties: {
+        best: { type: 'integer' },
+        items: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['index', 'match', 'quality', 'reason'],
+          properties: { index: { type: 'integer' }, match: { type: 'integer' }, quality: { type: 'integer' }, reason: { type: 'string' } } } },
+      },
+    } } },
+  });
+  return parseRank(r.text, imgs.length);
+}
+
+const rank = (p: Product, imgs: { b64: string; mime: string }[]) => (useOpenAI() ? rankOpenAI(p, imgs) : rankGemini(p, imgs));
 
 // ------------------------------------------------------------------ controller
 
@@ -351,6 +427,7 @@ export class PhotosController {
       const errors: string[] = [];
       const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
       const sources = manual ? [fromUrl(manual, p.barcode)]
+        : useOpenAI() ? [openaiSearch(p), googleCse(q), brave(q)]
         : searchApi ? [googleCse(q), brave(q), geminiSearch(p, q)] : [geminiGuess(p)];
       const lists = await Promise.allSettled(sources);
       lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
