@@ -382,3 +382,10 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-22 — Admin products: currency shown as a symbol ($ € ₽ ֏) instead of the Access name («Доллары»), list and product card. Deployed.
 - 2026-11-22 — Registration: location (Բնակավայր) field removed; `/api/shop/register` no longer requires `city`. Backup `led-static-backup-20261122a.tgz`. Published.
 - 2026-11-22 — Auth forms: error box (`.au-err`) full width. Backup `led-static-backup-20261122b.tgz`. Published.
+- 2026-11-22 — Admin product card: **AI photo finder** (`backend/src/photos.ts`, `admin/src/photos.tsx`, README "AI product photos").
+  "Подобрать фото (AI)" collects candidates, Gemini vision scores exact-model match + photo quality and preselects the best; "Save" stores
+  it in the `media` volume (`/api/media/products/<id>/<sha1>.ext`, first in `products.images`); make main / remove. Downloads go through
+  an SSRF guard. `GEMINI_API_KEY` is in `/opt/led-computers/.env` (key from `access.txt`, now git-ignored). The key is **free tier**: Google
+  Search grounding is not allowed, so web search needs `GOOGLE_CSE_KEY`+`GOOGLE_CSE_CX` or `BRAVE_SEARCH_KEY` (not set yet) or billing +
+  `GEMINI_SEARCH=1`; until then paste a product-page/image link and AI picks from it. Server compose now has the `media` volume.
+  Backups `/root/led-compose-backup-20261122-0125.yml`, `/root/led-env-backup-20261122-0125`. Deployed.
