@@ -352,3 +352,13 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Catalog = 6 sections per the client's list: "Планшеты, смартфоны, гаджеты" is no longer a section — Планшеты, Смартфоны,
   Гаджеты are now subcategories at the end of Периферия. Last section renamed "Сетевое оборудование" (Ցանցային սարքավորումներ / Network
   equipment). Top menu 6 tiles (`data-m=0..5`; grid 6 columns, 3 on ≤1100px). Backup `led-static-backup-20261121zf.tgz`. Published.
+- 2026-11-21 — **Real customer accounts** (`backend/src/shop.ts`, `/api/shop/*`, site script `site-src/auth.html` on every page).
+  Registration = phone (+374 mask) + location (region select) + password only; a phone already in `customers` (also old led.am users,
+  matched by last 8 digits) → "log in or reset". Login by phone, e-mail or old login; old led.am passwords still work. Session = httpOnly
+  cookie `led_s` (path `/api/shop`, 30 days), `token_version` logs out everywhere (password change/reset, "log out on all devices").
+  Password reset: 6-digit code, 15 min, 5 tries — sent by e-mail (`SMTP_*` in `/opt/led-computers/.env`, **not set yet**) or SMS
+  (`sendSms()` in `backend/src/mailer.ts`, no provider yet); `MAIL_DEV_LOG=1` (currently ON on the test stand) prints codes to
+  `docker compose logs api` — remove it before go-live. Account page: real profile edit, addresses (`customers.addresses`), password,
+  order history from `customer_orders` (old led.am orders now; re-import keeps customer edits via `edited_at`). `localStorage led-user/led-adr`
+  are only a display cache. Rate limits in memory. Migration `ShopAccounts1764200000000` (`source`, `addresses`, `token_version`,
+  `customer_reset_codes`). DB backup `/root/led-db-backup-20261121-2311-pre-shop-accounts.dump`, static `led-static-backup-20261121zg.tgz`. Published.
