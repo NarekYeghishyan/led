@@ -269,14 +269,14 @@ async function geminiGuess(p: Product): Promise<Candidate[]> {
     contents: [{ role: 'user', parts: [{ text:
       `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
 ` +
-      'Give up to 6 URLs of web pages that show exactly this model with product photos: the official manufacturer product page first ' +
-      '(e.g. logitechg.com, tp-link.com, asus.com, hp.com), then large retailers (amazon.com, bestbuy.com, newegg.com, bhphotovideo.com). ' +
-      'Only URLs you are confident exist; prefer canonical product pages, not search pages. You may also include direct image URLs of the official product photo.' }] }],
+      'Give up to 8 URLs of pages with photos of exactly this model: the manufacturer's global English site product page first, ' +
+      'then other official/brand sites and international retailers. Do NOT use Russian marketplaces (ozon, wildberries, dns-shop, citilink, ' +
+      'yandex market) or amazon - they block servers. Prefer canonical product pages, not search pages. Direct official image URLs are also fine.' }] }],
     generationConfig: { temperature: 0.2, responseMimeType: 'application/json',
       responseSchema: { type: 'OBJECT', properties: { urls: { type: 'ARRAY', items: { type: 'STRING' } } }, required: ['urls'] } },
   }, 40000);
   let urls: string[] = [];
-  try { urls = (JSON.parse(r.text).urls || []).filter((u: unknown) => typeof u === 'string' && /^https?:\/\//.test(u)).slice(0, 6); } catch { /* bad JSON */ }
+  try { urls = (JSON.parse(r.text).urls || []).filter((u: unknown) => typeof u === 'string' && /^https?:\/\//.test(u)).slice(0, 8); } catch { /* bad JSON */ }
   const lists = await Promise.allSettled(urls.map((u) => fromUrl(u, p.barcode)));
   const out = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'gemini' })) : []));
   if (!out.length) throw new BadRequestException('AI could not find a reachable product page. Paste a product-page link.');
