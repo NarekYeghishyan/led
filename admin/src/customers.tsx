@@ -112,7 +112,7 @@ export function CustomersPage() {
           <option value="unconfirmed">{t('cu.st.unconfirmed')}</option>
         </select>
         <label className="check">
-          <input type="checkbox" checked={params.get('orders') === '1'} onChange={(e) => set({ orders: e.target.checked ? '1' : '' })} />
+          <input type="checkbox" checked={params.get('orders') !== '0'} onChange={(e) => set({ orders: e.target.checked ? '' : '0' })} />
           {t('cu.withOrders')}
         </label>
       </div>
