@@ -378,3 +378,4 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-22 — Admin products list: columns «Цена прайса» and «Диллерская цена 1» after «Цена» (sortable; joined from `mirror_rows` `Товары`, admin only). Deployed.
 - 2026-11-22 — Admin customers list default sort back to registration date, newest first (filter "with orders" still on by default). Deployed.
 - 2026-11-22 — Admin customers list: "with orders" filter off by default again (all customers, newest registrations first; `?orders=1` = only with orders). Deployed.
+- 2026-11-22 — Admin Access tables (`/tables/:name`): dates shown as `21.11.2026` (time only when not midnight); default sort = first key column, newest first. Deployed.
