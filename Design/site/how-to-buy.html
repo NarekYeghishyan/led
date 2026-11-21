@@ -654,7 +654,7 @@ nav.cats a.hot{background:#FFF3EA;padding:8px 14px!important}
       <a class="act" href="#"><svg class="i"><use href="#cart"/></svg><span>Корзина</span><em>2</em></a>
     </div>
   </div>
-  <nav class="cats"><a href="#" data-m="0"><svg class="i"><use href="#tower"/></svg><span>Компьютеры, ноутбуки, серверы</span></a><a href="#" data-m="1"><svg class="i"><use href="#phone"/></svg><span>Планшеты, смартфоны, гаджеты</span></a><a href="#" data-m="2"><svg class="i"><use href="#cpu"/></svg><span>Комплектующие</span></a><a href="#" data-m="3"><svg class="i"><use href="#monitor"/></svg><span>Периферия</span></a><a href="#" data-m="4"><svg class="i"><use href="#head"/></svg><span>Аксессуары</span></a><a href="#" data-m="5"><svg class="i"><use href="#wifi"/></svg><span>Сетевые устройства</span></a><a class="tool" href="#" aria-label="Собрать ПК"><svg class="i"><use href="#tool"/></svg><span class="tip">Собрать ПК</span></a><a class="hot" href="#"><svg class="i"><use href="#card"/></svg><span>Акции</span></a></nav>
+  <nav class="cats"><a href="#" data-m="0"><svg class="i"><use href="#tower"/></svg><span>Компьютеры</span></a><a href="#" data-m="1"><svg class="i"><use href="#laptop"/></svg><span>Ноутбуки</span></a><a href="#" data-m="2"><svg class="i"><use href="#cpu"/></svg><span>Комплектующие</span></a><a href="#" data-m="3"><svg class="i"><use href="#monitor"/></svg><span>Периферия</span></a><a href="#" data-m="4"><svg class="i"><use href="#phone"/></svg><span>Планшеты, смартфоны, гаджеты</span></a><a href="#" data-m="5"><svg class="i"><use href="#head"/></svg><span>Аксессуары</span></a><a href="#" data-m="6"><svg class="i"><use href="#wifi"/></svg><span>Сетевые устройства</span></a><a class="tool" href="#" aria-label="Собрать ПК"><svg class="i"><use href="#tool"/></svg><span class="tip">Собрать ПК</span></a><a class="hot" href="#"><svg class="i"><use href="#card"/></svg><span>Акции</span></a></nav>
 </div>
 <div class="mega" id="mega" hidden>
   <div class="wrap mega-in">
@@ -879,10 +879,11 @@ function loop(){if(!vis)return;g.clearRect(0,0,w,h);t+=.02;
 
 /* catalog mega-menu */
 const CAT=[
- ['tower',['Компьютеры и серверы','Համակարգիչներ, նոութբուքեր, սերվերներ','Computers & servers'],[['Домашние ПК','Տնային համակարգիչներ','Home PCs'],['Офисные ПК','Գրասենյակային համակարգիչներ','Office PCs'],['Игровые ПК','Խաղային համակարգիչներ','Gaming PCs'],['ПК для дизайнеров','Դիզայներների համար','PCs for designers'],['ПК для разработчиков','Ծրագրավորողների համար','PCs for developers'],['Мини‑ПК (NUC)','Մինի համակարգիչներ (NUC)','Mini PCs (NUC)'],['Ноутбуки','Նոութբուքեր','Laptops'],['Аксессуары для ноутбуков','Նոութբուքի աքսեսուարներ','Laptop accessories'],['Моноблоки','Մոնոբլոկներ','All‑in‑ones'],['Серверы и СХД','Սերվերներ և պահոցներ','Servers & storage'],['Серверное оборудование','Սերվերային սարքավորումներ','Server equipment']],['Игровые ПК со скидкой до 12%','Խաղային համակարգիչներ՝ մինչև 12% զեղչով','Gaming PCs up to 12% off']],
- ['phone',['Планшеты и гаджеты','Պլանշետներ, սմարթֆոններ, գաջեթներ','Tablets & gadgets'],[['Планшеты','Պլանշետներ','Tablets'],['Смартфоны','Սմարթֆոններ','Smartphones'],['Смарт‑часы','Խելացի ժամացույցներ','Smartwatches'],['Фитнес‑браслеты','Ֆիթնես ապարանջաններ','Fitness bands'],['Аксессуары','Աքսեսուարներ','Accessories']],['Новые планшеты уже в наличии','Նոր պլանշետներն արդեն առկա են','New tablets in stock']],
+ ['tower',['Компьютеры','Համակարգիչներ','Computers'],[['AIO','AIO (Մոնոբլոկներ)','AIO (All-in-ones)'],['Mini-PC','Mini-PC','Mini-PC'],['Для дома','Տան համար','Home'],['Офисные','Գրասենյակային','Office'],['Дизайнерские','Դիզայներական','Designer'],['Игровые','Խաղային','Gaming'],['Для разработчиков','Ծրագրավորողների համար','For developers']],['Игровые ПК со скидкой до 12%','Խաղային համակարգիչներ՝ մինչև 12% զեղչով','Gaming PCs up to 12% off']],
+ ['laptop',['Ноутбуки','Նոութբուքեր','Laptops'],[['Для дома','Տան համար','Home'],['Офисные','Գրասենյակային','Office'],['Игровые','Խաղային','Gaming'],['Сумки','Պայուսակներ','Bags'],['Подставки и охладители','Տակդիրներ և հովացուցիչներ','Stands & coolers'],['Зарядные устройства','Լիցքավորիչներ','Chargers'],['Блоки питания','Սնուցման բլոկներ','Power adapters'],['Аккумуляторы','Մարտկոցներ','Batteries']],['Ноутбуки для дома и работы','Նոութբուքեր տան և աշխատանքի համար','Laptops for home and work']],
  ['cpu',['Комплектующие','Համալրող սարքեր','Components'],[['Процессоры','Պրոցեսորներ','Processors'],['Материнские платы','Մայրական սալիկներ','Motherboards'],['Видеокарты','Վիդեոքարտեր','Graphics cards'],['Оперативная память','Օպերատիվ հիշողություն','RAM'],['SSD','SSD','SSD'],['Жёсткие диски','Կոշտ սկավառակներ','Hard drives'],['Охлаждение','Հովացում','Cooling'],['Блоки питания','Սնուցման բլոկներ','Power supplies'],['Корпуса','Իրաններ','Cases'],['Звуковые карты','Ձայնային քարտեր','Sound cards'],['Оптические приводы','Օպտիկական կրիչներ','Optical drives'],['Контроллеры','Կոնտրոլերներ','Controllers']],['Соберите ПК в конфигураторе','Հավաքեք համակարգիչը կոնֆիգուրատորում','Build a PC in the configurator']],
  ['monitor',['Периферия','Համալրող պարագաներ','Peripherals'],[['Мониторы','Մոնիտորներ','Monitors'],['Телевизоры','Հեռուստացույցներ','TVs'],['Проекторы и экраны','Պրոյեկտորներ և էկրաններ','Projectors & screens'],['Принтеры и сканеры','Տպիչներ և սկաներներ','Printers & scanners'],['ИБП и питание','ԱԱՍ և սնուցում','UPS & power'],['Программное обеспечение','Ծրագրային ապահովում','Software'],['Офисная мебель','Գրասենյակային կահույք','Office furniture'],['POS‑оборудование','POS սարքավորումներ','POS equipment'],['Видеонаблюдение','Տեսահսկում','Video surveillance'],['Графические планшеты','Գրաֆիկական պլանշետներ','Drawing tablets']],['Мониторы 165 Гц для игр и работы','165 Հց մոնիտորներ խաղի և աշխատանքի համար','165 Hz monitors for work and play']],
+ ['phone',['Планшеты и гаджеты','Պլանշետներ, սմարթֆոններ, գաջեթներ','Tablets & gadgets'],[['Планшеты','Պլանշետներ','Tablets'],['Смартфоны','Սմարթֆոններ','Smartphones'],['Смарт‑часы','Խելացի ժամացույցներ','Smartwatches'],['Фитнес‑браслеты','Ֆիթնես ապարանջաններ','Fitness bands'],['Аксессуары','Աքսեսուարներ','Accessories']],['Новые планшеты уже в наличии','Նոր պլանշետներն արդեն առկա են','New tablets in stock']],
  ['head',['Аксессуары','Աքսեսուարներ','Accessories'],[['Клавиатуры','Ստեղնաշարեր','Keyboards'],['Мыши','Մկնիկներ','Mice'],['Колонки','Բարձրախոսներ','Speakers'],['Наушники и микрофоны','Ականջակալներ և խոսափողներ','Headphones & mics'],['Веб‑камеры','Վեբ‑տեսախցիկներ','Webcams'],['Карты памяти и флешки','Հիշողության քարտեր և ֆլեշներ','Memory cards & USB drives'],['Кабели и адаптеры','Մալուխներ և ադապտերներ','Cables & adapters'],['Хабы и кардридеры','Հաբեր և քարտ‑ընթերցիչներ','Hubs & card readers'],['Джойстики и рули','Ջոյստիկներ և ղեկեր','Gamepads & wheels'],['Внешние боксы','Արտաքին բոքսեր','External enclosures']],['Игровые периферия и аксессуары','Խաղային աքսեսուարներ','Gaming gear and accessories']],
  ['wifi',['Сетевое оборудование','Ցանցային սարքեր','Networking'],[['Роутеры','Ռաութերներ','Routers'],['Коммутаторы','Կոմուտատորներ','Switches'],['Точки доступа','Մուտքի կետեր','Access points'],['Wi‑Fi усилители','Wi‑Fi ուժեղացուցիչներ','Wi‑Fi extenders'],['Сетевые карты','Ցանցային քարտեր','Network cards'],['Сетевые кабели','Ցանցային մալուխներ','Network cables'],['VoIP‑оборудование','VoIP սարքավորումներ','VoIP equipment'],['Медиаконвертеры','Մեդիափոխարկիչներ','Media converters'],['Принт‑серверы','Տպման սերվերներ','Print servers']],['Wi‑Fi 6 для дома и офиса','Wi‑Fi 6 տան և գրասենյակի համար','Wi‑Fi 6 for home and office']]];
 const L=()=>({hy:1,en:2}[lang()]||0);
@@ -902,12 +903,13 @@ cb.onclick=e=>{e.preventDefault();megaToggle(mega.hidden)};
 mbg.onclick=()=>megaToggle(false);document.getElementById('megaX').onclick=()=>megaToggle(false);addEventListener('keydown',e=>{if(e.key==='Escape')megaToggle(false)});
 document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(megaBuild)));
 const HOT=[[['LED Gamer i5 / RTX 5060','LED Gamer i5 / RTX 5060','LED Gamer i5 / RTX 5060','429 900','tower'],['Lenovo Yoga 7 14″','Lenovo Yoga 7 14″','Lenovo Yoga 7 14″','398 000','laptop'],['HP ProDesk 400 G9','HP ProDesk 400 G9','HP ProDesk 400 G9','289 000','pc']],
- [['iPad 10.9″ Wi‑Fi 64GB','iPad 10.9″ Wi‑Fi 64GB','iPad 10.9″ Wi‑Fi 64GB','189 000','phone'],['Samsung Galaxy Tab S9 FE','Samsung Galaxy Tab S9 FE','Samsung Galaxy Tab S9 FE','169 000','phone'],['Xiaomi Smart Band 9','Xiaomi Smart Band 9','Xiaomi Smart Band 9','19 900','phone']],
+ [['Lenovo Yoga 7 14″','Lenovo Yoga 7 14″','Lenovo Yoga 7 14″','398 000','laptop'],['ASUS TUF Gaming A15','ASUS TUF Gaming A15','ASUS TUF Gaming A15','459 000','laptop'],['HP 250 G10','HP 250 G10','HP 250 G10','219 000','laptop']],
  [['GeForce RTX 5070 12GB','GeForce RTX 5070 12GB','GeForce RTX 5070 12GB','289 000','cpu'],['Ryzen 7 7800X3D','Ryzen 7 7800X3D','Ryzen 7 7800X3D','168 000','cpu'],['Samsung 990 Pro 2TB','Samsung 990 Pro 2TB','Samsung 990 Pro 2TB','89 000','server']],
  [['Samsung Odyssey G5 27″','Samsung Odyssey G5 27″','Samsung Odyssey G5 27″','118 500','monitor'],['HP LaserJet M141w','HP LaserJet M141w','HP LaserJet M141w','62 000','print'],['APC Back‑UPS 850VA','APC Back‑UPS 850VA','APC Back‑UPS 850VA','54 000','ups']],
+ [['iPad 10.9″ Wi‑Fi 64GB','iPad 10.9″ Wi‑Fi 64GB','iPad 10.9″ Wi‑Fi 64GB','189 000','phone'],['Samsung Galaxy Tab S9 FE','Samsung Galaxy Tab S9 FE','Samsung Galaxy Tab S9 FE','169 000','phone'],['Xiaomi Smart Band 9','Xiaomi Smart Band 9','Xiaomi Smart Band 9','19 900','phone']],
  [['Logitech G502 X','Logitech G502 X','Logitech G502 X','29 900','kb'],['HyperX Cloud III','HyperX Cloud III','HyperX Cloud III','39 000','head'],['Logitech C920 HD Pro','Logitech C920 HD Pro','Logitech C920 HD Pro','34 500','monitor']],
  [['TP‑Link Archer AX55','TP‑Link Archer AX55','TP‑Link Archer AX55','36 900','wifi'],['TP‑Link TL‑SG108','TP‑Link TL‑SG108','TP‑Link TL‑SG108','12 500','server'],['Ubiquiti U6 Lite','Ubiquiti U6 Lite','Ubiquiti U6 Lite','49 000','wifi']]];
-const BR=[[0,1,3,4,5,9],[5,1,9,0,11,10],[6,7,8,4,2,5],[5,1,3,2,9,0],[10,1,2,4,5,0],[11,2,1,3,6,10]];
+const BR=[[0,1,3,4,5,9],[1,3,4,5,9,0],[6,7,8,4,2,5],[5,1,3,2,9,0],[5,1,9,0,11,10],[10,1,2,4,5,0],[11,2,1,3,6,10]];
 const brandTiles=[...document.querySelectorAll('.brands a')];
 const UI2={hot:['Популярное','Հանրաճանաչ','Popular'],br:['Бренды','Բրենդներ','Brands']};
 const _show=megaShow;megaShow=function(i){_show(i);const l=L();
@@ -1522,6 +1524,21 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 .mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
 </style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
 ['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
+
+
+
+
+
+
+
+
+<!--mega-fit--><style>
+@media (min-width:761px){.mega-in{max-height:calc(100vh - var(--mtop,180px) - 14px);grid-template-rows:minmax(0,1fr)}
+.mega-r{min-height:0;overflow:hidden}.mega-g{max-height:none!important;flex:1 1 auto;min-height:90px;overflow:auto}.mega-x{flex:none}.mega-l{overflow:auto}}
+</style><script>(()=>{const u=()=>{const m=document.querySelector('.mega');if(m&&m.offsetParent){const r=m.querySelector('.mega-in');if(r)document.documentElement.style.setProperty('--mtop',Math.max(0,r.getBoundingClientRect().top)+'px')}};
+['scroll','resize','mouseover','click'].forEach(e=>addEventListener(e,()=>requestAnimationFrame(u),{passive:true,capture:true}))})()</script><!--/mega-fit-->
+
 
 
 

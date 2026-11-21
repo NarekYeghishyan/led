@@ -309,3 +309,8 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Product page phones (≤560px): the 4 key-spec cards are a 2×2 grid (icon above text) instead of 4 stacked rows; description
   highlights (battery/weight/thickness) 3 in a row; spec labels top-aligned; "Similar products" heading and its link wrap cleanly.
   Backup `led-static-backup-20261121t.tgz`. Published.
+- 2026-11-21 — Catalog structure from the client (`Design/Categories.docx`): 7 sections — Компьютеры (AIO, Mini-PC, Для дома, Офисные,
+  Дизайнерские, Игровые, Для разработчиков), Ноутбуки (Для дома, Офисные, Игровые, Сумки, Подставки и охладители, Зарядные устройства,
+  Блоки питания, Аккумуляторы), Комплектующие, Периферия, Планшеты/смартфоны/гаджеты, Аксессуары, Сетевые устройства (last 5 unchanged).
+  Servers removed. `CAT`/`HOT`/`BR` and top menu (`data-m=0..6`, laptop icon) updated in index/category/product, rest rebuilt by
+  `build_shop.py`. Backup `led-static-backup-20261121u.tgz`. Published.
