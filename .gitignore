@@ -24,5 +24,8 @@ agent/state.sqlite
 agent/logs/
 __pycache__/
 
+# API keys handed over in a text file
+access.txt
+
 # stray root file
 /logo.png

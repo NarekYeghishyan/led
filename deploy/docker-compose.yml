@@ -36,6 +36,15 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-}
       MAIL_DEV_LOG: ${MAIL_DEV_LOG:-}
+      # AI photo finder (admin product page)
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GEMINI_SEARCH: ${GEMINI_SEARCH:-}
+      GOOGLE_CSE_KEY: ${GOOGLE_CSE_KEY:-}
+      GOOGLE_CSE_CX: ${GOOGLE_CSE_CX:-}
+      BRAVE_SEARCH_KEY: ${BRAVE_SEARCH_KEY:-}
+    volumes:
+      - media:/data/media   # product photos, served at /api/media/
     ports:
       - "127.0.0.1:5100:3000"
 
@@ -47,3 +56,4 @@ services:
 
 volumes:
   db-data:
+  media:

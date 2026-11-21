@@ -82,6 +82,25 @@ cd /opt/led-computers   # docker-compose.yml + .env from deploy/
 docker compose pull && docker compose up -d
 ```
 
+## AI product photos (admin → product → "Подобрать фото (AI)")
+
+`backend/src/photos.ts`. One click: candidate images are collected, downloaded and checked (public http(s) only —
+private/metadata IPs blocked on every redirect hop; JPEG/PNG/WebP/GIF by magic bytes; ≤ 8 MB; ≥ 250 px), then
+**Gemini vision** sees all of them with the product name/code and scores each for *exact model match* and *shop-photo
+quality* (clean background, no watermark/banner); its pick is preselected. "Save" downloads it to the `media` volume
+(`/data/media/products/<id>/<sha1>.ext`, served at `/api/media/...`) and puts it first in `products.images`.
+Nothing is written until the admin presses Save. Photos can be reordered ("make main") and removed.
+
+Candidate sources (env in `/opt/led-computers/.env`, see `deploy/.env.example`):
+- a pasted product-page or image link — always works (page: og:image, JSON-LD Product.image, gallery images with the model code);
+- `GOOGLE_CSE_KEY` + `GOOGLE_CSE_CX` — Google Custom Search, image mode (100 free queries/day);
+- `BRAVE_SEARCH_KEY` — Brave Search images;
+- `GEMINI_SEARCH=1` — Gemini's Google Search grounding finds product pages. **Needs billing on the Gemini key**; the
+  current key is free tier (grounding → 429), so it is off.
+
+Free-tier Gemini has per-minute limits; busy/limited models fall back to `gemini-3.5-flash` → `gemini-flash-lite-latest`.
+Free-tier requests may be used by Google to improve its models — only public product photos and names are sent.
+
 ## Customers from the old led.am site
 
 The admin panel's **Customers** page holds the registered users of the old site with their orders, order lines and

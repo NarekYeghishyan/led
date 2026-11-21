@@ -295,3 +295,25 @@ button.danger { background: var(--bad, #c62828); color: #fff; }
 .link-btn{background:none!important;border:0!important;padding:2px 0!important;color:var(--accent,#1468DC)!important;cursor:pointer;font:inherit;box-shadow:none!important}
 .link-btn:hover{text-decoration:underline}
 .link-btn.small{font-size:12px}
+
+/* product photos + AI finder (photos.tsx) */
+.ph { margin-top: 16px; }
+.ph-cur { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.ph-cur figure { margin: 0; width: 150px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #fff; }
+.ph-cur figure.main { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.ph-cur img { display: block; width: 100%; height: 130px; object-fit: contain; }
+.ph-cur figcaption { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 6px 8px; background: var(--panel); border-top: 1px solid var(--line); }
+.ph-cur .tag { margin-left: 0; }
+button.ghost { background: none; color: var(--accent); padding: 2px 4px; font-size: 12px; }
+button.ghost.bad { color: #c62828; }
+.ph-find { display: flex; gap: 10px; flex-wrap: wrap; }
+.ph-find input { flex: 1; min-width: 240px; }
+.ph-res { margin-top: 10px; }
+.ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+.ph-c { position: relative; display: flex; flex-direction: column; padding: 0; background: var(--panel); color: var(--text); border: 2px solid var(--line); border-radius: 10px; overflow: hidden; text-align: left; }
+.ph-c img { width: 100%; height: 150px; object-fit: contain; background: #fff; }
+.ph-c.best { border-color: #2e9e5b; }
+.ph-c.sel { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); }
+.ph-ai { position: absolute; top: 6px; left: 6px; background: #2e9e5b; color: #fff; font-size: 11px; font-weight: 600; border-radius: 4px; padding: 1px 6px; }
+.ph-meta { padding: 6px 8px; font-size: 12px; line-height: 1.4; }
+.ph-act { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; }

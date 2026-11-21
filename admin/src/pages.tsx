@@ -4,6 +4,7 @@ import {
   api, auth, makeFmt, type Category, type ChangeRow, type MirrorPage, type MirrorTable, type Paged, type ProductRow, type Stats, type SyncLogRow,
 } from './api';
 import { useI18n, type TKey } from './i18n';
+import { ProductPhotos } from './photos';
 
 /** Loads data and reloads it every `refreshMs` (live view of the store). */
 export function useData<T>(path: string, refreshMs = 0) {
@@ -280,6 +281,7 @@ export function ProductPage() {
           </dl>
         </section>
       </div>
+      <ProductPhotos id={p.id} images={p.images || []} />
     </>
   );
 }

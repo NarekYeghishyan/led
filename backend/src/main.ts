@@ -13,6 +13,7 @@ import { Mirror1764000000000 } from './migrations/1764000000000-mirror';
 import { SyncController, SyncService } from './sync';
 import { ImportController } from './import';
 import { CustomersController } from './customers';
+import { MEDIA_DIR, MEDIA_URL, PhotosController } from './photos';
 import { CustomerGuard, ShopController } from './shop';
 import { Customers1764100000000 } from './migrations/1764100000000-customers';
 import { ShopAccounts1764200000000 } from './migrations/1764200000000-shop-accounts';
@@ -39,7 +40,7 @@ class HealthController {
     TypeOrmModule.forFeature([AdminUser]),
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '12h' } }),
   ],
-  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController],
+  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController],
   providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard, CustomerGuard],
 })
 class AppModule {}
@@ -49,6 +50,11 @@ async function bootstrap() {
   app.useBodyParser('json', { limit: '20mb' });
   app.set('trust proxy', 1); // host nginx is the only client (port bound to 127.0.0.1)
   app.setGlobalPrefix('api');
+  // product photos saved by the admin (photos.ts); public, file names are content hashes
+  app.useStaticAssets(MEDIA_DIR, {
+    prefix: MEDIA_URL, maxAge: '30d', immutable: true, index: false, dotfiles: 'deny', fallthrough: false,
+    setHeaders: (res) => res.setHeader('X-Content-Type-Options', 'nosniff'),
+  });
   app.enableShutdownHooks();
   await app.listen(Number(process.env.PORT) || 3000);
 }
