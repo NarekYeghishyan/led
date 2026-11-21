@@ -365,7 +365,9 @@ stock and prices from the Access sync. Until then the templates are design refer
 - 2026-11-21 — Admin **"Log in as customer"** (list row link + button on the customer card): `POST /api/admin/customers/:id/login-as`
   (admin role only, not for blocked customers) sets the site cookie `led_s` in the admin's browser for 2 h (ends with the browser,
   token has `imp` = admin e-mail) and opens `/account.html` in a new tab; the account shows a yellow "viewing as customer" banner
-  with "Exit" (logs out, back to `/admin/customers`). Doesn't change the customer's last-login; written to `change_log` (`login_as`).
+  with "Exit" (logs out, back to `/admin/customers`). Doesn't change the customer's last-login; not logged (since 2026-11-22).
   Backup `led-static-backup-20261121zh.tgz`. Deployed.
 - 2026-11-22 — Admin product card (`/admin/products/:id`): rows «Цена прайса» (above «Цена»), «Диллерская цена 1» and «Диллерская цена 2» (below).
   Read from the Access mirror (`mirror_rows`, table `Товары`) in `GET /api/admin/products/:id` — no agent change. Admin only, **never in `/api/shop`**. Deployed.
+- 2026-11-22 — "Log in as customer" is no longer written to `change_log` (owner's request); old `login_as` rows deleted (copy in
+  `/root/led-changelog-login-as-20261122.csv`). Admin sidebar menu items have line icons (inline SVG, `.ni`). Deployed.

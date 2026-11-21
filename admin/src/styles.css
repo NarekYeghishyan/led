@@ -62,6 +62,9 @@ aside {
 }
 aside nav { display: grid; gap: 2px; flex: 1; align-content: start; }
 aside nav a { color: var(--side-text); padding: 8px 10px; border-radius: 8px; transition: background .15s, color .15s; }
+aside nav a { display: flex; align-items: center; gap: 10px; }
+aside nav .ni { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+aside nav a.active .ni, aside nav a:hover .ni { opacity: 1; }
 aside nav a:hover { background: var(--side-hover); color: #fff; text-decoration: none; }
 aside nav a.active { background: var(--side-active); color: #fff; font-weight: 600; box-shadow: 0 4px 14px rgba(20,104,220,.35); }
 aside nav a:focus-visible, .brand:focus-visible { outline: 2px solid #6aa8f7; outline-offset: 2px; }

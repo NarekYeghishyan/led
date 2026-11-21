@@ -146,7 +146,7 @@ export class CustomersController {
   }
 
   /** "Log in as this customer": sets the storefront session cookie in the admin's browser (2 h, ends with the browser).
-   *  Admin role only, logged to change_log; the site shows a banner and the customer's last-login date is not touched. */
+   *  Admin role only, not logged (owner's decision 2026-11-22); the site shows a banner and the customer's last-login date is not touched. */
   @Post(':id/login-as')
   async loginAs(@Param('id', ParseIntPipe) id: number, @Req() req: Request & { user: { email: string; role: string } },
     @Res({ passthrough: true }) res: Response) {
@@ -156,8 +156,6 @@ export class CustomersController {
     if (c.blocked) throw new BadRequestException('Customer is blocked — unblock first');
     const token = this.jwt.sign({ sub: id, kind: 'customer', v: c.token_version, imp: req.user.email || 'admin' }, { expiresIn: '2h' });
     res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', secure: req.secure, path: COOKIE_PATH });
-    await this.ds.query(`INSERT INTO change_log (entity, action, external_id, name, changes) VALUES ('customer', 'login_as', $1, $2, $3)`,
-      [id, c.name, JSON.stringify({ by: [null, req.user.email ?? 'admin'] })]);
     return { ok: true, url: '/account.html' };
   }
 }
