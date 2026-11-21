@@ -91,6 +91,17 @@ export function DashboardPage() {
 
 // ------------------------------------------------------------------ Products
 
+// Currency names from Access → symbols.
+const curSym = (n?: string | null): string => {
+  const s = (n || '').trim().toLowerCase();
+  if (!s) return '';
+  if (s.startsWith('дол') || s.startsWith('usd') || s === '$') return '$';
+  if (s.startsWith('евр') || s.startsWith('eur')) return '€';
+  if (s.startsWith('руб') || s.startsWith('rub')) return '₽';
+  if (s.startsWith('драм') || s.startsWith('amd') || s.startsWith('дрм')) return '֏';
+  return n || '';
+};
+
 const COLS: { key: string; label: TKey; sort?: string; num?: boolean }[] = [
   { key: 'externalId', label: 'col.code', sort: 'externalId', num: true },
   { key: 'name', label: 'col.name', sort: 'name' },
@@ -183,7 +194,7 @@ export function ProductsPage() {
                 <td data-label={t('col.barcode')} className="mono">{p.barcode || '—'}</td>
                 <td data-label={t('col.category')}>{p.categoryName || (p.categoryExternalId ?? '—')}</td>
                 <td data-label={t('col.brand')}>{p.brand || '—'}</td>
-                <td data-label={t('col.price')} className="num">{fmt.num(p.price)} <span className="muted">{p.currencyName || ''}</span></td>
+                <td data-label={t('col.price')} className="num">{fmt.num(p.price)} <span className="muted">{curSym(p.currencyName)}</span></td>
                 <td data-label={t('f.priceListPrice')} className="num">{p.priceList === null ? '—' : fmt.num(p.priceList)}</td>
                 <td data-label={t('f.dealerPrice1')} className="num">{p.dealerPrice1 === null ? '—' : fmt.num(p.dealerPrice1)}</td>
                 <td data-label={t('col.stock')} className={`num ${p.quantity > 0 ? 'in' : 'out'}`}>{fmt.num(p.quantity, 3)}</td>
@@ -233,7 +244,7 @@ export function ProductPage() {
     [t('f.brand'), p.brand || '—'],
     [t('f.unit'), p.unit || '—'],
     [t('f.priceListPrice'), p.priceList === null ? '—' : num2(p.priceList)],
-    [t('f.price'), `${fmt.num(p.price)} ${p.currency?.name ?? ''}`],
+    [t('f.price'), `${fmt.num(p.price)} ${curSym(p.currency?.name)}`],
     [t('f.dealerPrice1'), p.dealerPrice1 === null ? '—' : num2(p.dealerPrice1)],
     [t('f.dealerPrice2'), p.dealerPrice2 === null ? '—' : num2(p.dealerPrice2)],
     [t('f.stock'), fmt.num(p.quantity, 3)],
