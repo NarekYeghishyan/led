@@ -314,3 +314,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   Блоки питания, Аккумуляторы), Комплектующие, Периферия, Планшеты/смартфоны/гаджеты, Аксессуары, Сетевые устройства (last 5 unchanged).
   Servers removed. `CAT`/`HOT`/`BR` and top menu (`data-m=0..6`, laptop icon) updated in index/category/product, rest rebuilt by
   `build_shop.py`. Backup `led-static-backup-20261121u.tgz`. Published.
+- 2026-11-21 — Home: quick-links row under the hero (`.qk`): Акции (orange, HOT), Серверы и сетевое оборудование (navy), Новинки (green) cards +
+  stats card (20+ лет / 10 000+ / 0%, number + label). 4 columns; stats full width ≤1200px; one column on phones. Backup `led-static-backup-20261121v.tgz`. Published.
