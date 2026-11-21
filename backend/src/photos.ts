@@ -359,13 +359,14 @@ async function openaiSearch(p: Product): Promise<Candidate[]> {
   const r = await openai({
     tools: [{ type: 'web_search' }],
     input: `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
-Search the web and give up to 6 URLs of pages with product photos of EXACTLY this model: the official manufacturer product page first,
-then other official brand stores and large retailers. Prefer pages that are not Russian marketplaces or Amazon (they block servers).
-Reply with URLs only, one per line.`,
+Search the web and give up to 10 URLs, one per line, URLs only:
+- direct image file URLs (.jpg/.png/.webp, e.g. the manufacturer's CDN or cdn.shopify.com) of official product photos of EXACTLY this model;
+- product pages of exactly this model: the official manufacturer page first, then other official brand stores and large retailers.
+Avoid Russian marketplaces and Amazon (they block servers).`,
   }, 90000);
   const found = [...r.urls, ...(r.text.match(/https?:\/\/[^\s)\]>"']+/g) || [])]
     .map((u) => u.replace(/[.,;]+$/, '').replace(/[?&]utm_source=openai$/, ''));
-  const pages = [...new Set(found)].slice(0, 6);
+  const pages = [...new Set(found)].slice(0, 10);
   if (!pages.length) throw new BadRequestException('AI web search found no product pages');
   const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, p.barcode)));
   const out = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'openai' })) : []));
