@@ -406,3 +406,13 @@ stock and prices from the Access sync. Until then the templates are design refer
   photos). Both keys in server `.env`. OpenAI results vary per run, so a second, differently worded search runs when the first gives < 3
   usable images; logo/icon/banner URLs are skipped. Test: 16357 ×3 and 14123 ×1 — all 4 picked a correct white-background photo
   (match 100, quality 95–100), 18–30 s. Backups `/root/led-env-backup-*`, `/root/led-compose-backup-*`. Deployed.
+- 2026-11-22 — Admin **"Site categories"** (`/admin/site-categories`, `admin/src/site-categories.tsx`, `backend/src/site-categories.ts`): the
+  storefront catalog tree in the DB (`site_categories`: section → group → item, max 3 levels, RU/HY/EN names, icon + promo line for sections,
+  order, visible, slug, linked Access categories `access_category_ids` for the future product feed). Seeded from the site's `CAT` (index.html)
+  — 6 sections, 173 rows. Tree with search, ↑/↓ reorder, hide/show, add child, edit, move to another parent, delete (with children); every
+  change in `change_log` (entity `site_category`). Public `GET /api/shop/categories` (visible tree, cache 60 s). **The site's "Catalog" popup
+  and top menu now come from it** on every page (`site-src/site_cats.html`, cache `localStorage led-cats`, built-in `CAT` = fallback); page
+  scripts expose `window.LEDMega` for it, top-menu hover is delegated (menu re-renders). Category/product popups now list the same groups as
+  home. **Edit the catalog in the admin, not in `CAT`.** Not yet driven by it: the category page's left tree (`TREE`) and search's demo index.
+  build_shop.py no longer piles up blank lines (pages had ~900). DB backup `/root/led-db-backup-20261122-1218-pre-site-categories.dump`,
+  static `led-static-backup-20261122c.tgz`. Deployed + published.
