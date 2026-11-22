@@ -444,3 +444,5 @@ stock and prices from the Access sync. Until then the templates are design refer
   only a hint (often wrong). Products list has a "Категория сайта" column + filter; `/api/shop/categories` `k` = in-stock products
   in the category or below. Tables `product_site_categories`, `product_ai_categories` (migration `ProductSiteCategories1764500000000`).
   **The site tree has no "Сокет 1851"** (Core Ultra CPUs/boards stay in the group) — add it in the admin if wanted.
+  After the first AI run on production: 1 115 of 1 149 in stock exact, 15 group only, 19 none (batteries, camera bags…), 10 AI
+  suggestions to review. DB backup `/root/led-db-backup-20261123-0229-pre-product-categories.dump`, compose `led-compose-backup-20261123-0229.yml`. Deployed.
