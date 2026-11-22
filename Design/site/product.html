@@ -1769,7 +1769,8 @@ function apply(tree){
  try{M.rebuild()}catch(e){console.warn('catalog menu',e)}
  const nav=document.querySelector('nav.cats');
  if(nav){const l=L();nav.style.setProperty('--cats',Math.min(CAT.length,8));
-  nav.innerHTML=CAT.map((c,i)=>`<a href="/category.html" data-m="${i}" aria-label="${esc(c[1][l])}"><svg class="i"><use href="#${esc(c[0])}"/></svg><span>${esc(c[1][l])}</span></a>`).join('')}
+  nav.innerHTML=CAT.map((c,i)=>`<a href="/category.html?c=${encodeURIComponent(tree[i].s||'')}" data-m="${i}" aria-label="${esc(c[1][l])}"><svg class="i"><use href="#${esc(c[0])}"/></svg><span>${esc(c[1][l])}</span></a>`).join('')}
+ window.LEDCatsTree=tree;document.dispatchEvent(new CustomEvent('led:cats',{detail:tree})); /* category.html left tree */
 }
 try{apply(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){}
 fetch('/api/shop/categories',{credentials:'omit'}).then(r=>r.ok?r.json():null).then(t=>{if(!t)return;apply(t);try{localStorage.setItem(KEY,JSON.stringify(t))}catch(e){}}).catch(()=>{});

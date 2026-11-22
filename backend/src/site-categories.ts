@@ -186,7 +186,7 @@ export class SiteCategoriesController {
   }
 }
 
-/** Public: the visible tree for the site menus. Compact keys: s slug, n [ru,hy,en], i icon, p promo [ru,hy,en], c children. */
+/** Public: the visible tree for the site menus. Compact keys: s slug, n [ru,hy,en], i icon, p promo [ru,hy,en], k product count, c children. */
 @Controller('shop')
 export class SiteCategoriesPublicController {
   constructor(@InjectDataSource() private ds: DataSource) {}
@@ -195,10 +195,13 @@ export class SiteCategoriesPublicController {
   @Header('Cache-Control', 'public, max-age=60')
   async tree() {
     const rows: { id: number; parent_id: number | null; slug: string; name_ru: string; name_hy: string; name_en: string;
-      icon: string | null; promo_ru: string | null; promo_hy: string | null; promo_en: string | null }[] = await this.ds.query(
-      `SELECT id, parent_id, slug, name_ru, name_hy, name_en, icon, promo_ru, promo_hy, promo_en
-       FROM site_categories WHERE is_visible ORDER BY sort, id`);
-    type Node = { s: string; n: string[]; i?: string; p?: string[]; c?: Node[] };
+      icon: string | null; promo_ru: string | null; promo_hy: string | null; promo_en: string | null; k: number }[] = await this.ds.query(
+      `SELECT id, parent_id, slug, name_ru, name_hy, name_en, icon, promo_ru, promo_hy, promo_en,
+         (SELECT COUNT(*)::int FROM products p WHERE p.deleted_at IS NULL AND p.is_visible
+            AND p.category_external_id = ANY(c.access_category_ids)) AS k
+       FROM site_categories c WHERE is_visible ORDER BY sort, id`);
+    // k = products in the linked Access categories (own link, else the sum of the children); only when > 0
+    type Node = { s: string; n: string[]; i?: string; p?: string[]; k?: number; c?: Node[] };
     const kids = new Map<number | null, typeof rows>();
     for (const r of rows) kids.set(r.parent_id, [...(kids.get(r.parent_id) || []), r]);
     const or = (...v: (string | null)[]) => v.find((x) => x) || '';
@@ -210,6 +213,8 @@ export class SiteCategoriesPublicController {
       }
       const c = build(r.id);
       if (c.length) n.c = c;
+      const k = r.k || c.reduce((s, x) => s + (x.k || 0), 0);
+      if (k) n.k = k;
       return n;
     });
     return build(null); // a hidden category hides everything inside it
