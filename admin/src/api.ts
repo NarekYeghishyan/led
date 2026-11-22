@@ -32,6 +32,13 @@ export interface ProductRow {
   inPriceList: boolean; isVisible: boolean; deletedAt: string | null; syncedAt: string | null;
   categoryExternalId: number | null; categoryName: string | null; currencyName: string | null;
   priceList: number | null; dealerPrice1: number | null;
+  siteCat: SiteCatLink | null; siteCatCount: number;
+}
+/** A product's place in a site category (backend product-categories.ts): who put it there and how sure the AI was. */
+export interface SiteCatLink { id: number; source: 'manual' | 'rule' | 'ai'; conf: number | null }
+export interface AiSuggestion {
+  cat: number | null; conf: number; why: string | null; status: 'applied' | 'pending' | 'accepted' | 'rejected' | 'none' | 'replaced';
+  at: string; by: string | null;
 }
 export interface Paged<T> { items: T[]; total: number; page: number; limit: number }
 export interface Category { id: number; externalId: number; name: string; productCount: number; deletedAt: string | null }

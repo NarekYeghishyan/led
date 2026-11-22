@@ -5,6 +5,7 @@ import {
 } from './api';
 import { useI18n, type TKey } from './i18n';
 import { ProductPhotos } from './photos';
+import { CatChip, ProductSiteCats, useSiteCats } from './product-categories';
 
 /** Loads data and reloads it every `refreshMs` (live view of the store). */
 export function useData<T>(path: string, refreshMs = 0) {
@@ -108,6 +109,7 @@ const COLS: { key: string; label: TKey; sort?: string; num?: boolean }[] = [
   { key: 'name', label: 'col.name', sort: 'name' },
   { key: 'barcode', label: 'col.barcode' },
   { key: 'categoryName', label: 'col.category' },
+  { key: 'siteCat', label: 'col.siteCategory' },
   { key: 'brand', label: 'col.brand' },
   { key: 'price', label: 'col.price', sort: 'price', num: true },
   { key: 'priceList', label: 'f.priceListPrice', sort: 'priceList', num: true },
@@ -121,6 +123,7 @@ export function ProductsPage() {
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState(params.get('search') || '');
   const { data: cats } = useData<Category[]>('/admin/categories');
+  const siteCats = useSiteCats();
   const q = new URLSearchParams(params);
   if (!q.get('limit')) q.set('limit', '50');
   const { data, error } = useData<Paged<ProductRow>>(`/admin/products?${q}`, 15000);
@@ -152,6 +155,11 @@ export function ProductsPage() {
         <select value={params.get('categoryId') || ''} onChange={(e) => set({ categoryId: e.target.value })}>
           <option value="">{t('products.allCategories')}</option>
           {cats?.map((c) => <option key={c.id} value={c.externalId}>{c.name || `#${c.externalId}`} ({c.productCount})</option>)}
+        </select>
+        <select value={params.get('siteCat') || ''} onChange={(e) => set({ siteCat: e.target.value })} aria-label={t('col.siteCategory')}>
+          <option value="">{t('products.allSiteCats')}</option>
+          <option value="none">{t('products.noSiteCat')}</option>
+          {siteCats.ordered.map(({ c, depth }) => <option key={c.id} value={c.id}>{' '.repeat(depth * 3)}{c.nameRu || c.nameEn}</option>)}
         </select>
         <select value={params.get('stock') || ''} onChange={(e) => set({ stock: e.target.value })}>
           <option value="">{t('products.anyStock')}</option>
@@ -194,6 +202,10 @@ export function ProductsPage() {
                 <td data-label={t('col.name')} className="title"><Link to={`/products/${p.id}`}>{p.name || '—'}</Link>{p.discontinued && <span className="tag">{t('products.discontinued')}</span>}</td>
                 <td data-label={t('col.barcode')} className="mono">{p.barcode || '—'}</td>
                 <td data-label={t('col.category')}>{p.categoryName || (p.categoryExternalId ?? '—')}</td>
+                <td data-label={t('col.siteCategory')}>
+                  {p.siteCat ? <span className="pc-cats"><CatChip idx={siteCats} l={p.siteCat} short />{p.siteCatCount > 1 && <small className="muted">+{p.siteCatCount - 1}</small>}</span>
+                    : <span className="muted">—</span>}
+                </td>
                 <td data-label={t('col.brand')}>{p.brand || '—'}</td>
                 <td data-label={t('col.price')} className="num">{fmt.num(p.price)} <span className="muted">{curSym(p.currencyName)}</span></td>
                 <td data-label={t('f.priceListPrice')} className="num">{p.priceList === null ? '—' : fmt.num(p.priceList)}</td>
@@ -281,6 +293,7 @@ export function ProductPage() {
           </dl>
         </section>
       </div>
+      <ProductSiteCats id={p.id} />
       <ProductPhotos id={p.id} images={p.images || []} />
     </>
   );
@@ -462,7 +475,7 @@ export function LogsPage() {
         <input placeholder={t('logs.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
         <select value={params.get('entity') || ''} onChange={(e) => set({ entity: e.target.value })}>
           <option value="">{t('logs.allEntities')}</option>
-          {['products', 'categories', 'currencies', 'site_category', 'site_icon'].map((e) => <option key={e} value={e}>{t(`entity.${e}` as TKey)}</option>)}
+          {['products', 'categories', 'currencies', 'site_category', 'site_icon', 'product_site_category'].map((e) => <option key={e} value={e}>{t(`entity.${e}` as TKey)}</option>)}
           {tables && tables.length > 0 && <option value="tables">{t('logs.allTables')}</option>}
           {tables?.map((tb) => <option key={tb.name} value={`t:${tb.name}`}>{tb.name}</option>)}
         </select>

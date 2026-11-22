@@ -68,6 +68,9 @@ stock and prices from the Access sync. Until then the templates are design refer
 - Customer data (old led.am users, orders) is personal data: dumps (`*.sql`) never go to git or a web folder; on the server only
   `/root`, chmod 600. Back up the DB (`pg_dump`) before every customer import. Site accounts/orders must use the `customers`
   tables and `/api/shop/login` (see docs/PROJECT_PLAN.md "Customers"), never a new user table; customer tokens must never open `/api/admin`.
+- Two category trees: **"Категории сайта"** (`site_categories`, edited in the admin) is the **only** catalog the site shows.
+  **"Категории"** in the admin = Access `Типы` (`categories`, 362 rows, many legacy, synced, read-only): used only to find which
+  products go into a site category, never shown on the site. Storefront code must read categories from `site_categories` only.
 
 ## Log
 - 2026-11-20 — Claude desktop made home (`index.html`) and category (`category.html`) templates in
@@ -432,3 +435,12 @@ stock and prices from the Access sync. Until then the templates are design refer
   Icon keys of added icons start with `ci-`. Changes logged (`site_icon`). Backups `led-db-backup-20261122-1237-pre-site-icons.dump`,
   `led-static-backup-20261122e.tgz`. Deployed + published.
 - 2026-11-22 — Catalog popup: the top-menu tile of the section shown in the popup is active (hovering/clicking a `.mega-l` button moves it; closing the popup clears it). MutationObserver in `card_fx.html`, all pages. Backup `led-static-backup-20261122f.tgz`. Published.
+- 2026-11-23 — **Products → site categories** (admin "Привязка товаров" `/admin/product-categories`, README "Products → site
+  categories"). Order: manual (product card / bulk) > name rules of each site category (`site_categories.match_rules`: starts
+  with / contains / not, `/regex/`; edited in "Категории сайта" with a "Проверить" preview; + linked Access categories) > AI
+  (only in-stock products without an exact subcategory; ≥ 90 % applied and marked AI, lower → review list; auto every 30 min,
+  Gemini per `AI_PROVIDER`, `AI_CATEGORIES=off` / `AI_CATEGORIES_AUTO=0` to stop). Starting rules from real names
+  (`category-rules-seed.ts`): 1 092 of 1 149 in-stock products get an exact subcategory by rules alone. Access categories are
+  only a hint (often wrong). Products list has a "Категория сайта" column + filter; `/api/shop/categories` `k` = in-stock products
+  in the category or below. Tables `product_site_categories`, `product_ai_categories` (migration `ProductSiteCategories1764500000000`).
+  **The site tree has no "Сокет 1851"** (Core Ultra CPUs/boards stay in the group) — add it in the admin if wanted.

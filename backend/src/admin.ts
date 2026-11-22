@@ -30,6 +30,11 @@ export class AdminController {
         'p.deleted_at AS "deletedAt"', 'p.synced_at AS "syncedAt"',
         'p.category_external_id AS "categoryExternalId"', 'c.name AS "categoryName"', 'cur.name AS "currencyName"',
         `(CASE WHEN m.data->>'ЦенаПрайса' ~ '^-?[0-9]+([.][0-9]+)?$' THEN (m.data->>'ЦенаПрайса')::float END) AS "priceList"`, `(CASE WHEN m.data->>'Диллерская цена1' ~ '^-?[0-9]+([.][0-9]+)?$' THEN (m.data->>'Диллерская цена1')::float END) AS "dealerPrice1"`,
+        // main site category (an exact/leaf one first; manual > AI > rule) + how many the product has (product-categories.ts)
+        `(SELECT json_build_object('id', x.site_category_id, 'source', x.source, 'conf', x.confidence) FROM product_site_categories x
+          WHERE x.product_id = p.id ORDER BY EXISTS (SELECT 1 FROM site_categories k WHERE k.parent_id = x.site_category_id),
+            CASE x.source WHEN 'manual' THEN 0 WHEN 'ai' THEN 1 ELSE 2 END, x.site_category_id LIMIT 1) AS "siteCat"`,
+        `(SELECT COUNT(*)::int FROM product_site_categories x WHERE x.product_id = p.id) AS "siteCatCount"`,
       ]);
 
     if (q.deleted !== '1') qb.andWhere('p.deleted_at IS NULL');
@@ -38,6 +43,12 @@ export class AdminController {
         { s: `%${q.search.trim()}%`, exact: q.search.trim() });
     }
     if (q.categoryId) qb.andWhere('p.category_external_id = :cat', { cat: Number(q.categoryId) });
+    if (q.siteCat === 'none') qb.andWhere('NOT EXISTS (SELECT 1 FROM product_site_categories x WHERE x.product_id = p.id)');
+    else if (Number(q.siteCat)) {
+      qb.andWhere(`EXISTS (SELECT 1 FROM product_site_categories x WHERE x.product_id = p.id AND x.site_category_id IN (
+        WITH RECURSIVE t AS (SELECT id FROM site_categories WHERE id = :sc UNION ALL SELECT c2.id FROM site_categories c2 JOIN t ON c2.parent_id = t.id)
+        SELECT id FROM t))`, { sc: Number(q.siteCat) });
+    }
     if (q.stock === 'in') qb.andWhere('p.quantity > 0');
     if (q.stock === 'out') qb.andWhere('p.quantity <= 0');
     if (q.discontinued === '0') qb.andWhere('p.discontinued = false');

@@ -9,17 +9,22 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
+import { cleanRules } from './category-rules';
+import { ProductCategoriesService } from './product-categories';
 
 const MAX_DEPTH = 3; // section → group → item (the site's catalog popup shows exactly these levels)
 const TEXT = ['name_ru', 'name_hy', 'name_en', 'icon', 'promo_ru', 'promo_hy', 'promo_en', 'slug'] as const;
 const COLS = `c.id, c.parent_id AS "parentId", c.sort, c.slug, c.name_ru AS "nameRu", c.name_hy AS "nameHy", c.name_en AS "nameEn",
   c.icon, c.promo_ru AS "promoRu", c.promo_hy AS "promoHy", c.promo_en AS "promoEn", c.is_visible AS "isVisible",
-  c.access_category_ids AS "accessCategoryIds", c.updated_at AS "updatedAt"`;
+  c.access_category_ids AS "accessCategoryIds", c.match_rules AS "matchRules", c.updated_at AS "updatedAt"`;
 /** camelCase body field → column */
 const FIELD: Record<string, string> = {
   nameRu: 'name_ru', nameHy: 'name_hy', nameEn: 'name_en', icon: 'icon', promoRu: 'promo_ru', promoHy: 'promo_hy', promoEn: 'promo_en',
-  slug: 'slug', isVisible: 'is_visible', accessCategoryIds: 'access_category_ids', parentId: 'parent_id',
+  slug: 'slug', isVisible: 'is_visible', accessCategoryIds: 'access_category_ids', parentId: 'parent_id', matchRules: 'match_rules',
 };
+/** Distinct products in each category or below it (root = the category). */
+const SUBTREE_COUNTS = `sub AS (SELECT id AS root, id FROM site_categories
+    UNION ALL SELECT sub.root, c.id FROM site_categories c JOIN sub ON c.parent_id = sub.id)`;
 
 export const slugify = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[″"'`]/g, '').replace(/&/g, 'and')
   .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
@@ -29,15 +34,18 @@ type Req = { user?: { email?: string } };
 @Controller('admin/site-categories')
 @UseGuards(JwtGuard)
 export class SiteCategoriesController {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+  constructor(@InjectDataSource() private ds: DataSource, private products: ProductCategoriesService) {}
 
-  /** Flat list (the admin builds the tree); productCount = products (not deleted) in the linked Access categories. */
+  /** Flat list (the admin builds the tree); productCount / inStockCount = products placed in the category or below it. */
   @Get()
   list() {
     return this.ds.query(`
-      SELECT ${COLS},
-        (SELECT COUNT(*)::int FROM products p WHERE p.deleted_at IS NULL AND p.category_external_id = ANY(c.access_category_ids)) AS "productCount"
-      FROM site_categories c ORDER BY c.parent_id NULLS FIRST, c.sort, c.id`);
+      WITH RECURSIVE ${SUBTREE_COUNTS},
+        cnt AS (SELECT sub.root, COUNT(DISTINCT x.product_id)::int AS n, COUNT(DISTINCT x.product_id) FILTER (WHERE p.quantity > 0)::int AS s
+          FROM sub JOIN product_site_categories x ON x.site_category_id = sub.id
+          JOIN products p ON p.id = x.product_id AND p.deleted_at IS NULL GROUP BY sub.root)
+      SELECT ${COLS}, COALESCE(cnt.n, 0) AS "productCount", COALESCE(cnt.s, 0) AS "inStockCount"
+      FROM site_categories c LEFT JOIN cnt ON cnt.root = c.id ORDER BY c.parent_id NULLS FIRST, c.sort, c.id`);
   }
 
   @Post()
@@ -50,11 +58,12 @@ export class SiteCategoriesController {
     const [{ s }] = await this.ds.query(
       `SELECT COALESCE(MAX(sort), 0) + 10 AS s FROM site_categories WHERE parent_id IS NOT DISTINCT FROM $1`, [parentId]);
     const [row] = await this.ds.query(
-      `INSERT INTO site_categories (parent_id, sort, slug, name_ru, name_hy, name_en, icon, promo_ru, promo_hy, promo_en, is_visible, access_category_ids)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
+      `INSERT INTO site_categories (parent_id, sort, slug, name_ru, name_hy, name_en, icon, promo_ru, promo_hy, promo_en, is_visible, access_category_ids, match_rules)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
       [parentId, s, slug, v.name_ru ?? '', v.name_hy ?? '', v.name_en ?? '', v.icon ?? null, v.promo_ru ?? null, v.promo_hy ?? null,
-        v.promo_en ?? null, v.is_visible ?? true, v.access_category_ids ?? []]);
+        v.promo_en ?? null, v.is_visible ?? true, v.access_category_ids ?? [], JSON.stringify(v.match_rules ?? [])]);
     await this.log('created', row.id, String(v.name_ru || v.name_en || ''), {}, req);
+    this.products.scheduleRules();
     return this.one(row.id);
   }
 
@@ -78,7 +87,7 @@ export class SiteCategoriesController {
     for (const [k, val] of Object.entries(v)) {
       if (JSON.stringify(val) === JSON.stringify(cur[k])) continue;
       changes[k] = [cur[k], val];
-      args.push(val);
+      args.push(k === 'match_rules' ? JSON.stringify(val) : val);
       sets.push(`${k} = $${args.length}`);
     }
     if (!sets.length) return this.one(id);
@@ -89,6 +98,7 @@ export class SiteCategoriesController {
     }
     await this.ds.query(`UPDATE site_categories SET ${sets.join(', ')}, updated_at = now() WHERE id = $1`, args);
     await this.log('updated', id, cur.name_ru || cur.name_en, changes, req);
+    if ('match_rules' in changes || 'access_category_ids' in changes || 'parent_id' in changes) this.products.scheduleRules();
     return this.one(id);
   }
 
@@ -119,6 +129,7 @@ export class SiteCategoriesController {
       SELECT COUNT(*)::int AS n FROM t`, [id]);
     await this.ds.query(`DELETE FROM site_categories WHERE id = $1`, [id]);
     await this.log('deleted', id, cur.name_ru || cur.name_en, { removed: [n, null] }, req);
+    this.products.scheduleRules();
     return { ok: true, removed: n };
   }
 
@@ -136,7 +147,9 @@ export class SiteCategoriesController {
       if (!b || !(k in b) || (creating && k === 'parentId')) continue;
       const val = b[k];
       if (col === 'is_visible') out[col] = val === true || val === 'true' || val === 1;
-      else if (col === 'access_category_ids') {
+      else if (col === 'match_rules') {
+        try { out[col] = cleanRules(val); } catch (e) { throw new BadRequestException((e as Error).message); }
+      } else if (col === 'access_category_ids') {
         if (!Array.isArray(val)) throw new BadRequestException('accessCategoryIds must be an array');
         out[col] = [...new Set(val.map(Number).filter((x) => Number.isInteger(x)))];
       } else if (col === 'parent_id') out[col] = val === null || val === '' ? null : Number(val);
@@ -197,12 +210,14 @@ export class SiteCategoriesPublicController {
     const rows: { id: number; parent_id: number | null; slug: string; name_ru: string; name_hy: string; name_en: string;
       icon: string | null; promo_ru: string | null; promo_hy: string | null; promo_en: string | null; k: number;
       vb: string | null; svg: string | null }[] = await this.ds.query(
-      `SELECT c.id, parent_id, slug, name_ru, name_hy, name_en, icon, promo_ru, promo_hy, promo_en, i.view_box AS vb, i.body AS svg,
-         (SELECT COUNT(*)::int FROM products p WHERE p.deleted_at IS NULL AND p.is_visible
-            AND p.category_external_id = ANY(c.access_category_ids)) AS k
-       FROM site_categories c LEFT JOIN site_icons i ON i.key = c.icon AND c.parent_id IS NULL
+      `WITH RECURSIVE ${SUBTREE_COUNTS},
+         cnt AS (SELECT sub.root, COUNT(DISTINCT x.product_id)::int AS k FROM sub JOIN product_site_categories x ON x.site_category_id = sub.id
+           JOIN products p ON p.id = x.product_id AND p.deleted_at IS NULL AND p.is_visible AND p.quantity > 0 GROUP BY sub.root)
+       SELECT c.id, parent_id, slug, name_ru, name_hy, name_en, icon, promo_ru, promo_hy, promo_en, i.view_box AS vb, i.body AS svg,
+         COALESCE(cnt.k, 0) AS k
+       FROM site_categories c LEFT JOIN cnt ON cnt.root = c.id LEFT JOIN site_icons i ON i.key = c.icon AND c.parent_id IS NULL
        WHERE c.is_visible ORDER BY c.sort, c.id`);
-    // k = products in the linked Access categories (own link, else the sum of the children); only when > 0
+    // k = in-stock products placed in the category or below it (product_site_categories); only when > 0
     type Node = { s: string; n: string[]; i?: string; g?: [string, string]; p?: string[]; k?: number; c?: Node[] };
     const kids = new Map<number | null, typeof rows>();
     for (const r of rows) kids.set(r.parent_id, [...(kids.get(r.parent_id) || []), r]);
@@ -216,8 +231,7 @@ export class SiteCategoriesPublicController {
       }
       const c = build(r.id);
       if (c.length) n.c = c;
-      const k = r.k || c.reduce((s, x) => s + (x.k || 0), 0);
-      if (k) n.k = k;
+      if (r.k) n.k = r.k;
       return n;
     });
     return build(null); // a hidden category hides everything inside it

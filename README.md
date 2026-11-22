@@ -106,6 +106,32 @@ Candidate sources (env in `/opt/led-computers/.env`, see `deploy/.env.example`):
 Free-tier Gemini has per-minute limits; busy/limited models fall back to `gemini-3.5-flash` → `gemini-flash-lite-latest`.
 Free-tier requests may be used by Google to improve its models — only public product photos and names are sent.
 
+## Products → site categories (admin → "Привязка товаров")
+
+The site shows **only** the admin's "Категории сайта" tree (`site_categories`). The Access categories (`categories`, admin
+"Категории") are old and mixed up (e.g. "Мат.платы/Socket 1200" holds AM5 boards) — they are only one hint.
+Code: `backend/src/product-categories.ts` (engine + API), `backend/src/category-rules.ts` (rule matching),
+`backend/src/category-rules-seed.ts` (starting rules), admin `product-categories.tsx`, `rules.tsx`.
+
+Where a product goes, first wins:
+1. **manual** — set on the product card or in bulk on "Привязка товаров" (`products.site_cats_manual = true`); rules and AI
+   leave the product alone until "Вернуть на автомат".
+2. **rule** — every site category has name rules (`site_categories.match_rules`, edited in "Категории сайта" → category →
+   "Правила по названию товара", with a "Проверить" preview) plus optional linked Access categories. A rule = *name starts
+   with* any of … AND *contains* any of … AND *does not contain* … (plain text, any case; `/…/` = regex). Recomputed 30 s
+   after an Access sync batch, after a category edit, every 15 min, and by "Пересчитать". A rule on a group/section means
+   "somewhere in here".
+3. **ai** — only **in-stock** products the rules left without an exact (leaf) subcategory. The AI picks one leaf inside the
+   group the rules found (else from the whole tree). Confidence **≥ 90 %** → applied, marked "AI"; lower → waits on
+   "AI на проверку" (✓ accept / ✕ reject). Runs by itself every 30 min for new or renamed products; a product is not asked
+   again with the same name. Env: `AI_CATEGORIES=gemini|openai|off` (default: same AI as the photos, `AI_PROVIDER`),
+   `AI_CATEGORIES_AUTO=0` turns the automatic run off. Gemini free plan: a run waits between requests and on 429.
+
+Tables: `product_site_categories` (product, category, source manual|rule|ai, confidence), `product_ai_categories` (last AI
+answer per product: category, confidence, reason, status applied|pending|accepted|rejected|none|replaced). Manual changes,
+accepts and rejects are in the change log (entity `product_site_category`). `/api/shop/categories` counts (`k`) = in-stock
+products in the category or below. Products may sit in several categories (e.g. a case in "ATX" and "Игровые").
+
 ## Customers from the old led.am site
 
 The admin panel's **Customers** page holds the registered users of the old site with their orders, order lines and

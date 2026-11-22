@@ -1,22 +1,24 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api, type Category } from './api';
+import type { MatchRule } from './rules';
 import { useData, useT } from './pages';
 import { IconPicker, IconSvg, type SiteIcon } from './site-icons';
+import { RulesEditor } from './rules';
 
 /** Storefront catalog tree (backend/src/site-categories.ts). Section → group → item. */
 export interface SiteCat {
   id: number; parentId: number | null; sort: number; slug: string; nameRu: string; nameHy: string; nameEn: string;
   icon: string | null; promoRu: string | null; promoHy: string | null; promoEn: string | null; isVisible: boolean;
-  accessCategoryIds: number[]; productCount: number; updatedAt: string;
+  accessCategoryIds: number[]; matchRules: MatchRule[]; productCount: number; inStockCount: number; updatedAt: string;
 }
-type Draft = Omit<SiteCat, 'id' | 'sort' | 'productCount' | 'updatedAt'> & { id?: number };
+type Draft = Omit<SiteCat, 'id' | 'sort' | 'productCount' | 'inStockCount' | 'updatedAt'> & { id?: number };
 
 const MAX_DEPTH = 3;
 
 const empty = (parentId: number | null): Draft => ({
   parentId, slug: '', nameRu: '', nameHy: '', nameEn: '', icon: parentId === null ? 'pc' : null,
-  promoRu: '', promoHy: '', promoEn: '', isVisible: true, accessCategoryIds: [],
+  promoRu: '', promoHy: '', promoEn: '', isVisible: true, accessCategoryIds: [], matchRules: [],
 });
 
 export function SiteCategoriesPage() {
@@ -110,7 +112,7 @@ export function SiteCategoriesPage() {
             <span>{label(c)}</span>
             {(byParent.get(c.id)?.length ?? 0) > 0 && <small className="muted">{byParent.get(c.id)!.length}</small>}
             {!c.isVisible && <span className="tag bad">{t('sc.hidden')}</span>}
-            {c.accessCategoryIds.length > 0 && <span className="tag ok" title={t('sc.linkedTip')}>{fmt.num(c.productCount, 0)}</span>}
+            {c.productCount > 0 && <span className={`tag${c.inStockCount ? ' ok' : ''}`} title={t('sc.linkedTip', { all: fmt.num(c.productCount, 0) })}>{fmt.num(c.inStockCount, 0)}</span>}
           </button>
           <span className="sc-act">
             <button type="button" className="ghost" title={t('sc.up')} disabled={busy || i <= 0} onClick={() => move(c, 'up')}>↑</button>
@@ -246,6 +248,8 @@ function Editor({ draft, setDraft, busy, msg, err, onSubmit, onDelete, cats, byI
           ))}
         </div>
       )}
+
+      <RulesEditor rules={draft.matchRules || []} accessIds={draft.accessCategoryIds} onChange={(matchRules) => set({ matchRules })} />
 
       {err && <div className="error">{err}</div>}
       {msg && <div className="success">{msg}</div>}

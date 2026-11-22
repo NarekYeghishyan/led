@@ -3,6 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, In } from 'typeorm';
 import { ApiKeyGuard } from './auth';
 import { Category, ChangeLog, Currency, Product, SyncLog } from './entities';
+import { ProductCategoriesService } from './product-categories';
 
 interface Batch<T> {
   batchId?: string;
@@ -60,7 +61,7 @@ export const agentState: { seenAt: Date | null; version: string | null; error: s
 
 @Injectable()
 export class SyncService {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+  constructor(@InjectDataSource() private ds: DataSource, private siteCats: ProductCategoriesService) {}
 
   private check(batch: Batch<unknown>) {
     const n = (batch?.upserts?.length || 0) + (batch?.deletes?.length || 0);
@@ -94,7 +95,9 @@ export class SyncService {
       };
       return p;
     });
-    return this.apply(Product, 'products', batch, rows, PRODUCT_COLUMNS, now, PRODUCT_TRACKED);
+    const res = await this.apply(Product, 'products', batch, rows, PRODUCT_COLUMNS, now, PRODUCT_TRACKED);
+    this.siteCats.scheduleRules(30_000); // new/renamed products → site categories (product-categories.ts)
+    return res;
   }
 
   async lookup(entity: typeof Category | typeof Currency, name: string, batch: Batch<Record<string, unknown>>) {

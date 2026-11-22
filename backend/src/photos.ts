@@ -218,9 +218,9 @@ const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/models';
 /** Tried in order: a busy (503) or rate-limited (429) model falls through to the next one. */
 const models = () => [...new Set([process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-flash-lite-latest'])];
 
-type GeminiReply = { text: string; grounding: { web?: { uri?: string; title?: string } }[] };
+type GeminiReply = { text: string; grounding: { web?: { uri?: string; title?: string } }[]; model: string };
 
-async function gemini(body: unknown, timeoutMs = 90000): Promise<GeminiReply> {
+export async function gemini(body: unknown, timeoutMs = 90000): Promise<GeminiReply> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new ServiceUnavailableException('GEMINI_API_KEY is not set on the server');
   let last = 'unknown error', lastStatus = 502;
@@ -238,7 +238,7 @@ async function gemini(body: unknown, timeoutMs = 90000): Promise<GeminiReply> {
     };
     if (res.ok) {
       const c = d.candidates?.[0];
-      return { text: (c?.content?.parts || []).map((p) => p.text || '').join(''), grounding: c?.groundingMetadata?.groundingChunks || [] };
+      return { text: (c?.content?.parts || []).map((p) => p.text || '').join(''), grounding: c?.groundingMetadata?.groundingChunks || [], model: m };
     }
     last = d.error?.message || res.statusText; lastStatus = res.status;
     if (![404, 429, 500, 503, 504].includes(res.status)) break; // 404 = model retired for this key // bad request / key: another model won't help
@@ -329,14 +329,14 @@ async function rankGemini(p: Product, imgs: { b64: string; mime: string }[]): Pr
 // ------------------------------------------------------------------ OpenAI (used instead of Gemini when OPENAI_API_KEY is set)
 
 /** AI_PROVIDER=gemini|openai picks the AI that judges photos; unset = OpenAI when its key is set, else Gemini. */
-const useOpenAI = () => {
+export const useOpenAI = () => {
   const pv = (process.env.AI_PROVIDER || '').toLowerCase();
   return pv === 'openai' || (pv !== 'gemini' && !!process.env.OPENAI_API_KEY);
 };
 /** AI_SEARCH=openai|gemini picks who searches the web; unset = OpenAI web search whenever OPENAI_API_KEY is set. */
 const searchOpenAI = () => !!process.env.OPENAI_API_KEY && (process.env.AI_SEARCH || '').toLowerCase() !== 'gemini';
 
-async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promise<{ text: string; urls: string[] }> {
+export async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promise<{ text: string; urls: string[] }> {
   let res: Response;
   try {
     res = await fetch('https://api.openai.com/v1/responses', {

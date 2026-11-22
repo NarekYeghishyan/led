@@ -47,6 +47,9 @@ services:
       GOOGLE_CSE_KEY: ${GOOGLE_CSE_KEY:-}
       GOOGLE_CSE_CX: ${GOOGLE_CSE_CX:-}
       BRAVE_SEARCH_KEY: ${BRAVE_SEARCH_KEY:-}
+      # AI that sorts in-stock products into site categories: gemini | openai | off (unset = AI_PROVIDER); AUTO=0 = only by button
+      AI_CATEGORIES: ${AI_CATEGORIES:-}
+      AI_CATEGORIES_AUTO: ${AI_CATEGORIES_AUTO:-}
     volumes:
       - media:/data/media   # product photos, served at /api/media/
     ports:
