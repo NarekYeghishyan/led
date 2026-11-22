@@ -1450,8 +1450,17 @@ const extra={};CAT.forEach((c,i)=>{extra[c[1][0]]={h:hasHot?HOT[i]:null,b:hasBr?
 const nested=Array.isArray(CAT[0]?.[2]?.[0]?.[0]);
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 let last='';
+/* icons added in the admin: put their <symbol> into the page sprite (g = [viewBox, svg cleaned by the server whitelist]).
+   Built-in ones are already in the sprite; ones we added earlier are refreshed (the drawing may have been replaced). */
+function icons(tree){const NS='http://www.w3.org/2000/svg';let sp=document.getElementById('ledIcons');
+ tree.forEach(s=>{if(!s.i||!s.g||!/^[\w-]+$/.test(s.i))return;let sym=document.getElementById(s.i);
+  if(sym&&!sym.hasAttribute('data-led'))return;
+  if(!sp){sp=document.createElementNS(NS,'svg');sp.id='ledIcons';sp.setAttribute('width','0');sp.setAttribute('height','0');sp.setAttribute('aria-hidden','true');sp.style.position='absolute';document.body.prepend(sp)}
+  if(!sym){sym=document.createElementNS(NS,'symbol');sym.id=s.i;sym.setAttribute('data-led','');sp.appendChild(sym)}
+  sym.setAttribute('viewBox',s.g[0]);sym.innerHTML=s.g[1]})}
 function apply(tree){
  if(!Array.isArray(tree)||!tree.length)return;const js=JSON.stringify(tree);if(js===last)return;last=js;
+ icons(tree);
  const nc=tree.map(s=>[s.i||'pc',s.n,(s.c||[]).map(g=>nested?[g.n,(g.c||[]).map(x=>x.n)]:g.n),s.p||s.n]);
  CAT.splice(0,CAT.length,...nc);
  if(hasHot)HOT.splice(0,HOT.length,...nc.map(c=>(extra[c[1][0]]||{}).h||[]));

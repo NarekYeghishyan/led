@@ -462,7 +462,7 @@ export function LogsPage() {
         <input placeholder={t('logs.search')} value={search} onChange={(e) => setSearch(e.target.value)} />
         <select value={params.get('entity') || ''} onChange={(e) => set({ entity: e.target.value })}>
           <option value="">{t('logs.allEntities')}</option>
-          {['products', 'categories', 'currencies', 'site_category'].map((e) => <option key={e} value={e}>{t(`entity.${e}` as TKey)}</option>)}
+          {['products', 'categories', 'currencies', 'site_category', 'site_icon'].map((e) => <option key={e} value={e}>{t(`entity.${e}` as TKey)}</option>)}
           {tables && tables.length > 0 && <option value="tables">{t('logs.allTables')}</option>}
           {tables?.map((tb) => <option key={tb.name} value={`t:${tb.name}`}>{tb.name}</option>)}
         </select>

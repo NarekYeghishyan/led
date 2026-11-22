@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api, type Category } from './api';
 import { useData, useT } from './pages';
+import { IconPicker, IconSvg, type SiteIcon } from './site-icons';
 
 /** Storefront catalog tree (backend/src/site-categories.ts). Section → group → item. */
 export interface SiteCat {
@@ -11,8 +12,6 @@ export interface SiteCat {
 }
 type Draft = Omit<SiteCat, 'id' | 'sort' | 'productCount' | 'updatedAt'> & { id?: number };
 
-/** SVG symbols that exist on the site (Design/site/*.html sprite). */
-const ICONS = ['pc', 'tower', 'laptop', 'cpu', 'server', 'monitor', 'print', 'wifi', 'head', 'phone', 'ups', 'kb', 'tool', 'shield', 'card', 'store'];
 const MAX_DEPTH = 3;
 
 const empty = (parentId: number | null): Draft => ({
@@ -26,6 +25,9 @@ export function SiteCategoriesPage() {
   const [rev, setRev] = useState(0);
   const { data, error } = useData<SiteCat[]>(`/admin/site-categories?r=${rev}`);
   const { data: access } = useData<Category[]>('/admin/categories');
+  const [iconRev, setIconRev] = useState(0);
+  const { data: icons } = useData<SiteIcon[]>(`/admin/site-icons?r=${iconRev}`);
+  const iconBy = useMemo(() => new Map((icons || []).map((i) => [i.key, i])), [icons]);
   const [open, setOpen] = useState<Set<number>>(new Set());
   const [q, setQ] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -104,7 +106,7 @@ export function SiteCategoriesPage() {
             ? <button type="button" className="sc-tw" aria-label={isOpen ? t('sc.collapse') : t('sc.expand')} onClick={() => toggle(c.id)}>{isOpen ? '▾' : '▸'}</button>
             : <span className="sc-tw" />}
           <button type="button" className="sc-name" onClick={() => select(c)}>
-            {level === 0 && <span className="sc-ic mono">{c.icon}</span>}
+            {level === 0 && <span className="sc-ic" title={c.icon || ''}><IconSvg icon={iconBy.get(c.icon || '')} size={18} /></span>}
             <span>{label(c)}</span>
             {(byParent.get(c.id)?.length ?? 0) > 0 && <small className="muted">{byParent.get(c.id)!.length}</small>}
             {!c.isVisible && <span className="tag bad">{t('sc.hidden')}</span>}
@@ -150,7 +152,8 @@ export function SiteCategoriesPage() {
           {!draft && <p className="muted">{t('sc.pick')}</p>}
           {draft && (
             <Editor key={draft.id ?? `new-${draft.parentId}`} draft={draft} setDraft={setDraft} busy={busy} msg={msg} err={err}
-              onSubmit={save} onDelete={remove} cats={data || []} byId={byId} depth={depth} subtree={subtree} access={access || []} label={label} />
+              onSubmit={save} onDelete={remove} cats={data || []} byId={byId} depth={depth} subtree={subtree} access={access || []} label={label}
+              icons={icons || []} onIconsChanged={() => { setIconRev((r) => r + 1); reload(); }} />
           )}
         </section>
       </div>
@@ -158,12 +161,14 @@ export function SiteCategoriesPage() {
   );
 }
 
-function Editor({ draft, setDraft, busy, msg, err, onSubmit, onDelete, cats, byId, depth, subtree, access, label }: {
+function Editor({ draft, setDraft, busy, msg, err, onSubmit, onDelete, cats, byId, depth, subtree, access, label, icons, onIconsChanged }: {
   draft: Draft; setDraft: (d: Draft) => void; busy: boolean; msg: string; err: string; onSubmit: (e: FormEvent) => void;
   onDelete: () => void; cats: SiteCat[]; byId: Map<number, SiteCat>; depth: (c: SiteCat | undefined) => number;
-  subtree: (id: number) => number; access: Category[]; label: (c: SiteCat) => string;
+  subtree: (id: number) => number; access: Category[]; label: (c: SiteCat) => string; icons: SiteIcon[]; onIconsChanged: () => void;
 }) {
   const { t } = useT();
+  const [picker, setPicker] = useState(false);
+  const curIcon = icons.find((i) => i.key === (draft.icon || 'pc'));
   const set = (patch: Partial<Draft>) => setDraft({ ...draft, ...patch });
   const isSection = draft.parentId === null;
   const parent = draft.parentId === null ? undefined : byId.get(draft.parentId);
@@ -195,11 +200,16 @@ function Editor({ draft, setDraft, busy, msg, err, onSubmit, onDelete, cats, byI
       </div>
       {isSection && (
         <>
-          <label>{t('sc.icon')}
-            <select value={draft.icon || 'pc'} onChange={(e) => set({ icon: e.target.value })}>
-              {[...new Set([...ICONS, draft.icon || 'pc'])].map((i) => <option key={i} value={i}>{i}</option>)}
-            </select>
-          </label>
+          <div className="sc-iconf">
+            <span className="muted">{t('sc.icon')}</span>
+            <button type="button" className="sc-iconbtn" onClick={() => setPicker(true)}>
+              <span className="ic-site"><IconSvg icon={curIcon} size={22} /></span>
+              <span>{curIcon?.name || draft.icon || '—'}</span>
+              <span className="muted small">{t('sc.iconChange')}</span>
+            </button>
+          </div>
+          {picker && <IconPicker icons={icons} value={draft.icon} onChanged={onIconsChanged} onClose={() => setPicker(false)}
+            onPick={(key) => { set({ icon: key }); setPicker(false); }} />}
           <h2>{t('sc.promo')}</h2>
           <div className="cu-grid sc-names">
             <label>RU<input value={draft.promoRu ?? ''} onChange={(e) => set({ promoRu: e.target.value })} /></label>
