@@ -216,7 +216,7 @@ async function fromUrl(raw: string, code?: string | null): Promise<Candidate[]> 
 
 const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/models';
 /** Tried in order: a busy (503) or rate-limited (429) model falls through to the next one. */
-const models = () => [...new Set([process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-flash-lite-latest'])];
+const models = () => [...new Set([process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-flash-lite-latest'])];
 
 type GeminiReply = { text: string; grounding: { web?: { uri?: string; title?: string } }[] };
 
@@ -241,7 +241,7 @@ async function gemini(body: unknown, timeoutMs = 90000): Promise<GeminiReply> {
       return { text: (c?.content?.parts || []).map((p) => p.text || '').join(''), grounding: c?.groundingMetadata?.groundingChunks || [] };
     }
     last = d.error?.message || res.statusText; lastStatus = res.status;
-    if (![429, 500, 503, 504].includes(res.status)) break; // bad request / key: another model won't help
+    if (![404, 429, 500, 503, 504].includes(res.status)) break; // 404 = model retired for this key // bad request / key: another model won't help
   }
   if (lastStatus === 429) throw new HttpException('Gemini: limit reached (free plan). Wait a minute and try again.', 429);
   if (lastStatus >= 500) throw new HttpException('Gemini is busy right now. Try again in a minute.', 503);
@@ -328,7 +328,11 @@ async function rankGemini(p: Product, imgs: { b64: string; mime: string }[]): Pr
 
 // ------------------------------------------------------------------ OpenAI (used instead of Gemini when OPENAI_API_KEY is set)
 
-const useOpenAI = () => !!process.env.OPENAI_API_KEY;
+/** AI_PROVIDER=gemini|openai picks the AI; unset = OpenAI when its key is set, else Gemini. */
+const useOpenAI = () => {
+  const pv = (process.env.AI_PROVIDER || '').toLowerCase();
+  return pv === 'openai' || (pv !== 'gemini' && !!process.env.OPENAI_API_KEY);
+};
 
 async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promise<{ text: string; urls: string[] }> {
   let res: Response;

@@ -92,7 +92,8 @@ quality* (clean background, no watermark/banner); its pick is preselected. "Save
 Nothing is written until the admin presses Save. Photos can be reordered ("make main") and removed.
 
 Candidate sources (env in `/opt/led-computers/.env`, see `deploy/.env.example`):
-- **`OPENAI_API_KEY` (current)** — OpenAI web search finds product pages, OpenAI vision ranks the photos (`OPENAI_MODEL`, default gpt-5.4-mini). Without it Gemini is used;
+- `AI_PROVIDER=gemini|openai` switches the AI (both keys can stay set; unset = OpenAI if its key exists). Now **gemini**.
+- **`OPENAI_API_KEY`** — OpenAI web search finds product pages, OpenAI vision ranks the photos (`OPENAI_MODEL`, default gpt-5.4-mini). Without it Gemini is used;
 - **only `GEMINI_API_KEY`** — Gemini suggests official product-page URLs from its own knowledge (manufacturer,
   then big retailers); each is really fetched, wrong ones are dropped. Used when none of the search keys below is set;
 - a pasted product-page or image link — always works (page: og:image, JSON-LD Product.image, gallery images with the model code);
