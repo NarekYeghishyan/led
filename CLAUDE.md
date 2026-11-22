@@ -423,3 +423,11 @@ stock and prices from the Access sync. Until then the templates are design refer
   Counts in the tree = `k` from `/api/shop/categories` (products in linked Access categories), shown only when linked. Known old glitch: a
   raw "price" chip in the category toolbar (`.chips`), not from this change. Backups `led-db-backup-20261122-1227-pre-cat-tree.dump`,
   `led-static-backup-20261122d.tgz`. Deployed + published.
+- 2026-11-22 — **Category icons editable in the admin** ("Site categories" → section → Icon "Change…"): picker with previews of the site's
+  33 built-in icons (`site_icons.builtin`, read-only, = the static sprite) and **added icons**: upload `.svg` or paste SVG code, options
+  "filled" / "single colour" (currentColor → follows site colours + hover), live preview made by the server; rename/replace drawing, delete
+  only when no category uses it (`backend/src/site-icons.ts`, `admin/src/site-icons.tsx`, migration `SiteIcons1764400000000`). Uploaded SVG
+  is **rebuilt from a whitelist** (shapes + paint attributes only; scripts/styles/links/images/gradients dropped) — never store raw SVG.
+  `/api/shop/categories` sends each section's icon as `g: [viewBox, svg]`; site_cats.html adds missing `<symbol>`s to `#ledIcons`.
+  Icon keys of added icons start with `ci-`. Changes logged (`site_icon`). Backups `led-db-backup-20261122-1237-pre-site-icons.dump`,
+  `led-static-backup-20261122e.tgz`. Deployed + published.

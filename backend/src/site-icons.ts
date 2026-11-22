@@ -105,7 +105,7 @@ export class SiteIconsController {
 
   @Get()
   list() {
-    return this.ds.query(`SELECT ${COLS} FROM site_icons i ORDER BY i.builtin, i.id DESC`);
+    return this.ds.query(`SELECT ${COLS} FROM site_icons i ORDER BY i.builtin, CASE WHEN i.builtin THEN i.id ELSE -i.id END`);
   }
 
   /** What the icon will look like after cleaning (the admin shows it before saving). */
