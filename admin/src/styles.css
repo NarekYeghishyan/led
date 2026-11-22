@@ -317,3 +317,30 @@ button.ghost.bad { color: #c62828; }
 .ph-ai { position: absolute; top: 6px; left: 6px; background: #2e9e5b; color: #fff; font-size: 11px; font-weight: 600; border-radius: 4px; padding: 1px 6px; }
 .ph-meta { padding: 6px 8px; font-size: 12px; line-height: 1.4; }
 .ph-act { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+
+/* site categories (site-categories.tsx) */
+.sc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 440px); gap: 16px; align-items: start; }
+.sc-tree { padding: 14px; }
+.sc-list, .sc-list ul { list-style: none; margin: 0; padding: 0; }
+.sc-row { display: flex; align-items: center; gap: 4px; border-radius: 8px; padding: 2px 6px; }
+.sc-row:hover { background: var(--tint); }
+.sc-row.sel { background: var(--tint); box-shadow: inset 3px 0 0 var(--accent); }
+.sc-row.off .sc-name > span:not(.tag) { opacity: .5; text-decoration: line-through; }
+.sc-tw { width: 22px; flex: none; background: none; color: var(--muted); padding: 4px 0; text-align: center; }
+.sc-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; background: none; color: var(--text); padding: 6px 4px; text-align: left; }
+.sc-name > span:not(.tag):not(.sc-ic) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc-name .tag { margin-left: 0; }
+.sc-ic { font-size: 11px; color: var(--accent); background: var(--tint); border-radius: 4px; padding: 1px 5px; }
+.sc-act { display: flex; gap: 2px; opacity: .35; transition: opacity .15s; }
+.sc-row:hover .sc-act, .sc-row.sel .sc-act { opacity: 1; }
+.sc-act button { font-size: 14px; padding: 2px 6px; }
+.sc-edit { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; }
+.sc-names { grid-template-columns: 1fr; }
+.sc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sc-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--tint); border-radius: 999px; padding: 3px 4px 3px 10px; font-size: 13px; }
+.sc-chip button { background: none; color: var(--muted); padding: 0 6px; font-size: 15px; }
+.sc-chip button:hover { color: var(--bad); }
+.sc-found { display: grid; gap: 2px; }
+.sc-found button { text-align: left; font-size: 13px; padding: 5px 6px; }
+.sc-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 1000px) { .sc { grid-template-columns: 1fr; } .sc-edit { position: static; max-height: none; } .sc-act { opacity: 1; } }

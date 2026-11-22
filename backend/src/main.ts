@@ -17,6 +17,8 @@ import { MEDIA_DIR, MEDIA_URL, PhotosController } from './photos';
 import { CustomerGuard, ShopController } from './shop';
 import { Customers1764100000000 } from './migrations/1764100000000-customers';
 import { ShopAccounts1764200000000 } from './migrations/1764200000000-shop-accounts';
+import { SiteCategories1764300000000 } from './migrations/1764300000000-site-categories';
+import { SiteCategoriesController, SiteCategoriesPublicController } from './site-categories';
 
 for (const name of ['DATABASE_URL', 'JWT_SECRET', 'SYNC_API_KEY']) {
   if (!process.env[name]) throw new Error(`Missing env ${name}`);
@@ -33,14 +35,14 @@ class HealthController {
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: ENTITIES,
-      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000, ShopAccounts1764200000000],
+      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000, ShopAccounts1764200000000, SiteCategories1764300000000],
       migrationsRun: true,
       synchronize: false,
     }),
     TypeOrmModule.forFeature([AdminUser]),
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '12h' } }),
   ],
-  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController],
+  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController, SiteCategoriesController, SiteCategoriesPublicController],
   providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard, CustomerGuard],
 })
 class AppModule {}

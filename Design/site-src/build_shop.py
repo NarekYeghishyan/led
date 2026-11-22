@@ -48,6 +48,7 @@ cfx = (pathlib.Path(__file__).parent / "card_fx.html").read_text(encoding="utf-8
 resp = (pathlib.Path(__file__).parent / "responsive.html").read_text(encoding="utf-8")
 oc = (pathlib.Path(__file__).parent / "oneclick.html").read_text(encoding="utf-8")
 sx = (pathlib.Path(__file__).parent / "search_box.html").read_text(encoding="utf-8")
+scats = (pathlib.Path(__file__).parent / "site_cats.html").read_text(encoding="utf-8")  # catalog tree from the admin
 auth = (pathlib.Path(__file__).parent / "auth.html").read_text(encoding="utf-8")
 h = head.replace("<title>LED.AM Category Page</title>", "<title>Собери свою конфигурацию — LED Computers</title>")
 html = (h + '<main class="wrap asm" id="shop" data-page="assembly"><div id="spRoot"></div>\n' + stubs
@@ -89,6 +90,10 @@ for name in ["index.html", "category.html", "product.html", "cart.html", "favori
     t = re.sub(r"<!--search-box-->.*?<!--/search-box-->", "", t, flags=re.S)
     t = re.sub(r"<!--info-shared-->.*?<!--/info-shared-->", "", t, flags=re.S)
     t = re.sub(r"<!--auth-->.*?<!--/auth-->", "", t, flags=re.S)
-    t = t.replace("</body>", link + mask + fx + cfx + info_js + auth + oc + sx + resp + "</body>", 1)
+    t = re.sub(r"<!--site-cats-->.*?<!--/site-cats-->\n?", "", t, flags=re.S)
+    # stripped blocks leave their newlines behind; don't let them pile up (were ~900 blank lines per page by 2026-11-22)
+    t = re.sub(r"\n+</body>", "\n</body>", t, count=1)
+    t = re.sub(r"\n{3,}(?=<!--)", "\n", t)
+    t = t.replace("</body>", link + mask + fx + cfx + scats + info_js + auth + oc + sx + resp + "</body>", 1)
     p.write_text(t, encoding="utf-8")
     print("linked", name)

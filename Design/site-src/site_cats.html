@@ -1,0 +1,29 @@
+<!--site-cats--><script>/* catalog tree from the admin ("Site categories", GET /api/shop/categories): replaces the built-in CAT,
+   re-renders the "Catalog" popup and the top menu. Cached in localStorage `led-cats`; the built-in CAT stays as fallback. */
+(function(){
+const M=window.LEDMega;if(!M)return; /* set by the page's catalog script (index/category/product and pages built from them) */
+const {CAT,HOT,BR,L}=M,KEY='led-cats',hasHot=Array.isArray(HOT),hasBr=Array.isArray(BR);
+/* demo "Popular"/"Brands" blocks belong to the built-in sections: keep them with the section of the same RU name */
+const extra={};CAT.forEach((c,i)=>{extra[c[1][0]]={h:hasHot?HOT[i]:null,b:hasBr?BR[i]:null}});
+/* home popup: section → [group, [items]]; category/product (and pages built from them): section → [names] (2 levels) */
+const nested=Array.isArray(CAT[0]?.[2]?.[0]?.[0]);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+let last='';
+function apply(tree){
+ if(!Array.isArray(tree)||!tree.length)return;const js=JSON.stringify(tree);if(js===last)return;last=js;
+ const nc=tree.map(s=>[s.i||'pc',s.n,(s.c||[]).map(g=>nested?[g.n,(g.c||[]).map(x=>x.n)]:g.n),s.p||s.n]);
+ CAT.splice(0,CAT.length,...nc);
+ if(hasHot)HOT.splice(0,HOT.length,...nc.map(c=>(extra[c[1][0]]||{}).h||[]));
+ if(hasBr)BR.splice(0,BR.length,...nc.map(c=>(extra[c[1][0]]||{}).b||[]));
+ try{M.rebuild()}catch(e){console.warn('catalog menu',e)}
+ const nav=document.querySelector('nav.cats');
+ if(nav){const l=L();nav.style.setProperty('--cats',Math.min(CAT.length,8));
+  nav.innerHTML=CAT.map((c,i)=>`<a href="/category.html" data-m="${i}" aria-label="${esc(c[1][l])}"><svg class="i"><use href="#${esc(c[0])}"/></svg><span>${esc(c[1][l])}</span></a>`).join('')}
+}
+try{apply(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){}
+fetch('/api/shop/categories',{credentials:'omit'}).then(r=>r.ok?r.json():null).then(t=>{if(!t)return;apply(t);try{localStorage.setItem(KEY,JSON.stringify(t))}catch(e){}}).catch(()=>{});
+/* top menu labels follow the language buttons */
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{const l=L();
+ document.querySelectorAll('nav.cats a[data-m]').forEach(a=>{const c=CAT[+a.dataset.m],s=a.querySelector('span');if(c&&s){s.textContent=c[1][l];a.setAttribute('aria-label',c[1][l])}})},80)));
+})();
+</script><!--/site-cats-->
