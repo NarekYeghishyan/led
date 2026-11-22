@@ -416,3 +416,10 @@ stock and prices from the Access sync. Until then the templates are design refer
   home. **Edit the catalog in the admin, not in `CAT`.** Not yet driven by it: the category page's left tree (`TREE`) and search's demo index.
   build_shop.py no longer piles up blank lines (pages had ~900). DB backup `/root/led-db-backup-20261122-1218-pre-site-categories.dump`,
   static `led-static-backup-20261122c.tgz`. Deployed + published.
+- 2026-11-22 — Category page left tree (`#tree`) now comes from the admin "Site categories" too: section = header, group = link, its
+  subcategories nested under the selected group; `?c=section/group[/sub]` (slugs) selects, the URL follows clicks; top-menu tiles link to
+  `/category.html?c=<section>`; breadcrumb + page title follow. site_cats.html sets `window.LEDCatsTree` and fires `led:cats`; built-in
+  `TREE` = fallback. Filter panel: demo filter set guessed from names (laptops/bags/chargers/PC/gaming/AIO/Mini-PC), brand only elsewhere.
+  Counts in the tree = `k` from `/api/shop/categories` (products in linked Access categories), shown only when linked. Known old glitch: a
+  raw "price" chip in the category toolbar (`.chips`), not from this change. Backups `led-db-backup-20261122-1227-pre-cat-tree.dump`,
+  `led-static-backup-20261122d.tgz`. Deployed + published.
