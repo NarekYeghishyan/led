@@ -431,3 +431,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   `/api/shop/categories` sends each section's icon as `g: [viewBox, svg]`; site_cats.html adds missing `<symbol>`s to `#ledIcons`.
   Icon keys of added icons start with `ci-`. Changes logged (`site_icon`). Backups `led-db-backup-20261122-1237-pre-site-icons.dump`,
   `led-static-backup-20261122e.tgz`. Deployed + published.
+- 2026-11-22 — Catalog popup: the top-menu tile of the section shown in the popup is active (hovering/clicking a `.mega-l` button moves it; closing the popup clears it). MutationObserver in `card_fx.html`, all pages. Backup `led-static-backup-20261122f.tgz`. Published.
