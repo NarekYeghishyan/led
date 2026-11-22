@@ -38,6 +38,7 @@ services:
       MAIL_DEV_LOG: ${MAIL_DEV_LOG:-}
       # AI photo finder (admin product page)
       AI_PROVIDER: ${AI_PROVIDER:-}
+      AI_SEARCH: ${AI_SEARCH:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}

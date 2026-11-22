@@ -328,11 +328,13 @@ async function rankGemini(p: Product, imgs: { b64: string; mime: string }[]): Pr
 
 // ------------------------------------------------------------------ OpenAI (used instead of Gemini when OPENAI_API_KEY is set)
 
-/** AI_PROVIDER=gemini|openai picks the AI; unset = OpenAI when its key is set, else Gemini. */
+/** AI_PROVIDER=gemini|openai picks the AI that judges photos; unset = OpenAI when its key is set, else Gemini. */
 const useOpenAI = () => {
   const pv = (process.env.AI_PROVIDER || '').toLowerCase();
   return pv === 'openai' || (pv !== 'gemini' && !!process.env.OPENAI_API_KEY);
 };
+/** AI_SEARCH=openai|gemini picks who searches the web; unset = OpenAI web search whenever OPENAI_API_KEY is set. */
+const searchOpenAI = () => !!process.env.OPENAI_API_KEY && (process.env.AI_SEARCH || '').toLowerCase() !== 'gemini';
 
 async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promise<{ text: string; urls: string[] }> {
   let res: Response;
@@ -432,7 +434,7 @@ export class PhotosController {
       const errors: string[] = [];
       const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
       const sources = manual ? [fromUrl(manual, p.barcode)]
-        : useOpenAI() ? [openaiSearch(p), googleCse(q), brave(q)]
+        : searchOpenAI() ? [openaiSearch(p), googleCse(q), brave(q)]
         : searchApi ? [googleCse(q), brave(q), geminiSearch(p, q)] : [geminiGuess(p)];
       const lists = await Promise.allSettled(sources);
       lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
