@@ -361,21 +361,39 @@ async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promis
 }
 
 /** OpenAI web search finds product pages (and direct image URLs); their declared images become candidates. */
+const LOGO = /logo|icon|favicon|sprite|banner|placeholder|badge/i;
+
+async function openaiSearchOnce(p: Product, prompt: string, seen: Set<string>): Promise<Candidate[]> {
+  const r = await openai({ tools: [{ type: 'web_search' }], input: prompt }, 90000);
+  const found = [...r.urls, ...(r.text.match(/https?:\/\/[^\s)\]>"']+/g) || [])]
+    .map((u) => u.replace(/[.,;]+$/, '').replace(/[?&]utm_source=openai$/, ''))
+    .filter((u) => !seen.has(u));
+  const pages = [...new Set(found)].slice(0, 10);
+  pages.forEach((u) => seen.add(u));
+  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, p.barcode)));
+  return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []))
+    .filter((c) => !LOGO.test(c.url.split('?')[0]))
+    .map((c) => ({ ...c, source: 'openai' }));
+}
+
+/**
+ * OpenAI web search finds product pages (and direct image URLs); their declared images become candidates.
+ * Results vary per run, so when the first search gives fewer than 3 usable images a second, differently worded search runs.
+ */
 async function openaiSearch(p: Product): Promise<Candidate[]> {
-  const r = await openai({
-    tools: [{ type: 'web_search' }],
-    input: `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
+  const what = `"${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}`;
+  const seen = new Set<string>();
+  let out = await openaiSearchOnce(p, `Product from a computer store: ${what}.
 Search the web and give up to 10 URLs, one per line, URLs only:
 - direct image file URLs (.jpg/.png/.webp, e.g. the manufacturer's CDN or cdn.shopify.com) of official product photos of EXACTLY this model;
 - product pages of exactly this model: the official manufacturer page first, then other official brand stores and large retailers.
-Avoid Russian marketplaces and Amazon (they block servers).`,
-  }, 90000);
-  const found = [...r.urls, ...(r.text.match(/https?:\/\/[^\s)\]>"']+/g) || [])]
-    .map((u) => u.replace(/[.,;]+$/, '').replace(/[?&]utm_source=openai$/, ''));
-  const pages = [...new Set(found)].slice(0, 10);
-  if (!pages.length) throw new BadRequestException('AI web search found no product pages');
-  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, p.barcode)));
-  const out = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'openai' })) : []));
+Avoid Russian marketplaces and Amazon (they block servers).`, seen);
+  if (out.length < 3) {
+    const more = await openaiSearchOnce(p, `Find online shops (any country: Europe, Asia, Middle East, USA) that sell ${what}
+and show its product photos. Search by the model code. Give up to 10 product page URLs or direct product image URLs, one per line, URLs only.
+Not: Amazon, ozon, wildberries, dns-shop, citilink, yandex market, logos, manuals, FCC pages.`, seen).catch(() => []);
+    out = [...out, ...more];
+  }
   if (!out.length) throw new BadRequestException('Product pages found by AI could not be read. Paste a product-page link.');
   return out;
 }
