@@ -402,3 +402,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   `GEMINI_MODEL=gemini-2.5-flash` from access.txt is retired for this key (404) → falls through to gemini-3.8-flash / flash-latest.
   Gemini key is still free tier (Google Search → 429), so without a pasted link it only guesses pages (16357: no correct photo);
   with a pasted link it works (TP-Link UB500: match 100 / quality 95, 16 s). Deployed.
+- 2026-11-22 — AI photos **mixed mode**: `AI_SEARCH=openai` (OpenAI web search finds pages/images) + `AI_PROVIDER=gemini` (Gemini judges the
+  photos). Both keys in server `.env`. OpenAI results vary per run, so a second, differently worded search runs when the first gives < 3
+  usable images; logo/icon/banner URLs are skipped. Test: 16357 ×3 and 14123 ×1 — all 4 picked a correct white-background photo
+  (match 100, quality 95–100), 18–30 s. Backups `/root/led-env-backup-*`, `/root/led-compose-backup-*`. Deployed.
