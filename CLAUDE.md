@@ -398,3 +398,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   fallback when no OpenAI key. Works without a pasted link: 16357 (Ugreen 70601) and 14123 (TP-Link UB500) both got a correct pick in ~11 s.
   Sites that block servers (ugreen.com, Amazon, RU marketplaces) are skipped, not bypassed. Server compose has the new env lines;
   backups `/root/led-env-backup-*`, `/root/led-compose-backup-*`. Deployed.
+- 2026-11-22 — AI photos: switch `AI_PROVIDER=gemini|openai` (server `.env` now **gemini**; `OPENAI_API_KEY` kept, set `AI_PROVIDER=openai` to go back).
+  `GEMINI_MODEL=gemini-2.5-flash` from access.txt is retired for this key (404) → falls through to gemini-3.8-flash / flash-latest.
+  Gemini key is still free tier (Google Search → 429), so without a pasted link it only guesses pages (16357: no correct photo);
+  with a pasted link it works (TP-Link UB500: match 100 / quality 95, 16 s). Deployed.
