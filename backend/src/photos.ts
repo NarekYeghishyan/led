@@ -1,14 +1,18 @@
 /**
- * AI product photo finder (admin only).
+ * AI product photo finder (admin only). README "AI product photos".
  *
- *  1. Candidates: image-search APIs (Google Custom Search / Brave / Gemini Search grounding — whichever keys are set)
- *     plus an optional page or image URL pasted by the admin (works without any search key).
- *  2. Every candidate is downloaded through safeFetch (public http(s) only, size + type checks, no private IPs).
- *  3. Gemini (vision) looks at all candidates together with the product name/code and picks the best one.
- *  4. Saving downloads the chosen image again and stores it in MEDIA_DIR, served at /api/media/...
+ *  1. identify(): brand, model and codes are read from the product name (the Access brand column is empty).
+ *  2. Candidates: Icecat (official photos, free "Open Icecat" brands) first; if it gives too few, AI web search
+ *     (OpenAI, two differently worded searches in parallel) / Google CSE / Brave / Gemini guesses; or a pasted URL.
+ *  3. Every candidate is downloaded through safeFetch (public http(s) only, size + type checks, no private IPs),
+ *     checked with sharp (size, banner shape, logo URL) and de-duplicated by picture (same photo in two sizes).
+ *  4. The AI (Gemini or OpenAI, the other one if the first is busy) sees small thumbnails and rates each:
+ *     exact-model match, photo quality, kind (product / box / infographic / lifestyle / logo / other).
+ *     The server picks the main photo (match + quality + resolution) and marks good extra photos for the gallery.
+ *  5. Saving: the photo is cleaned with sharp (white border trimmed, centred on a white square, max 1200 px, WebP)
+ *     and stored in MEDIA_DIR, served at /api/media/...
  *
- * Env: OPENAI_API_KEY (+ OPENAI_MODEL, default gpt-5.4-mini) — if set, OpenAI does web search + ranking;
- *      otherwise GEMINI_API_KEY, GEMINI_MODEL (default gemini-flash-latest),
+ * Env: AI_PROVIDER, AI_SEARCH, OPENAI_API_KEY, OPENAI_MODEL, GEMINI_API_KEY, GEMINI_MODEL, ICECAT_USER, ICECAT=0,
  *      GOOGLE_CSE_KEY + GOOGLE_CSE_CX, BRAVE_SEARCH_KEY, GEMINI_SEARCH=1 (needs a paid Gemini plan), MEDIA_DIR.
  */
 import {
@@ -22,18 +26,21 @@ import { lookup } from 'dns/promises';
 import { isIP } from 'net';
 import { mkdir, unlink, writeFile } from 'fs/promises';
 import { join } from 'path';
+import sharp from 'sharp';
 import { JwtGuard } from './auth';
 import { Product } from './entities';
 
 export const MEDIA_DIR = process.env.MEDIA_DIR || '/data/media';
 export const MEDIA_URL = '/api/media';
 const UA = 'Mozilla/5.0 (compatible; LedComputersAdmin/1.0; +https://led.am)';
-const MAX_IMAGE = 8 * 1024 * 1024;
+const MAX_IMAGE = 16 * 1024 * 1024; // Icecat originals are 3–6 MB
 const MAX_HTML = 3 * 1024 * 1024;
-const MAX_AI_IMAGE = 3 * 1024 * 1024; // inline limit per image we send to Gemini
-const MIN_SIDE = 250;
-const MAX_CANDIDATES = 12;
+const MIN_SIDE = 300;
+const MAX_ASPECT = 2.2; // wider/taller than this = banner, not a product photo
+const MAX_CANDIDATES = 16;
 const MAX_IMAGES_PER_PRODUCT = 12;
+const SAVE_SIDE = 1200;
+const ICECAT_ENOUGH = 3; // this many Icecat photos = no web search needed
 
 // ------------------------------------------------------------------ safe fetch (SSRF guard)
 
@@ -66,7 +73,7 @@ async function checkUrl(raw: string): Promise<URL> {
 interface Fetched { url: string; type: string; body: Buffer }
 
 /** GET a public URL: manual redirects (each hop re-checked), timeout, byte limit. */
-async function safeFetch(raw: string, maxBytes: number, accept: string, timeoutMs = 12000): Promise<Fetched> {
+async function safeFetch(raw: string, maxBytes: number, accept: string, timeoutMs = 10000): Promise<Fetched> {
   let url = raw;
   for (let hop = 0; hop < 5; hop++) {
     const u = await checkUrl(url);
@@ -93,7 +100,7 @@ async function safeFetch(raw: string, maxBytes: number, accept: string, timeoutM
   throw new Error('Too many redirects');
 }
 
-// ------------------------------------------------------------------ image sniffing (no native deps)
+// ------------------------------------------------------------------ image sniffing (quick check before sharp)
 
 interface ImgInfo { mime: string; ext: string; width: number; height: number }
 
@@ -131,16 +138,148 @@ export function sniffImage(b: Buffer): ImgInfo | null {
   return null;
 }
 
+// ------------------------------------------------------------------ image analysis + cleaning (sharp)
+
+const WHITE = { r: 255, g: 255, b: 255 };
+const base = (b: Buffer) => sharp(b, { failOn: 'none', limitInputPixels: 80e6 }).rotate().flatten({ background: WHITE });
+
+interface Inspected { width: number; height: number; thumb: Buffer; hash: bigint; whiteBg: boolean }
+
+/** Real size, a 512 px JPEG thumbnail for the AI, a picture hash (dHash) and whether the background is white. */
+async function inspect(b: Buffer): Promise<Inspected | null> {
+  const meta = await sharp(b, { failOn: 'none' }).metadata().catch(() => null);
+  if (!meta?.width || !meta.height || !['jpeg', 'png', 'webp', 'avif', 'gif', 'heif'].includes(meta.format || '')) return null;
+  const swap = (meta.orientation || 1) >= 5;
+  const width = swap ? meta.height : meta.width, height = swap ? meta.width : meta.height;
+  const [thumb, h, border] = await Promise.all([
+    base(b).resize(512, 512, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer(),
+    base(b).grayscale().resize(9, 8, { fit: 'fill' }).raw().toBuffer(),
+    base(b).grayscale().resize(32, 32, { fit: 'fill' }).raw().toBuffer(),
+  ]);
+  let hash = 0n;
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) hash = (hash << 1n) | (h[y * 9 + x] > h[y * 9 + x + 1] ? 1n : 0n);
+  return { width, height, thumb, hash, whiteBg: isWhiteBorder(border, 32) };
+}
+
+/** Border pixels of a small grayscale picture are (almost) all white. */
+function isWhiteBorder(g: Buffer, n: number): boolean {
+  const px: number[] = [];
+  for (let i = 0; i < n; i++) px.push(g[i], g[(n - 1) * n + i], g[i * n], g[i * n + n - 1]);
+  const light = px.filter((v) => v >= 238).length;
+  return light / px.length >= 0.9;
+}
+
+const hamming = (a: bigint, b: bigint) => { let x = a ^ b, n = 0; while (x) { n += Number(x & 1n); x >>= 1n; } return n; };
+
+/**
+ * Shop-ready photo: on a white background the empty border is trimmed and the product is centred on a white square
+ * (it fills ~90 %); other photos are only resized. Max 1200 px, WebP.
+ */
+export async function cleanPhoto(b: Buffer): Promise<{ body: Buffer; ext: string }> {
+  const flat = await base(b).jpeg({ quality: 95 }).toBuffer();
+  const g = await sharp(flat).grayscale().resize(32, 32, { fit: 'fill' }).raw().toBuffer();
+  let img = flat;
+  if (isWhiteBorder(g, 32)) {
+    const t = await sharp(flat).trim({ background: WHITE, threshold: 20 }).jpeg({ quality: 95 }).toBuffer({ resolveWithObject: true }).catch(() => null);
+    const src = t && t.info.width >= 40 && t.info.height >= 40 ? t : await sharp(flat).toBuffer({ resolveWithObject: true });
+    const { width: w, height: h } = src.info;
+    const side = Math.round(Math.max(w, h) / 0.9);
+    const top = Math.floor((side - h) / 2), left = Math.floor((side - w) / 2);
+    img = await sharp(src.data).extend({ top, bottom: side - h - top, left, right: side - w - left, background: WHITE }).jpeg({ quality: 95 }).toBuffer();
+  }
+  const body = await sharp(img).resize(SAVE_SIDE, SAVE_SIDE, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 86 }).toBuffer();
+  return { body, ext: 'webp' };
+}
+
+// ------------------------------------------------------------------ what is this product?
+
+/** Brands seen in the store's product names (whole word, any case). The Access brand column is empty. */
+const BRANDS = [
+  'ASUS', 'Genius', 'HP', 'Intel', 'CrownMicro', 'Crown', 'Lanberg', 'Samsung', 'Patriot', 'LG', 'AMD', 'Gigabyte', 'Acer',
+  'Logitech', 'TP-Link', 'Sony', 'Seagate', 'Lenovo', 'ACME', 'Toshiba', 'Dell', 'Genesis', 'D-Link', 'Kingston', 'Ugreen',
+  'Thermaltake', 'MSI', 'Canon', 'WD', 'Western Digital', 'AeroCool', 'Sven', 'Orico', 'DeepCool', 'Targus', 'Creative',
+  'Emtec', 'Palit', 'Sapphire', 'Manhattan', 'TwinMOS', 'Lightwave', 'Buro', 'ASRock', 'Digma', 'AOC', 'Philips', 'Zotac',
+  'ID-Cooling', 'Marvo', 'Gembird', 'ViewSonic', 'Crucial', 'Belkin', 'NEC', 'A-Data', 'ADATA', 'Natec', 'Cactus', 'Zalman',
+  'XYZ', 'Kingmax', 'BenQ', 'Bloody', 'A4Tech', 'Arctic', 'Apacer', 'Intex', 'FSP', 'Oklick', 'Linksys', 'Xerox', 'Hitachi',
+  'Golla', 'SanDisk', 'Chieftec', 'Pinnacle', 'Fujitsu', 'Microsoft', 'Verbatim', 'Xilence', 'Intellinet', 'Biostar', 'Epson',
+  'CoolMate', 'Team', 'TeamGroup', 'MikroTik', 'Cooler Master', 'CoolerMaster', 'Cougar', 'Wacom', 'Panasonic', 'Pioneer',
+  'Canyon', 'PowerColor', 'APC', 'Xiaomi', 'Corsair', 'AFOX', 'Defender', 'Apple', 'Transcend', 'Thermal Master', 'Maxtor',
+  'Foxconn', 'GeIL', 'OCZ', 'Kreton', 'Huawei', 'Razer', 'HyperX', 'SteelSeries', 'Redragon', '2E', 'Hikvision', 'Ubiquiti',
+  'Tenda', 'Mercusys', 'Netis', 'Keenetic', 'Noctua', 'be quiet!', 'NZXT', 'Lian Li', 'Fractal Design', 'Montech', 'Hama',
+  'Baseus', 'Anker', 'Trust', 'Edifier', 'Sennheiser', 'JBL', 'Jabra', 'Brother', 'Kyocera', 'Ricoh', 'Eaton', 'Powercom',
+  'Ippon', 'Vention', 'Cudy', 'Ruijie', 'Synology', 'QNAP', 'Dahua', 'Ezviz', 'Huion', 'XP-Pen', 'Elgato', 'AverMedia',
+  'Sharkoon', 'Fantech', 'Hoco', 'Remax', 'GameMax', '1stPlayer', 'Thermalright', 'Silicon Power', 'Netac', 'Lexar',
+  'Hiksemi', 'Goodram', 'iiyama', 'Hisense', 'ZyXEL', 'Cisco', 'Mercury', 'Elitegroup', 'ECS', 'Gamdias', 'Endorfy',
+];
+const ICECAT_BRAND: Record<string, string> = { wd: 'Western Digital', 'a-data': 'ADATA', team: 'Team Group', teamgroup: 'Team Group', coolermaster: 'Cooler Master', crownmicro: 'CROWN', crown: 'CROWN' };
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const BRAND_RE = new RegExp(`(?:^|[^A-Za-z0-9])(${[...BRANDS].sort((a, b) => b.length - a.length).map(esc).join('|')})(?=$|[^A-Za-z0-9])`, 'i');
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+export interface Ident {
+  name: string; brand: string | null; model: string; code: string | null; codeInName: boolean; gtin: string | null; codes: string[];
+}
+
+/** "Мышь беспроводная Logitech M330 Silent Plus (USB, Black)" + barcode → brand Logitech, model "M330 Silent Plus", codes. */
+export function identify(p: Pick<Product, 'name' | 'brand' | 'barcode'>): Ident {
+  const name = (p.name || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  const m = BRAND_RE.exec(name);
+  const brand = (p.brand || '').trim() || (m ? BRANDS.find((b) => b.toLowerCase() === m[1].toLowerCase()) || m[1] : null);
+  let model = m ? name.slice(m.index + m[0].length) : name.replace(/^(?:[А-Яа-яЁё][А-Яа-яЁё.\-]*\s*)+/, '');
+  model = model.replace(/\s+/g, ' ').trim().slice(0, 80);
+  const raw = (p.barcode || '').trim();
+  const gtin = /^\d{8,14}$/.test(raw) ? raw : null;
+  const code = !gtin && raw.length >= 3 ? raw : null;
+  const codeInName = !!code && norm(name).includes(norm(code));
+  // model-like tokens: letters + digits, e.g. TXE70UH, AD-0036-BK, CT240BX500SSD1
+  const tokens = model.split(/[\s,/]+/).filter((t) => t.length >= 4 && /\d/.test(t) && /[a-z]/i.test(t) && !/^\d+(gb|tb|mb|w|mhz|ghz|hz|mm|cm|m)$/i.test(t));
+  const codes = [...new Set([code, model.length <= 40 && /\d/.test(model) ? model : null, ...tokens.sort((a, b) => b.length - a.length).slice(0, 2)]
+    .filter((c): c is string => !!c))];
+  return { name: p.name || '', brand, model, code, codeInName, gtin, codes };
+}
+
+function describe(id: Ident): string {
+  return `"${id.name}"${id.brand ? `, brand ${id.brand}` : ''}${id.model ? `, model ${id.model}` : ''}`
+    + (id.code ? (id.codeInName ? `, part number ${id.code}` : `, store code ${id.code} (maybe the manufacturer part number, maybe the store's own code)`) : '')
+    + (id.gtin ? `, EAN ${id.gtin}` : '');
+}
+
+function searchQuery(id: Ident): string {
+  return [id.brand, id.model || id.name, id.code && !id.codeInName ? id.code : ''].filter(Boolean).join(' ').slice(0, 200);
+}
+
 // ------------------------------------------------------------------ candidate sources
 
-interface Candidate { url: string; page?: string; source: string; title?: string }
+interface Candidate { url: string; preview?: string; page?: string; source: string; title?: string }
+const LOGO = /logo|icon|favicon|sprite|banner|placeholder|badge|twitter-image|og-image-default/i;
 
-function searchQuery(p: Product): string {
-  // "Мышь Logitech G102 LIGHTSYNC (RGB, 6 Button, ...)" -> "Мышь Logitech G102 LIGHTSYNC" + code if missing
-  let q = (p.name || '').replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
-  if (p.brand && !q.toLowerCase().includes(p.brand.toLowerCase())) q = `${p.brand} ${q}`;
-  if (p.barcode && p.barcode.length >= 4 && !/^\d{8,14}$/.test(p.barcode) && !q.includes(p.barcode)) q += ` ${p.barcode}`;
-  return q.slice(0, 200);
+/** Open Icecat: official photos for brands that publish there for free (TP-Link, Gigabyte, ASUS, Lenovo, Lanberg…). */
+async function icecat(id: Ident): Promise<Candidate[]> {
+  if (process.env.ICECAT === '0') return [];
+  const user = process.env.ICECAT_USER || 'openIcecat-live';
+  const tries: Record<string, string>[] = [];
+  if (id.gtin) tries.push({ GTIN: id.gtin });
+  if (id.brand) {
+    const brand = ICECAT_BRAND[id.brand.toLowerCase()] || id.brand;
+    id.codes.slice(0, 3).forEach((c) => tries.push({ Brand: brand, ProductCode: c }));
+  }
+  type Gal = { Pic?: string; Pic500x500?: string; IsMain?: string; Type?: string; PicWidth?: string | number; PicHeight?: string | number };
+  type Data = { GeneralInfo?: { Title?: string; IcecatId?: number }; Image?: { HighPic?: string; Pic500x500?: string }; Gallery?: Gal[] };
+  const got = await Promise.all(tries.slice(0, 4).map(async (q) => {
+    const u = new URL('https://live.icecat.biz/api/');
+    Object.entries({ UserName: user, Language: 'en', ...q }).forEach(([k, v]) => u.searchParams.set(k, v));
+    const res = await fetch(u, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': UA } }).catch(() => null);
+    if (!res?.ok) return null;
+    const j = await res.json().catch(() => null) as { data?: Data } | null;
+    return j?.data?.Gallery?.length || j?.data?.Image?.HighPic ? j.data : null;
+  }));
+  const d = got.find(Boolean);
+  if (!d) return [];
+  const gal = (d.Gallery || []).filter((g) => g.Pic && (!g.Type || g.Type === 'ProductImage'))
+    .sort((a, b) => (b.IsMain === 'Y' ? 1 : 0) - (a.IsMain === 'Y' ? 1 : 0));
+  const list: Candidate[] = gal.map((g) => ({ url: g.Pic!, preview: g.Pic500x500 || g.Pic, title: d.GeneralInfo?.Title, source: 'icecat' }));
+  if (!list.length && d.Image?.HighPic) list.push({ url: d.Image.HighPic, preview: d.Image.Pic500x500, title: d.GeneralInfo?.Title, source: 'icecat' });
+  return list.slice(0, 8);
 }
 
 async function googleCse(q: string): Promise<Candidate[]> {
@@ -166,8 +305,8 @@ async function brave(q: string): Promise<Candidate[]> {
     .map((r) => ({ url: r.properties!.url!, page: r.url, title: r.title, source: 'brave' }));
 }
 
-/** Product images declared by a web page: og:image, twitter:image, JSON-LD Product.image, image_src. */
-function pageImages(html: string, base: string, code?: string | null): string[] {
+/** Product images declared by a web page: og:image, twitter:image, JSON-LD Product.image, image_src, gallery imgs with a model code. */
+function pageImages(html: string, base: string, codes: string[]): string[] {
   const out: string[] = [];
   const add = (v: unknown) => {
     if (typeof v === 'string' && v.trim()) { try { out.push(new URL(v.trim().replace(/&amp;/g, '&'), base).toString()); } catch { /* skip */ } }
@@ -190,24 +329,24 @@ function pageImages(html: string, base: string, code?: string | null): string[] 
   for (const m of html.matchAll(/<script[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
     try { walk(JSON.parse(m[1])); } catch { /* broken JSON-LD */ }
   }
-  // gallery <img> whose address mentions the model code (e.g. .../UB500_01.jpg)
-  const c = (code || '').toLowerCase();
-  if (c.length >= 4) {
+  // gallery <img> whose address mentions a model code (e.g. .../UB500_01.jpg)
+  const cs = codes.map(norm).filter((c) => c.length >= 4);
+  if (cs.length) {
     for (const m of html.matchAll(/<img\b[^>]*>/gi)) {
       for (const a of m[0].matchAll(/(?:src|data-src|data-zoom-image|data-large|data-original)\s*=\s*["']([^"']+)["']/gi)) {
-        if (a[1].toLowerCase().includes(c) && !a[1].startsWith('data:')) add(a[1]);
+        if (!a[1].startsWith('data:') && cs.some((c) => norm(a[1]).includes(c))) add(a[1]);
       }
     }
   }
   return [...new Set(out)].slice(0, 10);
 }
 
-/** A pasted URL: an image itself, or a page whose declared images become candidates. */
-async function fromUrl(raw: string, code?: string | null): Promise<Candidate[]> {
-  const f = await safeFetch(raw, Math.max(MAX_HTML, MAX_IMAGE), 'text/html,image/*;q=0.9,*/*;q=0.5');
-  if (sniffImage(f.body)) return [{ url: f.url, source: 'url' }];
+/** A pasted/found URL: an image itself, or a page whose declared images become candidates. */
+async function fromUrl(raw: string, codes: string[], timeoutMs = 8000): Promise<Candidate[]> {
+  const f = await safeFetch(raw, Math.max(MAX_HTML, MAX_IMAGE), 'text/html,image/*;q=0.9,*/*;q=0.5', timeoutMs);
+  if (sniffImage(f.body) || f.type.startsWith('image/')) return [{ url: f.url, source: 'url' }];
   if (!f.type.includes('html')) throw new BadRequestException('URL is neither a web page nor an image');
-  const imgs = pageImages(f.body.toString('utf8'), f.url, code);
+  const imgs = pageImages(f.body.toString('utf8'), f.url, codes);
   if (!imgs.length) throw new BadRequestException('No product images found on that page');
   return imgs.map((url) => ({ url, page: f.url, source: 'url' }));
 }
@@ -249,27 +388,22 @@ export async function gemini(body: unknown, timeoutMs = 90000): Promise<GeminiRe
 }
 
 /** Paid Gemini plans only: Google Search grounding finds product pages; their declared images become candidates. */
-async function geminiSearch(p: Product, q: string): Promise<Candidate[]> {
+async function geminiSearch(id: Ident): Promise<Candidate[]> {
   if (process.env.GEMINI_SEARCH !== '1') return [];
   const r = await gemini({
-    contents: [{ role: 'user', parts: [{ text: `Find official manufacturer and large retailer product pages for exactly this product: "${p.name}" (code ${p.barcode || '-'}). Search query hint: ${q}. List the page URLs.` }] }],
+    contents: [{ role: 'user', parts: [{ text: `Find official manufacturer and large retailer product pages for exactly this product: ${describe(id)}. List the page URLs.` }] }],
     tools: [{ google_search: {} }],
   }, 60000);
   const pages = r.grounding.map((g) => g.web?.uri).filter((u): u is string => !!u).slice(0, 5);
-  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, p.barcode)));
+  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, id.codes)));
   return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'gemini' })) : []));
 }
 
-/**
- * Works with the free Gemini key (no search tools): Gemini suggests official product-page URLs from its own knowledge
- * (manufacturer site first, then big retailers). Every URL is then really fetched through the SSRF guard, so a wrong
- * or invented URL just fails and is dropped. Used when no search API is configured.
- */
-async function geminiGuess(p: Product): Promise<Candidate[]> {
+/** Free Gemini key (no search tools): Gemini suggests product-page URLs from memory; each is really fetched, wrong ones fail. */
+async function geminiGuess(id: Ident): Promise<Candidate[]> {
   const r = await gemini({
     contents: [{ role: 'user', parts: [{ text:
-      `Product from a computer store: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}.
-` +
+      `Product from a computer store: ${describe(id)}.\n` +
       'Give up to 8 URLs of pages with photos of exactly this model: the manufacturer global English site product page first, ' +
       'then other official/brand sites and international retailers. Do NOT use Russian marketplaces (ozon, wildberries, dns-shop, citilink, ' +
       'yandex market) or amazon - they block servers. Prefer canonical product pages, not search pages. Direct official image URLs are also fine.' }] }],
@@ -278,55 +412,13 @@ async function geminiGuess(p: Product): Promise<Candidate[]> {
   }, 40000);
   let urls: string[] = [];
   try { urls = (JSON.parse(r.text).urls || []).filter((u: unknown) => typeof u === 'string' && /^https?:\/\//.test(u)).slice(0, 8); } catch { /* bad JSON */ }
-  const lists = await Promise.allSettled(urls.map((u) => fromUrl(u, p.barcode)));
+  const lists = await Promise.allSettled(urls.map((u) => fromUrl(u, id.codes)));
   const out = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value.map((c) => ({ ...c, source: 'gemini' })) : []));
   if (!out.length) throw new BadRequestException('AI could not find a reachable product page. Paste a product-page link.');
   return out;
 }
 
-interface Ranked { index: number; match: number; quality: number; reason: string }
-
-function rankPrompt(p: Product, n: number) {
-  return `You choose the main photo for an online computer store product card.
-Product: "${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, code/model ${p.barcode}` : ''}.
-Below are ${n} candidate images, numbered from 0.
-For each image rate:
-- match (0-100): is it EXACTLY this product (same model, version and colour from the name)? A different model, accessory, box only, or a generic picture is low.
-- quality (0-100): clear product shot on a clean/white background, product fills the frame, sharp, no watermark, no added text/banners/collage, no people.
-Then pick "best" = index of the image that is exactly this product with the best quality, or -1 if none is exactly this product.
-Give "reason" in Russian, max 15 words.`;
-}
-
-function parseRank(text: string, n: number): { best: number; items: Ranked[] } {
-  try {
-    const j = JSON.parse(text) as { best: number; items: Ranked[] };
-    return { best: Number.isInteger(j.best) && j.best >= 0 && j.best < n ? j.best : -1, items: Array.isArray(j.items) ? j.items : [] };
-  } catch {
-    throw new HttpException('AI returned an unreadable answer, try again', 502);
-  }
-}
-
-async function rankGemini(p: Product, imgs: { b64: string; mime: string }[]): Promise<{ best: number; items: Ranked[] }> {
-  const parts: unknown[] = [{ text: rankPrompt(p, imgs.length) }];
-  imgs.forEach((im, i) => { parts.push({ text: `Image ${i}:` }); parts.push({ inline_data: { mime_type: im.mime, data: im.b64 } }); });
-  const r = await gemini({
-    contents: [{ role: 'user', parts }],
-    generationConfig: {
-      temperature: 0, responseMimeType: 'application/json',
-      responseSchema: {
-        type: 'OBJECT', required: ['best', 'items'],
-        properties: {
-          best: { type: 'INTEGER' },
-          items: { type: 'ARRAY', items: { type: 'OBJECT', required: ['index', 'match', 'quality', 'reason'], properties: {
-            index: { type: 'INTEGER' }, match: { type: 'INTEGER' }, quality: { type: 'INTEGER' }, reason: { type: 'STRING' } } } },
-        },
-      },
-    },
-  });
-  return parseRank(r.text, imgs.length);
-}
-
-// ------------------------------------------------------------------ OpenAI (used instead of Gemini when OPENAI_API_KEY is set)
+// ------------------------------------------------------------------ OpenAI
 
 /** AI_PROVIDER=gemini|openai picks the AI that judges photos; unset = OpenAI when its key is set, else Gemini. */
 export const useOpenAI = () => {
@@ -337,6 +429,7 @@ export const useOpenAI = () => {
 const searchOpenAI = () => !!process.env.OPENAI_API_KEY && (process.env.AI_SEARCH || '').toLowerCase() !== 'gemini';
 
 export async function openai(body: Record<string, unknown>, timeoutMs = 120000): Promise<{ text: string; urls: string[] }> {
+  if (!process.env.OPENAI_API_KEY) throw new ServiceUnavailableException('OPENAI_API_KEY is not set on the server');
   let res: Response;
   try {
     res = await fetch('https://api.openai.com/v1/responses', {
@@ -360,71 +453,128 @@ export async function openai(body: Record<string, unknown>, timeoutMs = 120000):
   };
 }
 
-/** OpenAI web search finds product pages (and direct image URLs); their declared images become candidates. */
-const LOGO = /logo|icon|favicon|sprite|banner|placeholder|badge/i;
-
-async function openaiSearchOnce(p: Product, prompt: string, seen: Set<string>): Promise<Candidate[]> {
-  const r = await openai({ tools: [{ type: 'web_search' }], input: prompt }, 90000);
+async function openaiSearchOnce(id: Ident, prompt: string): Promise<Candidate[]> {
+  const r = await openai({ tools: [{ type: 'web_search' }], reasoning: { effort: 'low' }, input: prompt }, 75000);
   const found = [...r.urls, ...(r.text.match(/https?:\/\/[^\s)\]>"']+/g) || [])]
-    .map((u) => u.replace(/[.,;]+$/, '').replace(/[?&]utm_source=openai$/, ''))
-    .filter((u) => !seen.has(u));
+    .map((u) => u.replace(/[.,;]+$/, '').replace(/[?&]utm_source=openai$/, ''));
   const pages = [...new Set(found)].slice(0, 10);
-  pages.forEach((u) => seen.add(u));
-  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, p.barcode)));
-  return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []))
-    .filter((c) => !LOGO.test(c.url.split('?')[0]))
-    .map((c) => ({ ...c, source: 'openai' }));
+  const lists = await Promise.allSettled(pages.map((u) => fromUrl(u, id.codes)));
+  return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : [])).map((c) => ({ ...c, source: 'web' }));
 }
 
-/**
- * OpenAI web search finds product pages (and direct image URLs); their declared images become candidates.
- * Results vary per run, so when the first search gives fewer than 3 usable images a second, differently worded search runs.
- */
-async function openaiSearch(p: Product): Promise<Candidate[]> {
-  const what = `"${p.name}"${p.brand ? `, brand ${p.brand}` : ''}${p.barcode ? `, model/part code ${p.barcode}` : ''}`;
-  const seen = new Set<string>();
-  let out = await openaiSearchOnce(p, `Product from a computer store: ${what}.
+/** OpenAI web search, two differently worded searches at the same time (results vary per run). */
+async function openaiSearch(id: Ident): Promise<Candidate[]> {
+  const what = describe(id);
+  const res = await Promise.allSettled([
+    openaiSearchOnce(id, `Product from a computer store: ${what}.
 Search the web and give up to 10 URLs, one per line, URLs only:
-- direct image file URLs (.jpg/.png/.webp, e.g. the manufacturer's CDN or cdn.shopify.com) of official product photos of EXACTLY this model;
+- direct image file URLs (.jpg/.png/.webp, e.g. the manufacturer's CDN) of official product photos of EXACTLY this model;
 - product pages of exactly this model: the official manufacturer page first, then other official brand stores and large retailers.
-Avoid Russian marketplaces and Amazon (they block servers).`, seen);
-  if (out.length < 3) {
-    const more = await openaiSearchOnce(p, `Find online shops (any country: Europe, Asia, Middle East, USA) that sell ${what}
-and show its product photos. Search by the model code. Give up to 10 product page URLs or direct product image URLs, one per line, URLs only.
-Not: Amazon, ozon, wildberries, dns-shop, citilink, yandex market, logos, manuals, FCC pages.`, seen).catch(() => []);
-    out = [...out, ...more];
+Avoid Russian marketplaces and Amazon (they block servers).`),
+    openaiSearchOnce(id, `Find online shops (any country: Europe, Asia, Middle East, USA) that sell ${what}
+and show its product photos on a white background. Search by the model / part number. Give up to 10 product page URLs or direct
+product image URLs, one per line, URLs only. Not: Amazon, ozon, wildberries, dns-shop, citilink, yandex market, logos, manuals, FCC pages.`),
+  ]);
+  const out = res.flatMap((r) => (r.status === 'fulfilled' ? r.value : []));
+  if (!out.length) {
+    const err = res.find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
+    if (err) throw err.reason;
+    throw new BadRequestException('Product pages found by AI could not be read. Paste a product-page link.');
   }
-  if (!out.length) throw new BadRequestException('Product pages found by AI could not be read. Paste a product-page link.');
   return out;
 }
 
-async function rankOpenAI(p: Product, imgs: { b64: string; mime: string }[]): Promise<{ best: number; items: Ranked[] }> {
-  const content: unknown[] = [{ type: 'input_text', text: rankPrompt(p, imgs.length) }];
-  imgs.forEach((im, i) => {
-    content.push({ type: 'input_text', text: `Image ${i}:` });
-    content.push({ type: 'input_image', image_url: `data:${im.mime};base64,${im.b64}`, detail: 'low' });
-  });
-  const r = await openai({
-    input: [{ role: 'user', content }],
-    text: { format: { type: 'json_schema', name: 'photo_rank', strict: true, schema: {
-      type: 'object', additionalProperties: false, required: ['best', 'items'],
-      properties: {
-        best: { type: 'integer' },
-        items: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['index', 'match', 'quality', 'reason'],
-          properties: { index: { type: 'integer' }, match: { type: 'integer' }, quality: { type: 'integer' }, reason: { type: 'string' } } } },
-      },
-    } } },
-  });
-  return parseRank(r.text, imgs.length);
+// ------------------------------------------------------------------ ranking
+
+const KINDS = ['product', 'box', 'infographic', 'lifestyle', 'logo', 'other'] as const;
+type Kind = typeof KINDS[number];
+interface Ranked { index: number; match: number; quality: number; kind: Kind; reason: string }
+
+function rankPrompt(id: Ident, n: number) {
+  return `You check candidate photos for an online computer store product card.
+Product: ${describe(id)}.
+Below are ${n} candidate images, numbered from 0. For EVERY image give:
+- match (0-100): is it EXACTLY this product (same model, version and colour from the name)? A different model or colour, an accessory,
+  a generic/stock picture, a brand logo = low (0-40). If you cannot tell the model apart from close relatives, give 60-80.
+- kind: "product" = the product itself (any angle); "box" = packaging visible (alone or next to the product); "infographic" = added text,
+  feature callouts, collage; "lifestyle" = product in use / in a room / with people; "logo" = logo, banner, icon; "other".
+- quality (0-100) as a MAIN shop photo: clean white or light plain background, product fills the frame, sharp, no watermark,
+  no shop logo, no added text. Any watermark or another shop's logo: max 30. Box, infographic, lifestyle: max 60.
+- reason: in Russian, max 12 words.`;
 }
 
-const rank = (p: Product, imgs: { b64: string; mime: string }[]) => (useOpenAI() ? rankOpenAI(p, imgs) : rankGemini(p, imgs));
+function parseRank(text: string, n: number): Ranked[] {
+  let j: { items?: Ranked[] };
+  try { j = JSON.parse(text); } catch { throw new HttpException('AI returned an unreadable answer, try again', 502); }
+  return (Array.isArray(j.items) ? j.items : []).filter((x) => Number.isInteger(x.index) && x.index >= 0 && x.index < n)
+    .map((x) => ({ ...x, kind: (KINDS as readonly string[]).includes(x.kind) ? x.kind : 'other' }));
+}
+
+const itemSchema = (upper: boolean) => {
+  const t = (s: string) => (upper ? s.toUpperCase() : s);
+  return {
+    type: t('object'), required: ['index', 'match', 'quality', 'kind', 'reason'],
+    properties: {
+      index: { type: t('integer') }, match: { type: t('integer') }, quality: { type: t('integer') },
+      kind: { type: t('string'), enum: [...KINDS], ...(upper ? { format: 'enum' } : {}) }, reason: { type: t('string') },
+    },
+  };
+};
+
+async function rankGemini(id: Ident, thumbs: Buffer[]): Promise<Ranked[]> {
+  const parts: unknown[] = [{ text: rankPrompt(id, thumbs.length) }];
+  thumbs.forEach((b, i) => { parts.push({ text: `Image ${i}:` }); parts.push({ inline_data: { mime_type: 'image/jpeg', data: b.toString('base64') } }); });
+  const r = await gemini({
+    contents: [{ role: 'user', parts }],
+    generationConfig: {
+      temperature: 0, responseMimeType: 'application/json',
+      responseSchema: { type: 'OBJECT', required: ['items'], properties: { items: { type: 'ARRAY', items: itemSchema(true) } } },
+    },
+  }, 45000);
+  return parseRank(r.text, thumbs.length);
+}
+
+async function rankOpenAI(id: Ident, thumbs: Buffer[]): Promise<Ranked[]> {
+  const content: unknown[] = [{ type: 'input_text', text: rankPrompt(id, thumbs.length) }];
+  thumbs.forEach((b, i) => {
+    content.push({ type: 'input_text', text: `Image ${i}:` });
+    content.push({ type: 'input_image', image_url: `data:image/jpeg;base64,${b.toString('base64')}`, detail: 'low' });
+  });
+  const item = { ...itemSchema(false), additionalProperties: false };
+  const r = await openai({
+    input: [{ role: 'user', content }], reasoning: { effort: 'low' },
+    text: { format: { type: 'json_schema', name: 'photo_rank', strict: true, schema: {
+      type: 'object', additionalProperties: false, required: ['items'], properties: { items: { type: 'array', items: item } },
+    } } },
+  }, 60000);
+  return parseRank(r.text, thumbs.length);
+}
+
+/** The configured AI first; if it is busy / limited / fails, the other one (when its key is set). Never throws. */
+async function rank(id: Ident, thumbs: Buffer[]): Promise<{ items: Ranked[]; by: string; error: string | null }> {
+  const order = useOpenAI() ? ['openai', 'gemini'] : ['gemini', 'openai'];
+  const avail = order.filter((x) => (x === 'openai' ? !!process.env.OPENAI_API_KEY : !!process.env.GEMINI_API_KEY));
+  let error: string | null = 'No AI key on the server';
+  for (const by of avail) {
+    try { return { items: await (by === 'openai' ? rankOpenAI(id, thumbs) : rankGemini(id, thumbs)), by, error: null }; }
+    catch (e) { error = (e as Error).message; }
+  }
+  return { items: [], by: '', error };
+}
+
+/** Main-photo score: exact match first, then quality, then resolution (300 px → 0 … 1200+ px → 25) and a white background. */
+function score(c: { match: number | null; quality: number | null; kind: string | null; width: number; height: number; whiteBg: boolean }) {
+  const side = Math.min(c.width, c.height);
+  const res = Math.max(0, Math.min(25, ((side - MIN_SIDE) / (1200 - MIN_SIDE)) * 25));
+  const kindPenalty = c.kind === 'product' || c.kind === null ? 0 : c.kind === 'lifestyle' ? 30 : 60;
+  return (c.match ?? 50) * 1.5 + (c.quality ?? 40) + res + (c.whiteBg ? 8 : 0) - kindPenalty;
+}
 
 // ------------------------------------------------------------------ controller
 
 export interface PhotoCandidate {
-  url: string; page: string | null; source: string; width: number; height: number; bytes: number;
-  match: number | null; quality: number | null; reason: string | null; best: boolean;
+  url: string; preview: string; page: string | null; source: string; width: number; height: number; bytes: number;
+  match: number | null; quality: number | null; kind: Kind | null; reason: string | null; best: boolean; gallery: boolean;
 }
 
 @Controller('admin/products/:id')
@@ -440,84 +590,138 @@ export class PhotosController {
     return p;
   }
 
-  /** Finds candidate photos and lets Gemini pick the best. Body: { url?: page or image URL }. Nothing is saved. */
+  /** Finds candidate photos, the AI rates them, the server picks the main one + gallery ones. Body: { url? }. Nothing is saved. */
   @Post('photo-search')
   async search(@Param('id', ParseIntPipe) id: number, @Body() body: { url?: string }) {
     const p = await this.product(id);
     if (this.busy.has(id)) throw new HttpException('Search for this product is already running', 409);
     this.busy.add(id);
+    const t0 = Date.now(), lap: string[] = [];
+    const mark = (s: string) => lap.push(`${s} ${((Date.now() - t0) / 1000).toFixed(1)}s`);
     try {
-      const q = searchQuery(p);
+      const ident = identify(p);
+      const q = searchQuery(ident);
       const manual = String(body?.url || '').trim();
       const errors: string[] = [];
-      const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
-      const sources = manual ? [fromUrl(manual, p.barcode)]
-        : searchOpenAI() ? [openaiSearch(p), googleCse(q), brave(q)]
-        : searchApi ? [googleCse(q), brave(q), geminiSearch(p, q)] : [geminiGuess(p)];
-      const lists = await Promise.allSettled(sources);
-      lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
-      const found = lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []));
-      if (!found.length) {
-        if (manual && errors.length) throw new BadRequestException(errors[0]);
-        return { query: q, candidates: [], best: -1, needsSearchKey: false, errors };
-      }
+      const collect = async (sources: Promise<Candidate[]>[]) => {
+        const lists = await Promise.allSettled(sources);
+        lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
+        return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []));
+      };
 
-      // download, validate, de-duplicate
-      const seenUrl = new Set<string>(), seenHash = new Set<string>();
-      const uniq = found.filter((c) => !seenUrl.has(c.url) && seenUrl.add(c.url)).slice(0, MAX_CANDIDATES * 2);
+      let found: Candidate[];
+      if (manual) {
+        found = await collect([fromUrl(manual, ident.codes, 15000)]);
+        if (!found.length) throw new BadRequestException(errors[0] || 'Nothing found at that link');
+      } else {
+        found = await collect([icecat(ident)]);
+        mark(`icecat ${found.length}`);
+        if (found.length < ICECAT_ENOUGH) {
+          const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
+          found = [...found, ...await collect(searchOpenAI() ? [openaiSearch(ident), googleCse(q), brave(q)]
+            : searchApi ? [googleCse(q), brave(q), geminiSearch(ident)] : [geminiGuess(ident)])];
+          mark(`web ${found.length}`);
+        }
+      }
+      const result = (candidates: PhotoCandidate[], extra: Record<string, unknown> = {}) => ({
+        query: q, ident: { brand: ident.brand, model: ident.model, code: ident.code, gtin: ident.gtin },
+        candidates, best: candidates[0]?.best ? 0 : -1, errors, ms: Date.now() - t0, needsSearchKey: false, ...extra,
+      });
+      if (!found.length) return result([]);
+
+      // download + check + de-duplicate (same picture in two sizes → keep the bigger one)
+      const seenUrl = new Set<string>();
+      const uniq = found.filter((c) => !LOGO.test(c.url.split('?')[0]) && !seenUrl.has(c.url) && seenUrl.add(c.url)).slice(0, 40);
       const got = await Promise.allSettled(uniq.map(async (c) => {
         const f = await safeFetch(c.url, MAX_IMAGE, 'image/*');
-        const info = sniffImage(f.body);
+        const info = await inspect(f.body);
         if (!info) throw new Error('not an image');
         if (Math.min(info.width, info.height) < MIN_SIDE) throw new Error('too small');
-        return { c, f, info, hash: createHash('sha1').update(f.body).digest('hex') };
+        if (Math.max(info.width, info.height) / Math.min(info.width, info.height) > MAX_ASPECT) throw new Error('banner shape');
+        return { c, f, info };
       }));
-      const ok = got.flatMap((g) => (g.status === 'fulfilled' ? [g.value] : []))
-        .filter((g) => !seenHash.has(g.hash) && seenHash.add(g.hash))
-        .slice(0, MAX_CANDIDATES);
-      if (!ok.length) return { query: q, candidates: [], best: -1, needsSearchKey: false, errors: ['No usable images (too small, blocked or not images)'] };
+      mark(`download ${uniq.length}`);
+      const ok: { c: Candidate; f: Fetched; info: Inspected }[] = [];
+      for (const g of got) {
+        if (g.status !== 'fulfilled') continue;
+        const dup = ok.findIndex((o) => hamming(o.info.hash, g.value.info.hash) <= 5);
+        if (dup < 0) ok.push(g.value);
+        else if (g.value.info.width * g.value.info.height > ok[dup].info.width * ok[dup].info.height) ok[dup] = g.value;
+      }
+      const usable = ok.slice(0, MAX_CANDIDATES);
+      if (!usable.length) return result([], { errors: [...errors, 'No usable images (too small, banners, blocked or not images)'] });
 
-      const forAi = ok.filter((g) => g.f.body.length <= MAX_AI_IMAGE && g.info.mime !== 'image/gif');
-      const ranked = forAi.length ? await rank(p, forAi.map((g) => ({ b64: g.f.body.toString('base64'), mime: g.info.mime }))) : { best: -1, items: [] };
+      const ranked = await rank(ident, usable.map((g) => g.info.thumb));
+      if (ranked.error) errors.push(`AI: ${ranked.error}`);
+      mark(`rank ${ranked.by || 'failed'}`);
 
-      const candidates: PhotoCandidate[] = ok.map((g) => {
-        const ai = forAi.indexOf(g);
-        const r = ai < 0 ? undefined : ranked.items.find((x) => x.index === ai);
+      let candidates: PhotoCandidate[] = usable.map((g, i) => {
+        const r = ranked.items.find((x) => x.index === i);
         return {
-          url: g.f.url, page: g.c.page || null, source: g.c.source, width: g.info.width, height: g.info.height, bytes: g.f.body.length,
-          match: r?.match ?? null, quality: r?.quality ?? null, reason: r?.reason ?? null, best: ai >= 0 && ai === ranked.best,
+          url: g.f.url, preview: g.c.preview || g.f.url, page: g.c.page || null, source: g.c.source,
+          width: g.info.width, height: g.info.height, bytes: g.f.body.length,
+          match: r?.match ?? null, quality: r?.quality ?? null, kind: r?.kind ?? null, reason: r?.reason ?? null, best: false, gallery: false,
         };
       });
-      const score = (c: PhotoCandidate) => (c.best ? 1000 : 0) + (c.match ?? -1) * 2 + (c.quality ?? 0);
-      candidates.sort((a, b) => score(b) - score(a));
-      this.log.log(`product ${id}: ${found.length} found, ${ok.length} usable, best=${ranked.best}`);
-      return { query: q, candidates, best: candidates[0]?.best ? 0 : -1, needsSearchKey: false, errors };
+      const sc = new Map(candidates.map((c, i) => [c, score({ ...c, whiteBg: usable[i].info.whiteBg })]));
+      // rated: hide clear misses (wrong product, logos) unless nothing would be left
+      if (ranked.items.length) {
+        const keep = candidates.filter((c) => (c.match ?? 0) >= 40 && c.kind !== 'logo');
+        if (keep.length) candidates = keep;
+      }
+      candidates.sort((a, b) => sc.get(b)! - sc.get(a)!);
+      const main = candidates.find((c) => (c.match ?? 0) >= 85 && c.kind === 'product' && (c.quality ?? 0) >= 50);
+      if (main) {
+        main.best = true;
+        candidates = [main, ...candidates.filter((c) => c !== main)];
+        candidates.filter((c) => !c.best && (c.match ?? 0) >= 85 && (c.kind === 'product' || c.kind === 'lifestyle') && (c.quality ?? 0) >= 55)
+          .slice(0, 5).forEach((c) => { c.gallery = true; });
+      }
+      this.log.log(`product ${id} «${q}»: ${found.length} found, ${usable.length} usable, main=${main ? 'yes' : 'no'}, by=${ranked.by || '-'} | ${lap.join(', ')}`);
+      return result(candidates, { rankedBy: ranked.by || null });
     } finally {
       this.busy.delete(id);
     }
   }
 
-  /** Downloads the chosen image and adds it to the product. Body: { url, main?: true = put first }. */
-  @Post('images')
-  async add(@Param('id', ParseIntPipe) id: number, @Body() body: { url?: string; main?: boolean }) {
-    const p = await this.product(id);
-    if ((p.images || []).length >= MAX_IMAGES_PER_PRODUCT) throw new BadRequestException(`Max ${MAX_IMAGES_PER_PRODUCT} photos`);
+  /** Downloads + cleans one photo, returns its /api/media path. */
+  private async store(id: number, url: string): Promise<string> {
     let f: Fetched;
-    try { f = await safeFetch(String(body?.url || ''), MAX_IMAGE, 'image/*'); } catch (e) {
+    try { f = await safeFetch(url, MAX_IMAGE, 'image/*', 20000); } catch (e) {
       if (e instanceof HttpException) throw e;
       throw new BadRequestException(`Download failed: ${(e as Error).message}`);
     }
-    const info = sniffImage(f.body);
-    if (!info) throw new BadRequestException('Not a JPEG/PNG/WebP/GIF image');
-    const name = `${createHash('sha1').update(f.body).digest('hex').slice(0, 16)}.${info.ext}`;
+    let out: { body: Buffer; ext: string };
+    try { out = await cleanPhoto(f.body); } catch {
+      const info = sniffImage(f.body); // sharp could not read it: keep the original if it is a plain image
+      if (!info) throw new BadRequestException('Not a JPEG/PNG/WebP/GIF image');
+      out = { body: f.body, ext: info.ext };
+    }
+    const name = `${createHash('sha1').update(out.body).digest('hex').slice(0, 16)}.${out.ext}`;
     const dir = join(MEDIA_DIR, 'products', String(id));
     await mkdir(dir, { recursive: true });
-    await writeFile(join(dir, name), f.body);
-    const path = `${MEDIA_URL}/products/${id}/${name}`;
-    const rest = (p.images || []).filter((x) => x !== path);
-    const images = body?.main === false ? [...rest, path] : [path, ...rest];
+    await writeFile(join(dir, name), out.body);
+    this.log.log(`product ${id}: saved ${name} (${Math.round(out.body.length / 1024)} KB) from ${f.url}`);
+    return `${MEDIA_URL}/products/${id}/${name}`;
+  }
+
+  /**
+   * Adds photos. Body: { url } or { urls: [...] }, main?: true (default) = the first one becomes the main photo,
+   * the others follow it; false = all go to the end.
+   */
+  @Post('images')
+  async add(@Param('id', ParseIntPipe) id: number, @Body() body: { url?: string; urls?: string[]; main?: boolean }) {
+    const p = await this.product(id);
+    const urls = [...new Set((Array.isArray(body?.urls) ? body.urls : [body?.url]).map((u) => String(u || '').trim()).filter(Boolean))];
+    if (!urls.length) throw new BadRequestException('No URL');
+    if ((p.images || []).length + urls.length > MAX_IMAGES_PER_PRODUCT) throw new BadRequestException(`Max ${MAX_IMAGES_PER_PRODUCT} photos`);
+    const paths: string[] = [];
+    for (const u of urls) paths.push(await this.store(id, u)); // one by one: small server, big images
+    const fresh = await this.product(id); // the list may have changed while downloading
+    const rest = (fresh.images || []).filter((x) => !paths.includes(x));
+    const added = [...new Set(paths)];
+    const images = body?.main === false ? [...rest, ...added] : [added[0], ...rest, ...added.slice(1)];
     await this.ds.getRepository(Product).update({ id }, { images });
-    this.log.log(`product ${id}: saved ${path} from ${f.url}`);
     return { images };
   }
 

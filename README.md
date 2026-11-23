@@ -84,26 +84,34 @@ docker compose pull && docker compose up -d
 
 ## AI product photos (admin → product → "Подобрать фото (AI)")
 
-`backend/src/photos.ts`. One click: candidate images are collected, downloaded and checked (public http(s) only —
-private/metadata IPs blocked on every redirect hop; JPEG/PNG/WebP/GIF by magic bytes; ≤ 8 MB; ≥ 250 px), then
-**Gemini vision** sees all of them with the product name/code and scores each for *exact model match* and *shop-photo
-quality* (clean background, no watermark/banner); its pick is preselected. "Save" downloads it to the `media` volume
-(`/data/media/products/<id>/<sha1>.ext`, served at `/api/media/...`) and puts it first in `products.images`.
-Nothing is written until the admin presses Save. Photos can be reordered ("make main") and removed.
+`backend/src/photos.ts`, admin `admin/src/photos.tsx`. Nothing is written until the admin presses Save.
 
-Candidate sources (env in `/opt/led-computers/.env`, see `deploy/.env.example`):
-- `AI_PROVIDER=gemini|openai` = who judges the photos (now **gemini**); `AI_SEARCH=openai|gemini` = who searches the web
-  (now **openai**; unset = OpenAI whenever its key is set). Both keys stay in `.env`.
-- **`OPENAI_API_KEY`** — OpenAI web search finds product pages, OpenAI vision ranks the photos (`OPENAI_MODEL`, default gpt-5.4-mini). Without it Gemini is used;
-- **only `GEMINI_API_KEY`** — Gemini suggests official product-page URLs from its own knowledge (manufacturer,
-  then big retailers); each is really fetched, wrong ones are dropped. Used when none of the search keys below is set;
-- a pasted product-page or image link — always works (page: og:image, JSON-LD Product.image, gallery images with the model code);
-- `GOOGLE_CSE_KEY` + `GOOGLE_CSE_CX` — Google Custom Search, image mode (100 free queries/day);
-- `BRAVE_SEARCH_KEY` — Brave Search images;
-- `GEMINI_SEARCH=1` — Gemini's Google Search grounding finds product pages. **Needs billing on the Gemini key**; the
-  current key is free tier (grounding → 429), so it is off.
+1. **What is the product.** The Access brand column is empty, so `identify()` finds the brand in the name (list `BRANDS`,
+   ~180 brands seen in the store's names, whole word; ~84 % of names have one), the model (text after the brand) and the codes:
+   the barcode (an 8–14 digit barcode = EAN; another code is used as a part number but may be the store's own, e.g. `XYZ-SA-852`)
+   plus model-like tokens (`TXE70UH`, `CT240BX500SSD1`). **Add a brand to `BRANDS` when a new one appears.**
+2. **Icecat first** (`icecat()`): Open Icecat (`ICECAT_USER`, default the public `openIcecat-live`) looked up by EAN and by
+   brand + each code. Free only for brands that publish openly — works for TP-Link, Gigabyte, ASUS, Lenovo, Lanberg…; Logitech,
+   Crucial, Intel, Patriot, Natec, Wacom are paid-only, Cougar/Orico/Gembird/Sven are absent. Official high-res photos, ~2 s.
+   `ICECAT=0` turns it off.
+3. **Web search** only when Icecat gives < 3 photos: `AI_SEARCH=openai` = two differently worded OpenAI web searches run at the
+   same time; their pages' declared images (og:image, JSON-LD Product.image, gallery images with a model code) become candidates.
+   Other sources if keys are set: `GOOGLE_CSE_KEY`+`GOOGLE_CSE_CX`, `BRAVE_SEARCH_KEY`, `GEMINI_SEARCH=1` (paid Gemini only);
+   with no search at all Gemini guesses product-page URLs. A pasted page/image link replaces all of this.
+4. **Checks** (sharp): public http(s) only (private/metadata IPs blocked on every redirect hop), ≤ 16 MB, real image,
+   shorter side ≥ 300 px, not banner-shaped (> 2.2:1), no logo/icon/banner URL; the same picture in several sizes is kept once
+   (the biggest; picture hash). Max 16 go to the AI as 512 px thumbnails.
+5. **AI rating**: `AI_PROVIDER` (now gemini) rates every photo — exact-model match, quality as a main shop photo (watermark /
+   other shop's logo ≤ 30), kind (product / box / infographic / lifestyle / logo). If that AI is busy or limited, the other one
+   (OpenAI) is asked; if both fail the photos are still shown, unrated. Wrong products (match < 40) and logos are hidden.
+6. **The server picks**: main photo = match ≥ 85, kind "product", quality ≥ 50, best by match + quality + resolution + white
+   background; other good product/lifestyle photos are marked "галерея".
+7. **Save** (several at once, first selected = main unless unticked): the photo is cleaned — on a white background the empty
+   border is trimmed and the product centred on a white square (~90 % fill); max 1200 px; WebP — and stored in the `media`
+   volume (`/data/media/products/<id>/<sha1>.webp`, served at `/api/media/...`). Max 12 photos per product.
 
-Free-tier Gemini has per-minute limits; busy/limited models fall back to `gemini-3.5-flash` → `gemini-flash-lite-latest`.
+The server log has one line per search with the time of each step (`docker compose logs api | grep Photos`).
+Free-tier Gemini has per-minute limits; busy models fall back to the next Gemini model, then to OpenAI.
 Free-tier requests may be used by Google to improve its models — only public product photos and names are sent.
 
 ## Products → site categories (admin → "Привязка товаров")
