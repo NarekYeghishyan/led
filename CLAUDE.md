@@ -463,3 +463,4 @@ stock and prices from the Access sync. Until then the templates are design refer
   Admin: select several photos (★ = main, numbers = gallery order), "+ gallery photos" button. **Saved photos are cleaned**: white
   border trimmed, product centred on a white square, max 1200 px, WebP. Test on 8 products: 5–42 s per search (was 50–150 s, 2 of 8
   failed with "Gemini busy"); hard cases: Intel tray CPUs (only logos found — paste a link). DB backup `/root/led-db-backup-20261123-1648-pre-photos2.dump`. Deployed.
+- 2026-11-23 — Server `.env`: `AI_CATEGORIES=openai` — product → site-category AI now uses OpenAI (the free Gemini key ran out of daily quota). Photos already rate with OpenAI first. Backup `/root/led-env-backup-20261123-*`.
