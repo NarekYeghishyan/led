@@ -12,7 +12,7 @@
  *  5. Saving: the photo is cleaned with sharp (white border trimmed, centred on a white square, max 1200 px, WebP)
  *     and stored in MEDIA_DIR, served at /api/media/...
  *
- * Env: AI_PROVIDER, AI_SEARCH, OPENAI_API_KEY, OPENAI_MODEL, GEMINI_API_KEY, GEMINI_MODEL, ICECAT_USER, ICECAT=0,
+ * Env: AI_RANK, AI_PROVIDER, AI_SEARCH, OPENAI_API_KEY, OPENAI_MODEL, GEMINI_API_KEY, GEMINI_MODEL, ICECAT_USER, ICECAT=0,
  *      GOOGLE_CSE_KEY + GOOGLE_CSE_CX, BRAVE_SEARCH_KEY, GEMINI_SEARCH=1 (needs a paid Gemini plan), MEDIA_DIR.
  */
 import {
@@ -530,7 +530,7 @@ async function rankGemini(id: Ident, thumbs: Buffer[]): Promise<Ranked[]> {
       temperature: 0, responseMimeType: 'application/json',
       responseSchema: { type: 'OBJECT', required: ['items'], properties: { items: { type: 'ARRAY', items: itemSchema(true) } } },
     },
-  }, 45000);
+  }, 30000);
   return parseRank(r.text, thumbs.length);
 }
 
@@ -546,13 +546,17 @@ async function rankOpenAI(id: Ident, thumbs: Buffer[]): Promise<Ranked[]> {
     text: { format: { type: 'json_schema', name: 'photo_rank', strict: true, schema: {
       type: 'object', additionalProperties: false, required: ['items'], properties: { items: { type: 'array', items: item } },
     } } },
-  }, 60000);
+  }, 40000);
   return parseRank(r.text, thumbs.length);
 }
 
-/** The configured AI first; if it is busy / limited / fails, the other one (when its key is set). Never throws. */
+/**
+ * AI_RANK=openai|gemini = who rates the photos first; unset = OpenAI when its key is set (≈4 s for 16 photos; the free
+ * Gemini key runs out of daily quota and is slow). If the first fails / is busy, the other one is asked. Never throws.
+ */
 async function rank(id: Ident, thumbs: Buffer[]): Promise<{ items: Ranked[]; by: string; error: string | null }> {
-  const order = useOpenAI() ? ['openai', 'gemini'] : ['gemini', 'openai'];
+  const pref = (process.env.AI_RANK || (process.env.OPENAI_API_KEY ? 'openai' : 'gemini')).toLowerCase();
+  const order = pref === 'gemini' ? ['gemini', 'openai'] : ['openai', 'gemini'];
   const avail = order.filter((x) => (x === 'openai' ? !!process.env.OPENAI_API_KEY : !!process.env.GEMINI_API_KEY));
   let error: string | null = 'No AI key on the server';
   for (const by of avail) {
@@ -663,6 +667,8 @@ export class PhotosController {
           match: r?.match ?? null, quality: r?.quality ?? null, kind: r?.kind ?? null, reason: r?.reason ?? null, best: false, gallery: false,
         };
       });
+      // Icecat was looked up by EAN / exact part number: the product is right even when the AI can't read the model on the photo
+      candidates.forEach((c) => { if (c.source === 'icecat' && c.match !== null && c.match >= 60 && c.kind !== 'logo') c.match = Math.max(c.match, 95); });
       const sc = new Map(candidates.map((c, i) => [c, score({ ...c, whiteBg: usable[i].info.whiteBg })]));
       // rated: hide clear misses (wrong product, logos) unless nothing would be left
       if (ranked.items.length) {
