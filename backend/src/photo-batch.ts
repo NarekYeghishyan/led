@@ -25,6 +25,7 @@ const AUTO_MATCH = 95, AUTO_QUALITY = 80, AUTO_GALLERY = 3;
 const PAUSE_MS = 1500;
 const LIMITED = /rate limit|limit reached|busy|429|did not answer in time/i;
 const RETRIES = 2, RETRY_WAIT_MS = 60_000;
+const NO_CREDIT = /no credits|insufficient_quota|exceeded your current quota|billing/i;
 const ELIGIBLE = `p.deleted_at IS NULL AND p.quantity > 0 AND p.images = '[]'::jsonb
   AND NOT EXISTS (SELECT 1 FROM product_photo_jobs j WHERE j.product_id = p.id)`;
 
@@ -41,6 +42,8 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
   private log = new Logger('PhotoBatch');
   private working = false;
   private stopping = false;
+  /** set when the AI account has no credit: the queue waits until staff start / retry again */
+  paused: string | null = null;
   current: { jobId: number; productId: number; name: string; since: Date } | null = null;
   constructor(@InjectDataSource() private ds: DataSource) {}
 
@@ -55,6 +58,7 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
 
   /** Queues up to `limit` in-stock products without photos (newest first). */
   async start(limit: number, auto: boolean, by: string | null) {
+    this.paused = null;
     const n = Math.max(1, Math.min(MAX_BATCH, Math.floor(Number(limit) || 10)));
     const rows: { id: number }[] = await this.ds.query(
       `INSERT INTO product_photo_jobs (product_id, status, auto, created_by)
@@ -87,6 +91,7 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
       const job = rows?.[0];
       if (!job) return;
       await this.runJob(job);
+      if (this.paused) return;
       await new Promise((r) => setTimeout(r, PAUSE_MS));
     }
   }
@@ -103,6 +108,13 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
     this.current = { jobId: job.id, productId: p.id, name: p.name, since: new Date() };
     try {
       let r = await findPhotos(p, job.url || undefined);
+      // no credit on the AI account: retrying won't help — put the product back and stop the queue
+      if (r.errors.some((e) => NO_CREDIT.test(e)) && (!r.candidates.length || !r.rankedBy)) {
+        this.paused = r.errors.find((e) => NO_CREDIT.test(e))!.slice(0, 300);
+        this.log.warn(`queue paused: ${this.paused}`);
+        await this.ds.query(`UPDATE product_photo_jobs SET status = 'queued' WHERE id = $1`, [job.id]);
+        return;
+      }
       // AI rate limit / busy (OpenAI per-minute limit, Gemini free quota): wait and search again, up to 2 more times
       const limited = (x: typeof r) => x.errors.some((e) => LIMITED.test(e)) && (!x.candidates.length || !x.rankedBy);
       for (let i = 0; i < RETRIES && limited(r) && !this.stopping; i++) {
@@ -149,7 +161,7 @@ export class PhotoBatchController {
              COUNT(*) FILTER (WHERE images <> '[]'::jsonb)::int AS "withPhotos"
       FROM products WHERE deleted_at IS NULL AND quantity > 0`);
     const by = Object.fromEntries(STATUSES.map((s) => [s, counts.find((c) => c.status === s)?.n || 0]));
-    return { running: this.svc.running, current: this.svc.current, counts: by, eligible, inStock, withPhotos };
+    return { paused: this.svc.paused, running: this.svc.running, current: this.svc.current, counts: by, eligible, inStock, withPhotos };
   }
 
   /** Jobs of one status (or all), newest first. */
@@ -206,6 +218,7 @@ export class PhotoBatchController {
     const url = String(b?.url || '').trim() || null;
     if (url && !/^https?:\/\//i.test(url)) throw new BadRequestException('Link must start with http(s)://');
     await this.ds.query(`UPDATE product_photo_jobs SET status = 'queued', url = $2, error = NULL, finished_at = NULL WHERE id = $1`, [id, url]);
+    this.svc.paused = null;
     this.svc.kick();
     return { ok: true };
   }

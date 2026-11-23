@@ -9,7 +9,7 @@ import { CandidatePicker, MAX_PHOTOS, ResultInfo, type SearchResult } from './ph
 
 type Status = 'queued' | 'running' | 'saved' | 'review' | 'none' | 'error' | 'accepted' | 'skipped';
 interface Stats {
-  running: boolean; current: { jobId: number; productId: number; name: string; since: string } | null;
+  paused: string | null; running: boolean; current: { jobId: number; productId: number; name: string; since: string } | null;
   counts: Record<Status, number>; eligible: number; inStock: number; withPhotos: number;
 }
 interface Job {
@@ -44,7 +44,7 @@ export function PhotoBatchPage() {
   }, [view, page, tick]);
   // while the worker runs, refresh the numbers (and the list, except on the review tab — not to disturb a choice)
   useEffect(() => {
-    if (!st?.running && !st?.counts.queued) return;
+    if (!st?.running && (!st?.counts.queued || st.paused)) return;
     const h = setInterval(async () => {
       try {
         const s = await api<Stats>('/admin/photo-batch/stats');
@@ -93,6 +93,7 @@ export function PhotoBatchPage() {
           </button>
           {pending > 0 && <button type="button" className="secondary" disabled={busy} onClick={() => run(() => post('stop'), t('pb.stopped'))}>■ {t('pb.stop')}</button>}
         </div>
+        {st?.paused && <div className="error small">⏸ {t('pb.paused')}: {st.paused}</div>}
         <div className="muted small">
           {st?.running && st.current
             ? <>⏳ {t('pb.now')}: <Link to={`/products/${st.current.productId}`}>{st.current.name}</Link> · {t('pb.left', { n: pending })}</>
