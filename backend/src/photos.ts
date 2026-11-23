@@ -169,6 +169,7 @@ function isWhiteBorder(g: Buffer, n: number): boolean {
   return light / px.length >= 0.9;
 }
 
+const host = (u: string | null) => { try { return u ? new URL(u).hostname : ''; } catch { return ''; } };
 const hamming = (a: bigint, b: bigint) => { let x = a ^ b, n = 0; while (x) { n += Number(x & 1n); x >>= 1n; } return n; };
 
 /**
@@ -494,8 +495,10 @@ function rankPrompt(id: Ident, n: number) {
   return `You check candidate photos for an online computer store product card.
 Product: ${describe(id)}.
 Below are ${n} candidate images, numbered from 0. For EVERY image give:
-- match (0-100): is it EXACTLY this product (same model, version and colour from the name)? A different model or colour, an accessory,
-  a generic/stock picture, a brand logo = low (0-40). If you cannot tell the model apart from close relatives, give 60-80.
+- match (0-100): is it this product (same model, version and colour from the name)? Model numbers are often not readable on a
+  photo: if the shape, colour and branding fit this product and nothing contradicts it, give 85-95. Give 50-80 only when it may be a
+  close relative (e.g. a sibling model that looks different in some detail). A different model or colour, an accessory, a generic
+  stock picture, a brand logo = 0-40.
 - kind: "product" = the product itself (any angle); "box" = packaging visible (alone or next to the product); "infographic" = added text,
   feature callouts, collage; "lifestyle" = product in use / in a room / with people; "logo" = logo, banner, icon; "other".
 - quality (0-100) as a MAIN shop photo: clean white or light plain background, product fills the frame, sharp, no watermark,
@@ -667,8 +670,12 @@ export class PhotosController {
           match: r?.match ?? null, quality: r?.quality ?? null, kind: r?.kind ?? null, reason: r?.reason ?? null, best: false, gallery: false,
         };
       });
-      // Icecat was looked up by EAN / exact part number: the product is right even when the AI can't read the model on the photo
-      candidates.forEach((c) => { if (c.source === 'icecat' && c.match !== null && c.match >= 60 && c.kind !== 'logo') c.match = Math.max(c.match, 95); });
+      // Icecat (looked up by EAN / exact part number) and the brand's own site: the product is right even when the AI
+      // can't read the model on the photo
+      const brandKey = ident.brand ? norm(ident.brand) : '';
+      const official = (c: PhotoCandidate) => c.source === 'icecat'
+        || (brandKey.length >= 3 && [c.page, c.url].some((u) => norm(host(u)).includes(brandKey)));
+      candidates.forEach((c) => { if (official(c) && c.match !== null && c.match >= 60 && c.kind !== 'logo') c.match = Math.max(c.match, 95); });
       const sc = new Map(candidates.map((c, i) => [c, score({ ...c, whiteBg: usable[i].info.whiteBg })]));
       // rated: hide clear misses (wrong product, logos) unless nothing would be left
       if (ranked.items.length) {

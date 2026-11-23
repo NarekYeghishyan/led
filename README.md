@@ -104,8 +104,8 @@ docker compose pull && docker compose up -d
 5. **AI rating**: `AI_RANK` (unset = **OpenAI** when its key is set, ~4 s for 16 photos; the free Gemini key runs out of daily
    quota and took 30–50 s) rates every photo — exact-model match, quality as a main shop photo (watermark / other shop's logo
    ≤ 30), kind (product / box / infographic / lifestyle / logo). If it fails, the other AI is asked; if both fail the photos are
-   still shown, unrated. Wrong products (match < 40) and logos are hidden. Icecat photos (found by EAN / exact part number)
-   count as an exact match even when the model isn't readable on the photo.
+   still shown, unrated. Wrong products (match < 40) and logos are hidden. Icecat photos (found by EAN / exact part number) and photos
+   from the brand's own site (host contains the brand, e.g. logitech.com) count as an exact match even when the model isn't readable.
 6. **The server picks**: main photo = match ≥ 85, kind "product", quality ≥ 50, best by match + quality + resolution + white
    background; other good product/lifestyle photos are marked "галерея".
 7. **Save** (several at once, first selected = main unless unticked): the photo is cleaned — on a white background the empty
