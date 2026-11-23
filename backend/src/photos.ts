@@ -444,7 +444,8 @@ export async function openai(body: Record<string, unknown>, timeoutMs = 120000):
     output?: { type: string; content?: { text?: string; annotations?: { url?: string }[] }[] }[];
   };
   if (!res.ok) {
-    if (res.status === 429) throw new HttpException('OpenAI: rate limit or no credit on the account. Try again later.', 429);
+    // 429 = per-minute rate limit, or (code insufficient_quota) no credit left on the account
+    if (res.status === 429) throw new HttpException(`OpenAI 429 (rate limit or no credit): ${d.error?.message || ''}`.slice(0, 300), 429);
     throw new HttpException(`OpenAI: ${d.error?.message || res.statusText}`.slice(0, 300), 502);
   }
   const content = (d.output || []).filter((o) => o.type === 'message').flatMap((o) => o.content || []);

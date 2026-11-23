@@ -23,6 +23,8 @@ const STATUSES = ['queued', 'running', 'saved', 'review', 'none', 'error', 'acce
 const MAX_BATCH = 300;
 const AUTO_MATCH = 95, AUTO_QUALITY = 80, AUTO_GALLERY = 3;
 const PAUSE_MS = 1500;
+const LIMITED = /rate limit|limit reached|busy|429|did not answer in time/i;
+const RETRIES = 2, RETRY_WAIT_MS = 60_000;
 const ELIGIBLE = `p.deleted_at IS NULL AND p.quantity > 0 AND p.images = '[]'::jsonb
   AND NOT EXISTS (SELECT 1 FROM product_photo_jobs j WHERE j.product_id = p.id)`;
 
@@ -100,7 +102,15 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
     if (!p) return finish('error', { error: 'Product not found' });
     this.current = { jobId: job.id, productId: p.id, name: p.name, since: new Date() };
     try {
-      const r = await findPhotos(p, job.url || undefined);
+      let r = await findPhotos(p, job.url || undefined);
+      // AI rate limit / busy (OpenAI per-minute limit, Gemini free quota): wait and search again, up to 2 more times
+      const limited = (x: typeof r) => x.errors.some((e) => LIMITED.test(e)) && (!x.candidates.length || !x.rankedBy);
+      for (let i = 0; i < RETRIES && limited(r) && !this.stopping; i++) {
+        this.log.warn(`product ${p.id}: AI limit (${r.errors.join('; ').slice(0, 120)}), waiting ${RETRY_WAIT_MS / 1000} s`);
+        await new Promise((ok) => setTimeout(ok, RETRY_WAIT_MS));
+        r = await findPhotos(p, job.url || undefined);
+      }
+      if (limited(r) && !r.candidates.length) return await finish('error', { result: r, error: r.errors.join('; ') });
       if (!r.candidates.length) return await finish('none', { result: r, error: r.errors.join('; ') || null });
       const pick = job.auto && !job.url ? autoPick(r) : [];
       // staff may have added photos meanwhile: then never save by itself
