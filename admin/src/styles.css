@@ -452,3 +452,21 @@ button.pc-tile:hover { border-color: var(--accent); }
   .pc-table td:nth-child(3), .pc-table td:nth-child(4) { min-width: 0; }
   .pc-bulk { top: 64px; }
 }
+
+/* batch AI photos (photo-batch.tsx) */
+.pb-run input[type=number] { width: 80px; }
+.pb-list { display: grid; gap: 12px; }
+.pb-job { padding: 14px 18px; }
+.pb-job.saved, .pb-job.accepted { border-left: 4px solid var(--ok); }
+.pb-job.review { border-left: 4px solid var(--warn); }
+.pb-job.none, .pb-job.error { border-left: 4px solid var(--bad); }
+.pb-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; margin-bottom: 8px; }
+.pb-head .tag { margin-left: 0; }
+.pb-name { font-weight: 700; }
+.pb-cur { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.pb-cur img { width: 72px; height: 72px; object-fit: contain; background: #fff; border: 1px solid var(--line); border-radius: 8px; display: block; }
+.pb-cur img.main { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.pb-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.pb-actions input { flex: 1; min-width: 220px; }
+.tag.info { background: #e6effc; color: #1458b8; }
+.tag.warn { background: #fdf0e1; color: #a35a00; }

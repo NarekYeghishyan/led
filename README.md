@@ -112,6 +112,14 @@ docker compose pull && docker compose up -d
    border is trimmed and the product centred on a white square (~90 % fill); max 1200 px; WebP — and stored in the `media`
    volume (`/data/media/products/<id>/<sha1>.webp`, served at `/api/media/...`). Max 12 photos per product.
 
+**Batch** (admin → "Фото товаров (AI)", `backend/src/photo-batch.ts`, `admin/src/photo-batch.tsx`, table `product_photo_jobs`):
+"Find photos for N products" queues in-stock products without photos that were never searched (newest first, max 300 per
+start); one background worker runs them one by one (1.5 s pause; a restart re-queues the running one). **Clear cases are saved by
+themselves** (checkbox "ясные случаи сохранять сами"): main photo from Icecat or the brand's own site, match ≥ 95, quality ≥ 80,
+plus up to 3 official gallery photos — status "сохранено само", "Отменить" removes exactly those photos. Everything else is
+"на проверку": the same photo picker as the product card; or paste a link and "Искать по ссылке"; or skip. "Не найдено" /
+"ошибка" can be retried. A product is queued by a batch only once; later tries go through "Искать снова".
+
 The server log has one line per search with the time of each step (`docker compose logs api | grep Photos`).
 Free-tier Gemini has per-minute limits; busy models fall back to the next Gemini model, then to OpenAI.
 Free-tier requests may be used by Google to improve its models — only public product photos and names are sent.

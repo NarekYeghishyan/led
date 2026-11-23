@@ -577,17 +577,171 @@ function score(c: { match: number | null; quality: number | null; kind: string |
   return (c.match ?? 50) * 1.5 + (c.quality ?? 40) + res + (c.whiteBg ? 8 : 0) - kindPenalty;
 }
 
-// ------------------------------------------------------------------ controller
+// ------------------------------------------------------------------ search + save (shared by the product button and the batch)
 
 export interface PhotoCandidate {
   url: string; preview: string; page: string | null; source: string; width: number; height: number; bytes: number;
   match: number | null; quality: number | null; kind: Kind | null; reason: string | null; best: boolean; gallery: boolean;
+  /** Icecat or the brand's own site */
+  official: boolean;
 }
+export interface PhotoSearchResult {
+  query: string; ident: { brand: string | null; model: string; code: string | null; gtin: string | null };
+  candidates: PhotoCandidate[]; best: number; errors: string[]; ms: number; rankedBy?: string | null; needsSearchKey: false;
+}
+const log = new Logger('Photos');
+
+/** Finds candidate photos, the AI rates them, picks the main one + gallery ones. manualUrl = only that page/image. Nothing is saved. */
+export async function findPhotos(p: Product, manualUrl?: string): Promise<PhotoSearchResult> {
+  const t0 = Date.now(), lap: string[] = [];
+  const mark = (s: string) => lap.push(`${s} ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+  const ident = identify(p);
+  const q = searchQuery(ident);
+  const manual = String(manualUrl || '').trim();
+  const errors: string[] = [];
+  const collect = async (sources: Promise<Candidate[]>[]) => {
+    const lists = await Promise.allSettled(sources);
+    lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
+    return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []));
+  };
+
+  let found: Candidate[];
+  if (manual) {
+    found = await collect([fromUrl(manual, ident.codes, 15000)]);
+    if (!found.length) throw new BadRequestException(errors[0] || 'Nothing found at that link');
+  } else {
+    found = await collect([icecat(ident)]);
+    mark(`icecat ${found.length}`);
+    if (found.length < ICECAT_ENOUGH) {
+      const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
+      found = [...found, ...await collect(searchOpenAI() ? [openaiSearch(ident), googleCse(q), brave(q)]
+        : searchApi ? [googleCse(q), brave(q), geminiSearch(ident)] : [geminiGuess(ident)])];
+      mark(`web ${found.length}`);
+    }
+  }
+  const result = (candidates: PhotoCandidate[], rankedBy: string | null = null): PhotoSearchResult => ({
+    query: q, ident: { brand: ident.brand, model: ident.model, code: ident.code, gtin: ident.gtin },
+    candidates, best: candidates[0]?.best ? 0 : -1, errors, ms: Date.now() - t0, rankedBy, needsSearchKey: false,
+  });
+  if (!found.length) return result([]);
+
+  // download + check + de-duplicate (same picture in two sizes → keep the bigger one)
+  const seenUrl = new Set<string>();
+  const uniq = found.filter((c) => !LOGO.test(c.url.split('?')[0]) && !seenUrl.has(c.url) && seenUrl.add(c.url)).slice(0, 40);
+  const got = await Promise.allSettled(uniq.map(async (c) => {
+    const f = await safeFetch(c.url, MAX_IMAGE, 'image/*');
+    const info = await inspect(f.body);
+    if (!info) throw new Error('not an image');
+    if (Math.min(info.width, info.height) < MIN_SIDE) throw new Error('too small');
+    if (Math.max(info.width, info.height) / Math.min(info.width, info.height) > MAX_ASPECT) throw new Error('banner shape');
+    return { c, f, info };
+  }));
+  mark(`download ${uniq.length}`);
+  const ok: { c: Candidate; f: Fetched; info: Inspected }[] = [];
+  for (const g of got) {
+    if (g.status !== 'fulfilled') continue;
+    const dup = ok.findIndex((o) => hamming(o.info.hash, g.value.info.hash) <= 5);
+    if (dup < 0) ok.push(g.value);
+    else if (g.value.info.width * g.value.info.height > ok[dup].info.width * ok[dup].info.height) ok[dup] = g.value;
+  }
+  const usable = ok.slice(0, MAX_CANDIDATES);
+  if (!usable.length) {
+    errors.push('No usable images (too small, banners, blocked or not images)');
+    return result([]);
+  }
+
+  const ranked = await rank(ident, usable.map((g) => g.info.thumb));
+  if (ranked.error) errors.push(`AI: ${ranked.error}`);
+  mark(`rank ${ranked.by || 'failed'}`);
+
+  // Icecat (looked up by EAN / exact part number) and the brand's own site: the product is right even when the AI
+  // can't read the model on the photo
+  const brandKey = ident.brand ? norm(ident.brand) : '';
+  let candidates: PhotoCandidate[] = usable.map((g, i) => {
+    const r = ranked.items.find((x) => x.index === i);
+    const official = g.c.source === 'icecat' || (brandKey.length >= 3 && [g.c.page || null, g.f.url].some((u) => norm(host(u)).includes(brandKey)));
+    let match = r?.match ?? null;
+    if (official && match !== null && match >= 60 && r?.kind !== 'logo') match = Math.max(match, 95);
+    return {
+      url: g.f.url, preview: g.c.preview || g.f.url, page: g.c.page || null, source: g.c.source,
+      width: g.info.width, height: g.info.height, bytes: g.f.body.length,
+      match, quality: r?.quality ?? null, kind: r?.kind ?? null, reason: r?.reason ?? null, best: false, gallery: false, official,
+    };
+  });
+  const sc = new Map(candidates.map((c, i) => [c, score({ ...c, whiteBg: usable[i].info.whiteBg })]));
+  // rated: hide clear misses (wrong product, logos) unless nothing would be left
+  if (ranked.items.length) {
+    const keep = candidates.filter((c) => (c.match ?? 0) >= 40 && c.kind !== 'logo');
+    if (keep.length) candidates = keep;
+  }
+  candidates.sort((a, b) => sc.get(b)! - sc.get(a)!);
+  const main = candidates.find((c) => (c.match ?? 0) >= 85 && c.kind === 'product' && (c.quality ?? 0) >= 50);
+  if (main) {
+    main.best = true;
+    candidates = [main, ...candidates.filter((c) => c !== main)];
+    candidates.filter((c) => !c.best && (c.match ?? 0) >= 85 && (c.kind === 'product' || c.kind === 'lifestyle') && (c.quality ?? 0) >= 55)
+      .slice(0, 5).forEach((c) => { c.gallery = true; });
+  }
+  log.log(`product ${p.id} «${q}»: ${found.length} found, ${usable.length} usable, main=${main ? 'yes' : 'no'}, by=${ranked.by || '-'} | ${lap.join(', ')}`);
+  return result(candidates, ranked.by || null);
+}
+
+/** Downloads + cleans one photo, returns its /api/media path. */
+async function storePhoto(id: number, url: string): Promise<string> {
+  let f: Fetched;
+  try { f = await safeFetch(url, MAX_IMAGE, 'image/*', 20000); } catch (e) {
+    if (e instanceof HttpException) throw e;
+    throw new BadRequestException(`Download failed: ${(e as Error).message}`);
+  }
+  let out: { body: Buffer; ext: string };
+  try { out = await cleanPhoto(f.body); } catch {
+    const info = sniffImage(f.body); // sharp could not read it: keep the original if it is a plain image
+    if (!info) throw new BadRequestException('Not a JPEG/PNG/WebP/GIF image');
+    out = { body: f.body, ext: info.ext };
+  }
+  const name = `${createHash('sha1').update(out.body).digest('hex').slice(0, 16)}.${out.ext}`;
+  const dir = join(MEDIA_DIR, 'products', String(id));
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, name), out.body);
+  log.log(`product ${id}: saved ${name} (${Math.round(out.body.length / 1024)} KB) from ${f.url}`);
+  return `${MEDIA_URL}/products/${id}/${name}`;
+}
+
+/**
+ * Downloads, cleans and adds photos to a product. main = the first one becomes the main photo (the others follow it);
+ * false = all go to the end. Returns the new image list and the added paths.
+ */
+export async function addPhotos(ds: DataSource, id: number, rawUrls: string[], main = true): Promise<{ images: string[]; added: string[] }> {
+  const repo = ds.getRepository(Product);
+  const p = await repo.findOneBy({ id });
+  if (!p) throw new NotFoundException();
+  const urls = [...new Set(rawUrls.map((u) => String(u || '').trim()).filter(Boolean))];
+  if (!urls.length) throw new BadRequestException('No URL');
+  if ((p.images || []).length + urls.length > MAX_IMAGES_PER_PRODUCT) throw new BadRequestException(`Max ${MAX_IMAGES_PER_PRODUCT} photos`);
+  const paths: string[] = [];
+  for (const u of urls) paths.push(await storePhoto(id, u)); // one by one: small server, big images
+  const fresh = await repo.findOneBy({ id }); // the list may have changed while downloading
+  const added = [...new Set(paths)];
+  const rest = (fresh?.images || []).filter((x) => !added.includes(x));
+  const images = main ? [added[0], ...rest, ...added.slice(1)] : [...rest, ...added];
+  await repo.update({ id }, { images });
+  return { images, added };
+}
+
+/** Deletes saved photo files of a product (only our own hashed file names). */
+export async function removePhotoFiles(id: number, paths: string[]) {
+  const prefix = `${MEDIA_URL}/products/${id}/`;
+  for (const x of paths) {
+    const name = x.startsWith(prefix) ? x.slice(prefix.length) : '';
+    if (/^[a-f0-9]{16}\.(jpg|png|webp|gif)$/.test(name)) await unlink(join(MEDIA_DIR, 'products', String(id), name)).catch(() => undefined);
+  }
+}
+
+// ------------------------------------------------------------------ controller (product card)
 
 @Controller('admin/products/:id')
 @UseGuards(JwtGuard)
 export class PhotosController {
-  private log = new Logger('Photos');
   private busy = new Set<number>();
   constructor(@InjectDataSource() private ds: DataSource) {}
 
@@ -603,138 +757,13 @@ export class PhotosController {
     const p = await this.product(id);
     if (this.busy.has(id)) throw new HttpException('Search for this product is already running', 409);
     this.busy.add(id);
-    const t0 = Date.now(), lap: string[] = [];
-    const mark = (s: string) => lap.push(`${s} ${((Date.now() - t0) / 1000).toFixed(1)}s`);
-    try {
-      const ident = identify(p);
-      const q = searchQuery(ident);
-      const manual = String(body?.url || '').trim();
-      const errors: string[] = [];
-      const collect = async (sources: Promise<Candidate[]>[]) => {
-        const lists = await Promise.allSettled(sources);
-        lists.forEach((l) => { if (l.status === 'rejected') errors.push(String((l.reason as Error)?.message || l.reason)); });
-        return lists.flatMap((l) => (l.status === 'fulfilled' ? l.value : []));
-      };
-
-      let found: Candidate[];
-      if (manual) {
-        found = await collect([fromUrl(manual, ident.codes, 15000)]);
-        if (!found.length) throw new BadRequestException(errors[0] || 'Nothing found at that link');
-      } else {
-        found = await collect([icecat(ident)]);
-        mark(`icecat ${found.length}`);
-        if (found.length < ICECAT_ENOUGH) {
-          const searchApi = !!(process.env.GOOGLE_CSE_KEY || process.env.BRAVE_SEARCH_KEY || process.env.GEMINI_SEARCH === '1');
-          found = [...found, ...await collect(searchOpenAI() ? [openaiSearch(ident), googleCse(q), brave(q)]
-            : searchApi ? [googleCse(q), brave(q), geminiSearch(ident)] : [geminiGuess(ident)])];
-          mark(`web ${found.length}`);
-        }
-      }
-      const result = (candidates: PhotoCandidate[], extra: Record<string, unknown> = {}) => ({
-        query: q, ident: { brand: ident.brand, model: ident.model, code: ident.code, gtin: ident.gtin },
-        candidates, best: candidates[0]?.best ? 0 : -1, errors, ms: Date.now() - t0, needsSearchKey: false, ...extra,
-      });
-      if (!found.length) return result([]);
-
-      // download + check + de-duplicate (same picture in two sizes → keep the bigger one)
-      const seenUrl = new Set<string>();
-      const uniq = found.filter((c) => !LOGO.test(c.url.split('?')[0]) && !seenUrl.has(c.url) && seenUrl.add(c.url)).slice(0, 40);
-      const got = await Promise.allSettled(uniq.map(async (c) => {
-        const f = await safeFetch(c.url, MAX_IMAGE, 'image/*');
-        const info = await inspect(f.body);
-        if (!info) throw new Error('not an image');
-        if (Math.min(info.width, info.height) < MIN_SIDE) throw new Error('too small');
-        if (Math.max(info.width, info.height) / Math.min(info.width, info.height) > MAX_ASPECT) throw new Error('banner shape');
-        return { c, f, info };
-      }));
-      mark(`download ${uniq.length}`);
-      const ok: { c: Candidate; f: Fetched; info: Inspected }[] = [];
-      for (const g of got) {
-        if (g.status !== 'fulfilled') continue;
-        const dup = ok.findIndex((o) => hamming(o.info.hash, g.value.info.hash) <= 5);
-        if (dup < 0) ok.push(g.value);
-        else if (g.value.info.width * g.value.info.height > ok[dup].info.width * ok[dup].info.height) ok[dup] = g.value;
-      }
-      const usable = ok.slice(0, MAX_CANDIDATES);
-      if (!usable.length) return result([], { errors: [...errors, 'No usable images (too small, banners, blocked or not images)'] });
-
-      const ranked = await rank(ident, usable.map((g) => g.info.thumb));
-      if (ranked.error) errors.push(`AI: ${ranked.error}`);
-      mark(`rank ${ranked.by || 'failed'}`);
-
-      let candidates: PhotoCandidate[] = usable.map((g, i) => {
-        const r = ranked.items.find((x) => x.index === i);
-        return {
-          url: g.f.url, preview: g.c.preview || g.f.url, page: g.c.page || null, source: g.c.source,
-          width: g.info.width, height: g.info.height, bytes: g.f.body.length,
-          match: r?.match ?? null, quality: r?.quality ?? null, kind: r?.kind ?? null, reason: r?.reason ?? null, best: false, gallery: false,
-        };
-      });
-      // Icecat (looked up by EAN / exact part number) and the brand's own site: the product is right even when the AI
-      // can't read the model on the photo
-      const brandKey = ident.brand ? norm(ident.brand) : '';
-      const official = (c: PhotoCandidate) => c.source === 'icecat'
-        || (brandKey.length >= 3 && [c.page, c.url].some((u) => norm(host(u)).includes(brandKey)));
-      candidates.forEach((c) => { if (official(c) && c.match !== null && c.match >= 60 && c.kind !== 'logo') c.match = Math.max(c.match, 95); });
-      const sc = new Map(candidates.map((c, i) => [c, score({ ...c, whiteBg: usable[i].info.whiteBg })]));
-      // rated: hide clear misses (wrong product, logos) unless nothing would be left
-      if (ranked.items.length) {
-        const keep = candidates.filter((c) => (c.match ?? 0) >= 40 && c.kind !== 'logo');
-        if (keep.length) candidates = keep;
-      }
-      candidates.sort((a, b) => sc.get(b)! - sc.get(a)!);
-      const main = candidates.find((c) => (c.match ?? 0) >= 85 && c.kind === 'product' && (c.quality ?? 0) >= 50);
-      if (main) {
-        main.best = true;
-        candidates = [main, ...candidates.filter((c) => c !== main)];
-        candidates.filter((c) => !c.best && (c.match ?? 0) >= 85 && (c.kind === 'product' || c.kind === 'lifestyle') && (c.quality ?? 0) >= 55)
-          .slice(0, 5).forEach((c) => { c.gallery = true; });
-      }
-      this.log.log(`product ${id} «${q}»: ${found.length} found, ${usable.length} usable, main=${main ? 'yes' : 'no'}, by=${ranked.by || '-'} | ${lap.join(', ')}`);
-      return result(candidates, { rankedBy: ranked.by || null });
-    } finally {
-      this.busy.delete(id);
-    }
+    try { return await findPhotos(p, body?.url); } finally { this.busy.delete(id); }
   }
 
-  /** Downloads + cleans one photo, returns its /api/media path. */
-  private async store(id: number, url: string): Promise<string> {
-    let f: Fetched;
-    try { f = await safeFetch(url, MAX_IMAGE, 'image/*', 20000); } catch (e) {
-      if (e instanceof HttpException) throw e;
-      throw new BadRequestException(`Download failed: ${(e as Error).message}`);
-    }
-    let out: { body: Buffer; ext: string };
-    try { out = await cleanPhoto(f.body); } catch {
-      const info = sniffImage(f.body); // sharp could not read it: keep the original if it is a plain image
-      if (!info) throw new BadRequestException('Not a JPEG/PNG/WebP/GIF image');
-      out = { body: f.body, ext: info.ext };
-    }
-    const name = `${createHash('sha1').update(out.body).digest('hex').slice(0, 16)}.${out.ext}`;
-    const dir = join(MEDIA_DIR, 'products', String(id));
-    await mkdir(dir, { recursive: true });
-    await writeFile(join(dir, name), out.body);
-    this.log.log(`product ${id}: saved ${name} (${Math.round(out.body.length / 1024)} KB) from ${f.url}`);
-    return `${MEDIA_URL}/products/${id}/${name}`;
-  }
-
-  /**
-   * Adds photos. Body: { url } or { urls: [...] }, main?: true (default) = the first one becomes the main photo,
-   * the others follow it; false = all go to the end.
-   */
+  /** Adds photos. Body: { url } or { urls: [...] }, main?: true (default) = the first one becomes the main photo. */
   @Post('images')
   async add(@Param('id', ParseIntPipe) id: number, @Body() body: { url?: string; urls?: string[]; main?: boolean }) {
-    const p = await this.product(id);
-    const urls = [...new Set((Array.isArray(body?.urls) ? body.urls : [body?.url]).map((u) => String(u || '').trim()).filter(Boolean))];
-    if (!urls.length) throw new BadRequestException('No URL');
-    if ((p.images || []).length + urls.length > MAX_IMAGES_PER_PRODUCT) throw new BadRequestException(`Max ${MAX_IMAGES_PER_PRODUCT} photos`);
-    const paths: string[] = [];
-    for (const u of urls) paths.push(await this.store(id, u)); // one by one: small server, big images
-    const fresh = await this.product(id); // the list may have changed while downloading
-    const rest = (fresh.images || []).filter((x) => !paths.includes(x));
-    const added = [...new Set(paths)];
-    const images = body?.main === false ? [...rest, ...added] : [added[0], ...rest, ...added.slice(1)];
-    await this.ds.getRepository(Product).update({ id }, { images });
+    const { images } = await addPhotos(this.ds, id, Array.isArray(body?.urls) ? body.urls : [String(body?.url || '')], body?.main !== false);
     return { images };
   }
 
@@ -746,7 +775,7 @@ export class PhotosController {
     const next = Array.isArray(body?.images) ? [...new Set(body.images.map(String))] : null;
     if (!next || next.some((x) => !cur.includes(x))) throw new BadRequestException('images must be a subset of the current list');
     await this.ds.getRepository(Product).update({ id }, { images: next });
-    await this.removeFiles(id, cur.filter((x) => !next.includes(x)));
+    await removePhotoFiles(id, cur.filter((x) => !next.includes(x)));
     return { images: next };
   }
 
@@ -754,15 +783,7 @@ export class PhotosController {
   async clear(@Param('id', ParseIntPipe) id: number) {
     const p = await this.product(id);
     await this.ds.getRepository(Product).update({ id }, { images: [] });
-    await this.removeFiles(id, p.images || []);
+    await removePhotoFiles(id, p.images || []);
     return { images: [] };
-  }
-
-  private async removeFiles(id: number, paths: string[]) {
-    const prefix = `${MEDIA_URL}/products/${id}/`;
-    for (const x of paths) {
-      const name = x.startsWith(prefix) ? x.slice(prefix.length) : '';
-      if (/^[a-f0-9]{16}\.(jpg|png|webp|gif)$/.test(name)) await unlink(join(MEDIA_DIR, 'products', String(id), name)).catch(() => undefined);
-    }
   }
 }

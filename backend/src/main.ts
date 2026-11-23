@@ -23,6 +23,8 @@ import { SiteIconsController } from './site-icons';
 import { SiteCategoriesController, SiteCategoriesPublicController } from './site-categories';
 import { ProductSiteCategories1764500000000 } from './migrations/1764500000000-product-site-categories';
 import { ProductCategoriesController, ProductCategoriesService } from './product-categories';
+import { PhotoJobs1764600000000 } from './migrations/1764600000000-photo-jobs';
+import { PhotoBatchController, PhotoBatchService } from './photo-batch';
 
 for (const name of ['DATABASE_URL', 'JWT_SECRET', 'SYNC_API_KEY']) {
   if (!process.env[name]) throw new Error(`Missing env ${name}`);
@@ -39,15 +41,15 @@ class HealthController {
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: ENTITIES,
-      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000, ShopAccounts1764200000000, SiteCategories1764300000000, SiteIcons1764400000000, ProductSiteCategories1764500000000],
+      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000, ShopAccounts1764200000000, SiteCategories1764300000000, SiteIcons1764400000000, ProductSiteCategories1764500000000, PhotoJobs1764600000000],
       migrationsRun: true,
       synchronize: false,
     }),
     TypeOrmModule.forFeature([AdminUser]),
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '12h' } }),
   ],
-  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController, SiteCategoriesController, SiteCategoriesPublicController, SiteIconsController, ProductCategoriesController],
-  providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard, CustomerGuard, ProductCategoriesService],
+  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController, SiteCategoriesController, SiteCategoriesPublicController, SiteIconsController, ProductCategoriesController, PhotoBatchController],
+  providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard, CustomerGuard, ProductCategoriesService, PhotoBatchService],
 })
 class AppModule {}
 
