@@ -453,3 +453,13 @@ stock and prices from the Access sync. Until then the templates are design refer
   what the AI is sent (names, brands, Access category names; never prices/customers), that it may answer only with a listed category,
   the admin tags (вручную / правило / AI 95%), and limits (300 per run, 40 per request). PROJECT_PLAN data-ownership table: site
   catalog + placement owned by the website. New rule above on AI placement.
+- 2026-11-23 — **AI photos reworked** (`backend/src/photos.ts`, `admin/src/photos.tsx`, README "AI product photos"). Brand/model/codes read
+  from the product name (`identify()`, `BRANDS` list — the Access brand column is empty; add new brands there). **Open Icecat** first
+  (official high-res photos, free for TP-Link, Gigabyte, ASUS, Lenovo, Lanberg…; ~0.1 s); web search (2 OpenAI searches in parallel)
+  only if Icecat gives < 3. sharp (new backend dependency) checks size ≥ 300 px, banner shape, logo URLs, drops the same picture in two
+  sizes, sends 512 px thumbnails to the AI. **Photos are rated by OpenAI first** (`AI_RANK`, ~4 s; the free Gemini key had run out of
+  daily quota and took 30–50 s), Gemini as fallback; rating = match / quality / kind (product, box, infographic, lifestyle, logo).
+  Server picks the main photo (match + quality + resolution + white background); Icecat and brand-site photos count as exact matches.
+  Admin: select several photos (★ = main, numbers = gallery order), "+ gallery photos" button. **Saved photos are cleaned**: white
+  border trimmed, product centred on a white square, max 1200 px, WebP. Test on 8 products: 5–42 s per search (was 50–150 s, 2 of 8
+  failed with "Gemini busy"); hard cases: Intel tray CPUs (only logos found — paste a link). DB backup `/root/led-db-backup-20261123-1648-pre-photos2.dump`. Deployed.
