@@ -126,6 +126,25 @@ Where a product goes, first wins:
    "AI на проверку" (✓ accept / ✕ reject). Runs by itself every 30 min for new or renamed products; a product is not asked
    again with the same name. Env: `AI_CATEGORIES=gemini|openai|off` (default: same AI as the photos, `AI_PROVIDER`),
    `AI_CATEGORIES_AUTO=0` turns the automatic run off. Gemini free plan: a run waits between requests and on 429.
+   Up to 300 products per automatic run, 40 per request. A later rule that finds an exact subcategory replaces an
+   automatic AI pick (status `replaced`); a manual choice replaces both.
+
+**Who decides.** Everything runs on the server by itself. Claude (the developer's assistant) only wrote the starting rules
+once, from the real product names (`category-rules-seed.ts`, copied into `match_rules` by the migration, only where a
+category had no rules yet). From then on the rules belong to the staff and are edited in the admin. Claude takes no part at
+runtime. The AI is the server's own Gemini/OpenAI call (`ask()` in `product-categories.ts`).
+
+**What the AI gets and may answer.** Per product: id, name, brand and the old Access category name, plus the list of
+allowed site categories (`id: path`). It never gets prices, cost, stock or customer data. It must answer with an id from that
+list; any other answer is stored as "no fit" (`none`). The prompt also has hints for laptops (gaming / office / home series)
+and ready-built PCs (line in the name). These hints use the category names "Игровые", "Офисные", "Для дома", so **update
+`ask()` if those categories are renamed**. The Gemini key is free tier, so Google may use what it is sent, which here is
+only product and category names.
+
+**Where to see who placed a product.** Every site-category chip in the admin (product card, products list, "Привязка
+товаров") has a tag: **вручную** (manual), **правило** (rule) or **AI 95%** (AI with its confidence). The storefront never
+calls the AI. `/api/shop/categories` (and the storefront product feed, when it is built) reads only the stored
+`product_site_categories`.
 
 Tables: `product_site_categories` (product, category, source manual|rule|ai, confidence), `product_ai_categories` (last AI
 answer per product: category, confidence, reason, status applied|pending|accepted|rejected|none|replaced). Manual changes,

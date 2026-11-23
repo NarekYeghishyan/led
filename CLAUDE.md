@@ -71,6 +71,9 @@ stock and prices from the Access sync. Until then the templates are design refer
 - Two category trees: **"Категории сайта"** (`site_categories`, edited in the admin) is the **only** catalog the site shows.
   **"Категории"** in the admin = Access `Типы` (`categories`, 362 rows, many legacy, synced, read-only): used only to find which
   products go into a site category, never shown on the site. Storefront code must read categories from `site_categories` only.
+- Product → site category placement runs on the server by itself: manual > name rules > AI (Gemini, in-stock products only,
+  ≥ 90 % applied). Never send prices/cost/customer data to the AI, only names/brands/category names. Storefront reads the stored
+  `product_site_categories`, never calls the AI. Renaming "Игровые"/"Офисные"/"Для дома" → update the hints in `ask()`.
 
 ## Log
 - 2026-11-20 — Claude desktop made home (`index.html`) and category (`category.html`) templates in
@@ -446,3 +449,7 @@ stock and prices from the Access sync. Until then the templates are design refer
   **The site tree has no "Сокет 1851"** (Core Ultra CPUs/boards stay in the group) — add it in the admin if wanted.
   After the first AI run on production: 1 115 of 1 149 in stock exact, 15 group only, 19 none (batteries, camera bags…), 10 AI
   suggestions to review. DB backup `/root/led-db-backup-20261123-0229-pre-product-categories.dump`, compose `led-compose-backup-20261123-0229.yml`. Deployed.
+- 2026-11-23 — Docs: README "Products → site categories" now says who decides (the server; Claude only wrote the starting rules once),
+  what the AI is sent (names, brands, Access category names; never prices/customers), that it may answer only with a listed category,
+  the admin tags (вручную / правило / AI 95%), and limits (300 per run, 40 per request). PROJECT_PLAN data-ownership table: site
+  catalog + placement owned by the website. New rule above on AI placement.

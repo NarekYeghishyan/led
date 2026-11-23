@@ -94,10 +94,17 @@ Tables include: Товары, Товары1, Типы (categories), Группы
 
 | Field | Owner | Updated by |
 |---|---|---|
-| code/SKU, name, price, stock, category | **Access** | Sync Agent only |
+| code/SKU, name, price, stock, Access category (`Типы`) | **Access** | Sync Agent only |
 | images, long description, SEO, `is_visible`, slug | **Website** | Admin panel only |
+| site catalog (`site_categories`) and where each product is shown (`product_site_categories`) | **Website** | Admin (manual, rules) + server AI |
 
 The sync **never** touches the fields the website owns.
+
+**Site categories (done 2026-11-23).** The storefront shows only the admin's "Категории сайта" tree. The Access category
+is only a hint for placing products, and it is often wrong. Placement order: manual (admin) > name rules per site category
+> AI (server-side Gemini/OpenAI, in-stock products without an exact subcategory only; ≥ 90 % applied and marked "AI",
+lower waits for review). Several categories per product are allowed. The starting rules were written once from the real
+names; the staff own them from then on. Details: README "Products → site categories".
 
 ## 4. PostgreSQL schema (initial)
 
