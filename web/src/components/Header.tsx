@@ -71,7 +71,7 @@ export function Header({ lang, cats, extras }: { lang: Lang; cats: CatNode[]; ex
   };
 
   const sec = cats[cur] ?? cats[0];
-  const secPath = (s: CatNode) => href(lang, `/catalog/${s.s}`);
+  const secPath = (s: CatNode) => href(lang, `/${s.s}`);
   const ex = sec ? extras[sec.s] : undefined;
   const promo = sec ? pick(sec.p ?? sec.n, lang) : '';
 
@@ -122,7 +122,7 @@ export function Header({ lang, cats, extras }: { lang: Lang; cats: CatNode[]; ex
               </div>
               <div className="mega-g" id="megaGrid" key={sec.s}>
                 {(sec.c ?? []).map((g, k) => (
-                  <a key={g.s} href={href(lang, `/catalog/${sec.s}/${g.s}`)} style={{ animationDelay: `${k * 25}ms` }}><i />{pick(g.n, lang)}</a>
+                  <a key={g.s} href={href(lang, `/${sec.s}/${g.s}`)} style={{ animationDelay: `${k * 25}ms` }}><i />{pick(g.n, lang)}</a>
                 ))}
               </div>
               <div className="mega-x">
@@ -130,7 +130,7 @@ export function Header({ lang, cats, extras }: { lang: Lang; cats: CatNode[]; ex
                   <small id="megaHotT">{t(lang, 'popular')}</small>
                   <div id="megaHot">
                     {(ex?.hot ?? []).map((p, k) => (
-                      <a key={p.code} className="mh" href={href(lang, `/p/${p.slug}`)} style={{ animationDelay: `${k * 50}ms` }}>
+                      <a key={p.code} className="mh" href={href(lang, `/product/${p.slug}`)} style={{ animationDelay: `${k * 50}ms` }}>
                         <div className="im">{p.image ? <img src={p.image} alt="" loading="lazy" /> : <Icon name={sec.i || 'pc'} />}</div>
                         <span>{p.name}</span><b>{money(p.price)}</b>
                       </a>
@@ -141,7 +141,7 @@ export function Header({ lang, cats, extras }: { lang: Lang; cats: CatNode[]; ex
                   <small id="megaBrT">{t(lang, 'brands')}</small>
                   <div id="megaBr">
                     {(ex?.brands ?? []).map((b) => (
-                      <a key={b} href={`${href(lang, `/catalog/${sec.s}`)}?brand=${encodeURIComponent(b)}`} title={b} className="mbr">{b}</a>
+                      <a key={b} href={`${href(lang, `/${sec.s}`)}?brand=${encodeURIComponent(b)}`} title={b} className="mbr">{b}</a>
                     ))}
                   </div>
                 </div>

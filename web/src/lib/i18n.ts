@@ -65,11 +65,45 @@ const T = {
   notFound: ['Էջը չի գտնվել', 'Страница не найдена', 'Page not found'],
   notFoundText: ['Հնարավոր է՝ հղումը հնացել է։ Փորձեք կատալոգից։', 'Возможно, ссылка устарела. Попробуйте найти в каталоге.',
     'The link may be out of date. Try the catalog.'],
+  categories: ['Բաժիններ', 'Категории', 'Categories'],
+  filters: ['Ֆիլտրեր', 'Фильтры', 'Filters'],
+  reset: ['Մաքրել', 'Сбросить', 'Reset'],
+  price: ['Գին, ֏', 'Цена, ֏', 'Price, ֏'],
+  priceFrom: ['սկսած', 'от', 'from'],
+  priceTo: ['մինչև', 'до', 'to'],
+  apply: ['Կիրառել', 'Применить', 'Apply'],
+  brand: ['Բրենդ', 'Бренд', 'Brand'],
+  sortBy: ['Դասավորել՝', 'Сортировка:', 'Sort:'],
+  sortDefault: ['Առաջարկվող', 'Рекомендуемые', 'Recommended'],
+  sortCheap: ['Նախ՝ էժան', 'Сначала дешевле', 'Price: low to high'],
+  sortExpensive: ['Նախ՝ թանկ', 'Сначала дороже', 'Price: high to low'],
+  sortNew: ['Նորույթներ', 'Новинки', 'Newest'],
+  sortName: ['Ըստ անվանման', 'По названию', 'By name'],
+  show: ['Ցույց տալ', 'Показать', 'Show'],
+  compareBtn: ['Համեմատել', 'Сравнить', 'Compare'],
+  details: ['Մանրամասն', 'Подробнее', 'Details'],
+  inStockLong: ['Առկա է', 'В наличии', 'In stock'],
+  lastN: ['Մնացել է {n} հատ', 'Осталось {n} шт.', 'Only {n} left'],
+  empty: ['Այս ֆիլտրերով ապրանքներ չկան', 'По этим фильтрам товаров нет', 'No products match these filters'],
+  emptyCat: ['Այս բաժնում դեռ առկա ապրանքներ չկան', 'В этом разделе пока нет товаров в наличии', 'No products in stock in this category yet'],
+  addedCart: ['Ավելացվեց զամբյուղ', 'Добавлено в корзину', 'Added to cart'],
+  go: ['Անցնել', 'Перейти', 'View'],
+  favOn: ['Ավելացվեց ընտրյալներում', 'Добавлено в избранное', 'Saved to wishlist'],
+  favOff: ['Հեռացվեց ընտրյալներից', 'Убрано из избранного', 'Removed from wishlist'],
+  cmpOn: ['Ավելացվեց համեմատման', 'Добавлено к сравнению', 'Added to compare'],
+  cmpOff: ['Հեռացվեց համեմատումից', 'Убрано из сравнения', 'Removed from compare'],
+  inCompare: ['Համեմատման մեջ՝', 'В сравнении:', 'In compare:'],
+  pageN: ['էջ {n}', 'страница {n}', 'page {n}'],
+  buyIn: ['գնել Երևանում', 'купить в Ереване', 'buy in Yerevan'],
+  catDesc: ['{name} LED Computers-ում՝ {n} ապրանք առկա է։ Պաշտոնական երաշխիք, առաքում ամբողջ Հայաստանում, ապառիկ։',
+    '{name} в LED Computers: {n} товаров в наличии. Официальная гарантия, доставка по Армении, рассрочка.',
+    '{name} at LED Computers: {n} products in stock. Official warranty, delivery across Armenia, instalments.'],
 } satisfies Record<string, [string, string, string]>;
 
 export type TKey = keyof typeof T;
 const IDX: Record<Lang, number> = { hy: 0, ru: 1, en: 2 };
-export const t = (lang: Lang, key: TKey) => T[key][IDX[lang]];
+export const t = (lang: Lang, key: TKey, vars?: Record<string, string | number>) =>
+  vars ? T[key][IDX[lang]].replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? '')) : T[key][IDX[lang]];
 
 /** Pages that are still static templates (Design/site) — they read the language from localStorage `led-lang`. */
 export const STATIC = {

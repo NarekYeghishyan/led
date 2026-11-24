@@ -1,3 +1,4 @@
+import { revalidateSite } from './revalidate';
 import { BadRequestException, Body, Controller, Get, Injectable, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, In } from 'typeorm';
@@ -97,6 +98,7 @@ export class SyncService {
     });
     const res = await this.apply(Product, 'products', batch, rows, PRODUCT_COLUMNS, now, PRODUCT_TRACKED);
     this.siteCats.scheduleRules(30_000); // new/renamed products → site categories (product-categories.ts)
+    if (res.upserted || res.deleted) revalidateSite(['products', 'categories']); // price / stock / new product on the site now
     return res;
   }
 
@@ -162,6 +164,7 @@ export class SyncService {
    * initial upload does not fill the log with thousands of "added" entries.
    */
   async mirror(table: string, b: MirrorBatch) {
+    if (table === 'Курсы' && (b?.upserts?.length || b?.deletes?.length)) revalidateSite(['products']); // new rate → ֏ prices
     this.check(b);
     if (!table || table.length > 128) throw new BadRequestException('table name');
     const now = new Date();

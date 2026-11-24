@@ -24,7 +24,7 @@ export default async function CatalogPage({ params }: P) {
       <div className="sh"><h2 style={{ fontSize: 28 }}>{t(lang, 'catalog')}</h2></div>
       <div className="cgrid cat-sections">
         {cats.map((c) => (
-          <a key={c.s} className="c" href={href(lang, `/catalog/${c.s}`)}>
+          <a key={c.s} className="c" href={href(lang, `/${c.s}`)}>
             <div className="ic"><Icon name={c.i || 'pc'} /></div>
             <b>{pick(c.n, lang)}</b>
             <span>{c.k ? `${c.k} ${t(lang, 'products')}` : '\u00a0'}</span>
@@ -34,10 +34,10 @@ export default async function CatalogPage({ params }: P) {
       <div className="cat-groups">
         {cats.map((c) => (
           <section key={c.s}>
-            <h3><a href={href(lang, `/catalog/${c.s}`)}>{pick(c.n, lang)}</a></h3>
+            <h3><a href={href(lang, `/${c.s}`)}>{pick(c.n, lang)}</a></h3>
             <ul>
               {(c.c ?? []).map((g) => (
-                <li key={g.s}><a href={href(lang, `/catalog/${c.s}/${g.s}`)}>{pick(g.n, lang)}</a>{g.k ? <small>{g.k}</small> : null}</li>
+                <li key={g.s}><a href={href(lang, `/${c.s}/${g.s}`)}>{pick(g.n, lang)}</a>{g.k ? <small>{g.k}</small> : null}</li>
               ))}
             </ul>
           </section>

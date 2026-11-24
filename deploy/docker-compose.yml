@@ -52,6 +52,9 @@ services:
       # AI that sorts in-stock products into site categories: gemini | openai | off (unset = AI_PROVIDER); AUTO=0 = only by button
       AI_CATEGORIES: ${AI_CATEGORIES:-}
       AI_CATEGORIES_AUTO: ${AI_CATEGORIES_AUTO:-}
+      # storefront refresh after a sync / catalog change (backend/src/revalidate.ts → web /internal/revalidate)
+      WEB_ORIGIN: http://web:3000
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
     volumes:
       - media:/data/media   # product photos, served at /api/media/
     ports:
@@ -71,6 +74,7 @@ services:
     environment:
       API_ORIGIN: http://api:3000
       SITE_URL: https://led.creativeweb.am
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:-}
     ports:
       - "127.0.0.1:5200:3000"
 

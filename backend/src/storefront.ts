@@ -1,6 +1,6 @@
 /**
  * Public product catalog for the storefront (Next.js `web/`): /api/shop/products, /api/shop/products/by-ids,
- * /api/shop/products/:slug. Plan: docs/PROJECT_PLAN.md section 11.
+ * /api/shop/products/:slug, and /api/shop/resolve (301 target for old / renamed URLs). Plan: docs/PROJECT_PLAN.md section 11.
  *
  * Rules:
  * - Only fields in PUBLIC_COLS leave this file. Never `raw`, cost/margin or dealer prices (they live in raw / mirror_rows).
@@ -68,7 +68,7 @@ type Sort = (typeof SORTS)[number];
 
 type Row = { id: number; code: number; name: string; price: number; quantity: number; hasImg: boolean };
 
-@Controller('shop/products')
+@Controller('shop')
 export class StorefrontController {
   private tree: Tree | null = null;
   private rates: Rates | null = null;
@@ -165,7 +165,7 @@ export class StorefrontController {
    * → { items, total, page, pages, limit, facets: { brands, price }, category: { path, children } | null }
    * Facets ignore their own filter (brand counts ignore the brand filter, the price range ignores min/max).
    */
-  @Get()
+  @Get('products')
   @Header('Cache-Control', 'public, max-age=30')
   async list(@Query() qs: Record<string, string>) {
     const t = await this.getTree();
@@ -275,7 +275,7 @@ export class StorefrontController {
   // ---------------------------------------------------------------- cart / favourites re-check
 
   /** GET /api/shop/products/by-ids?codes=17053,15221 (Access codes, max 100) → current card data; sold-out/hidden ones listed in `gone`. */
-  @Get('by-ids')
+  @Get('products/by-ids')
   @Header('Cache-Control', 'no-store')
   async byIds(@Query('codes') codes: string) {
     const list = [...new Set(String(codes || '').split(',').map((s) => parseInt(s, 10)).filter((n) => n > 0))].slice(0, 100);
@@ -287,6 +287,65 @@ export class StorefrontController {
     return { items, gone: list.filter((c) => !found.has(c)) };
   }
 
+  // ---------------------------------------------------------------- old / renamed URLs
+
+  /**
+   * GET /api/shop/resolve?path=/ru/products/category/genius-hs-04s_6801.html → { to: '/ru/product/…-6801' } or 404.
+   * The storefront asks this for every URL it doesn't know and answers with a 301, so pages Google indexed on the old
+   * led.am (languages /am, /ru, /en) and category URLs renamed in the admin keep their place. Order:
+   *  1. url_redirects (renamed/moved/deleted site categories, old led.am categories)
+   *  2. old product URL "…_<Access code>" → product page; not on sale → its site category; unknown → /catalog
+   *  3. old info pages (about, contacts, help, cart…) → the new ones
+   */
+  @Get('resolve')
+  @Header('Cache-Control', 'public, max-age=300')
+  async resolve(@Query('path') raw: string) {
+    const [pathPart, query = ''] = String(raw || '').split('?');
+    let p = pathPart;
+    try { p = decodeURIComponent(p); } catch { /* keep as is */ }
+    p = p.toLowerCase().replace(/\/+$/, '').replace(/\.(html?|php)$/, '');
+    const m = /^\/(am|hy|ru|en)(?=\/|$)/.exec(p);
+    const lang = m && (m[1] === 'ru' || m[1] === 'en') ? m[1] : 'hy';
+    const rest = (m ? p.slice(m[0].length) : p) || '/';
+    const pre = lang === 'hy' ? '' : `/${lang}`;
+    const app = (to: string) => ({ to: `${pre}${to === '/' ? '' : to}` || '/' });
+    const page = (to: string) => ({ to: lang === 'hy' ? to : `${to}${to.includes('?') ? '&' : '?'}lang=${lang}` }); // static templates
+
+    const [r] = await this.ds.query(`SELECT to_path FROM url_redirects WHERE from_path = $1`, [rest]);
+    if (r) {
+      await this.ds.query(`UPDATE url_redirects SET hits = hits + 1, last_hit_at = now() WHERE from_path = $1`, [rest]);
+      return app(r.to_path);
+    }
+    const prod = /^\/products\/(?:category|item|product)\/.*_(\d{1,7})$/.exec(rest);
+    if (prod) {
+      const code = Number(prod[1]);
+      const [cids, rates] = await this.rateParams();
+      const [x] = await this.ds.query(
+        `SELECT p.id, p.external_id AS code, p.name, p.slug AS "customSlug", (${VISIBLE} AND ${StorefrontController.PRICE} > 0) AS shown
+         FROM products p WHERE p.external_id = $3 AND p.deleted_at IS NULL`, [cids, rates, code]);
+      if (x?.shown) return app(`/product/${slugOf(x)}`);
+      if (x) {
+        const placed = await this.ds.query(`SELECT site_category_id, source FROM product_site_categories WHERE product_id = $1`, [x.id]);
+        const best = this.bestPath(await this.getTree(), placed);
+        if (best) return app('/' + best.map((c) => c.slug).join('/'));
+      }
+      return app('/catalog');
+    }
+    if (rest.startsWith('/products/category/')) return app('/catalog'); // old category without a mapping
+    const term = /(?:^|&)term=([^&]*)/.exec(query)?.[1];
+    if (rest === '/search') return page(term ? `/search.html?q=${term}` : '/search.html');
+    const OLD: Record<string, string> = {
+      '/': '/', '/home': '/', '/index': '/', '/about': '/about.html', '/jobs': '/about.html', '/comments': '/about.html',
+      '/contacts': '/contacts.html', '/credit_sale': '/credit.html', '/assembly': '/assembly.html', '/products/cart': '/cart.html',
+      '/products/compare': '/compare.html', '/users/registration': '/registration.html', '/users/login': '/login.html',
+      '/users/forgot': '/forgot-password.html', '/users/profile': '/account.html', '/help_up_menu/change': '/exchange.html',
+      '/help_up_menu/delivery': '/delivery.html', '/help_up_menu/how_order': '/how-to-buy.html',
+      '/help_up_menu/how_order_2': '/how-to-order.html', '/help_up_menu/how_pay': '/how-to-pay.html', '/help_up_menu/warranty': '/warranty.html',
+    };
+    if (OLD[rest]) return OLD[rest] === '/' ? { to: pre || '/' } : page(OLD[rest]);
+    throw new NotFoundException('No redirect');
+  }
+
   // ---------------------------------------------------------------- product page
 
   /**
@@ -294,7 +353,7 @@ export class StorefrontController {
    * the site 301s when the requested one differs. Includes breadcrumb (deepest site category, manual > rule > AI) and
    * similar products (same category, in stock, nearest price).
    */
-  @Get(':slug')
+  @Get('products/:slug')
   @Header('Cache-Control', 'public, max-age=30')
   async one(@Param('slug') slug: string) {
     const m = /(?:^|-)(\d{1,9})$/.exec(String(slug || ''));

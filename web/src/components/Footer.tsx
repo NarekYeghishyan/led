@@ -24,7 +24,7 @@ export function Footer({ lang, cats }: { lang: Lang; cats: CatNode[] }) {
             <div className="soc"><span>f</span><span>ig</span><span>tg</span><span>wa</span><span>vb</span></div>
           </div>
           <div><h5>{t(lang, 'catalog')}</h5><ul>
-            {cats.map((c) => <li key={c.s}><a href={href(lang, `/catalog/${c.s}`)} style={{ color: 'inherit', textDecoration: 'none' }}>{pick(c.n, lang)}</a></li>)}
+            {cats.map((c) => <li key={c.s}><a href={href(lang, `/${c.s}`)} style={{ color: 'inherit', textDecoration: 'none' }}>{pick(c.n, lang)}</a></li>)}
           </ul></div>
           <div><h5>{t(lang, 'customers')}</h5><ul>
             {help.map(([k, to]) => <li key={k}><a href={to} style={{ color: 'inherit', textDecoration: 'none' }}>{t(lang, k)}</a></li>)}

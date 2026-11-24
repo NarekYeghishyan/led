@@ -53,3 +53,11 @@ export async function getMegaExtras(sections: CatNode[]) {
   }));
   return out;
 }
+
+/** Where an unknown / old URL should 301 to (old led.am pages, renamed categories), or null. Path may include ?query. */
+export async function resolvePath(path: string): Promise<string | null> {
+  const res = await fetch(`${API}/api/shop/resolve?path=${encodeURIComponent(path)}`, { next: { revalidate: 300, tags: ['categories'] } });
+  if (!res.ok) return null;
+  const j = (await res.json()) as { to?: string };
+  return j.to && j.to.startsWith('/') && !j.to.startsWith('//') ? j.to : null;
+}

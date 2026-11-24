@@ -24,6 +24,7 @@ import { SiteCategoriesController, SiteCategoriesPublicController } from './site
 import { ProductSiteCategories1764500000000 } from './migrations/1764500000000-product-site-categories';
 import { ProductCategoriesController, ProductCategoriesService } from './product-categories';
 import { PhotoJobs1764600000000 } from './migrations/1764600000000-photo-jobs';
+import { UrlRedirects1764700000000 } from './migrations/1764700000000-url-redirects';
 import { PhotoBatchController, PhotoBatchService } from './photo-batch';
 import { StorefrontController } from './storefront';
 
@@ -42,7 +43,7 @@ class HealthController {
       type: 'postgres',
       url: process.env.DATABASE_URL,
       entities: ENTITIES,
-      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000, ShopAccounts1764200000000, SiteCategories1764300000000, SiteIcons1764400000000, ProductSiteCategories1764500000000, PhotoJobs1764600000000],
+      migrations: [Init1763380000000, ChangeLog1763900000000, Mirror1764000000000, Customers1764100000000, ShopAccounts1764200000000, SiteCategories1764300000000, SiteIcons1764400000000, ProductSiteCategories1764500000000, PhotoJobs1764600000000, UrlRedirects1764700000000],
       migrationsRun: true,
       synchronize: false,
     }),

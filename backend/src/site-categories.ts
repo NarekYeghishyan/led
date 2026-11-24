@@ -11,6 +11,8 @@ import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
 import { cleanRules } from './category-rules';
 import { ProductCategoriesService } from './product-categories';
+import { categoryPaths, recordPathChanges, RESERVED_ROOT } from './url-redirects';
+import { revalidateSite } from './revalidate';
 
 const MAX_DEPTH = 3; // section → group → item (the site's catalog popup shows exactly these levels)
 const TEXT = ['name_ru', 'name_hy', 'name_en', 'icon', 'promo_ru', 'promo_hy', 'promo_en', 'slug'] as const;
@@ -63,6 +65,8 @@ export class SiteCategoriesController {
       [parentId, s, slug, v.name_ru ?? '', v.name_hy ?? '', v.name_en ?? '', v.icon ?? null, v.promo_ru ?? null, v.promo_hy ?? null,
         v.promo_en ?? null, v.is_visible ?? true, v.access_category_ids ?? [], JSON.stringify(v.match_rules ?? [])]);
     await this.log('created', row.id, String(v.name_ru || v.name_en || ''), {}, req);
+    await this.ds.query(`DELETE FROM url_redirects WHERE from_path = ANY($1::text[])`, [[...(await categoryPaths(this.ds)).paths.values()]]);
+    revalidateSite(['categories']);
     this.products.scheduleRules();
     return this.one(row.id);
   }
@@ -91,13 +95,17 @@ export class SiteCategoriesController {
       sets.push(`${k} = $${args.length}`);
     }
     if (!sets.length) return this.one(id);
+    const pathsBefore = 'slug' in changes || 'parent_id' in changes ? await categoryPaths(this.ds) : null;
     if ('parent_id' in changes) { // moved: goes to the end of its new parent
       const [{ s }] = await this.ds.query(
         `SELECT COALESCE(MAX(sort), 0) + 10 AS s FROM site_categories WHERE parent_id IS NOT DISTINCT FROM $1`, [v.parent_id]);
       args.push(s); sets.push(`sort = $${args.length}`);
     }
     await this.ds.query(`UPDATE site_categories SET ${sets.join(', ')}, updated_at = now() WHERE id = $1`, args);
+    // the category's URL (and its children's) changed: old URLs 301 to the new ones (url_redirects)
+    if (pathsBefore) await recordPathChanges(this.ds, pathsBefore, `category ${id} ${'slug' in changes ? 'renamed' : 'moved'}`);
     await this.log('updated', id, cur.name_ru || cur.name_en, changes, req);
+    revalidateSite(['categories', 'products']);
     if ('match_rules' in changes || 'access_category_ids' in changes || 'parent_id' in changes) this.products.scheduleRules();
     return this.one(id);
   }
@@ -116,6 +124,7 @@ export class SiteCategoriesController {
     await this.ds.transaction(async (m) => {
       for (const [k, s] of sib.entries()) await m.query(`UPDATE site_categories SET sort = $2 WHERE id = $1`, [s.id, (k + 1) * 10]);
     });
+    revalidateSite(['categories']);
     return { ok: true };
   }
 
@@ -127,7 +136,10 @@ export class SiteCategoriesController {
     const [{ n }] = await this.ds.query(`
       WITH RECURSIVE t AS (SELECT id FROM site_categories WHERE id = $1 UNION ALL SELECT c.id FROM site_categories c JOIN t ON c.parent_id = t.id)
       SELECT COUNT(*)::int AS n FROM t`, [id]);
+    const pathsBefore = await categoryPaths(this.ds);
     await this.ds.query(`DELETE FROM site_categories WHERE id = $1`, [id]);
+    await recordPathChanges(this.ds, pathsBefore, `category ${id} deleted`); // its URLs 301 to the parent
+    revalidateSite(['categories', 'products']);
     await this.log('deleted', id, cur.name_ru || cur.name_en, { removed: [n, null] }, req);
     this.products.scheduleRules();
     return { ok: true, removed: n };
@@ -187,6 +199,7 @@ export class SiteCategoriesController {
     const b = slugify(base) || 'category';
     for (let i = 1; ; i++) {
       const s = i === 1 ? b : `${b}-${i}`;
+      if (parentId === null && RESERVED_ROOT.has(s)) continue; // a section slug is a top-level URL: /laptops
       const [hit] = await this.ds.query(
         `SELECT 1 FROM site_categories WHERE parent_id IS NOT DISTINCT FROM $1 AND slug = $2 AND id IS DISTINCT FROM $3`, [parentId, s, selfId]);
       if (!hit) return s;
