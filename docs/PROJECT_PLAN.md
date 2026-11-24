@@ -261,7 +261,7 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 | Out of stock | **For now the site uses in-stock products only** (owner, 2026-11-25): catalog, search, product pages, cart re-check. An out-of-stock product has no page (404) and the cart marks it gone. Discontinued, deleted, hidden or zero-price products are never shown. Which out-of-stock items become orderable later = open question 1 below. |
 | Stock per shop | Access has only one total (`ОстатокНВС`), no per-showroom stock → the site shows the total ("in stock" / "last N" for ≤ 3). |
 | Reviews | Block hidden until real reviews exist. |
-| URLs | `/` HY, `/ru/…`, `/en/…`; `/catalog/<section>/<group>/<sub>`; `/p/<slug>-<code>` (code = Access КодТовара, so a renamed product keeps working: wrong slug → 301 to the right one). 301 from old led.am URLs and the current `.html` test pages. |
+| URLs | `/` HY, `/ru/…`, `/en/…`; `/<section>/<group>/<sub>` (no prefix, reserved words blocked); `/product/<slug>-<code>` (code = Access КодТовара, so a renamed product keeps working: wrong slug → 301 to the right one). 301 from old led.am URLs and the current `.html` test pages. |
 
 **Steps.**
 
@@ -270,8 +270,8 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 | 1 ✅ | Product API (NestJS): `GET /api/shop/products` (site category, search, brand, price, stock, sort, pages, facet counts), `/api/shop/products/:slug`, `/api/shop/products/by-ids` (cart re-check). Fixed field allow-list — never cost/margin/`raw`. Prices in ֏, slugs, visibility rules | curl returns real products for a site category |
 | 2 | Specs and filters: `product_specs` (name parser → Icecat specs → AI from names only), brands normalised, filter set per site category (edited in "Категории сайта"), facet counts | Laptops filter by CPU/RAM/SSD/screen on real data |
 | 3 ✅ | Next.js base (done 2026-11-25, live at /catalog): `web/`, CSS/tokens from the templates, layout (top bar, header, catalog popup, top menu, footer), HY/RU/EN routing, API client, page cache + refresh trigger from NestJS after a sync, Docker image + GitHub Actions, nginx route | Empty layout live on the test domain |
-| 4 | Category page `/catalog/...`: tree, filters in the URL, sort, pages, server-rendered cards, breadcrumb, meta | Category pages show live products |
-| 5 | Product page `/p/...`: gallery, specs, description, stock, JSON-LD, similar, bought together, cart/♡/compare/1-click | Product pages live |
+| 4 ✅ | Category page `/<section>/<group>/<item>` (done 2026-11-25): tree, filters in the URL, sort, pages, server-rendered cards, breadcrumb, meta | Category pages show live products |
+| 5 | Product page `/product/...`: gallery, specs, description, stock, JSON-LD, similar, bought together, cart/♡/compare/1-click | Product pages live |
 | 6 | Shared shop state: cart/favourites/compare with real ids, price/stock re-check, favourites saved to the account, real search (full-text + trigram, RU/HY/EN synonyms) | Cart and search on real data |
 | 7 | Port the remaining pages: home (real New/Sale/Best sellers), search, brand, cart, checkout, account, login/registration/forgot, info pages, assembly. Then retire the static site | Whole site in Next.js |
 | 8 | Admin web fields: descriptions HY/RU/EN, SEO, specs, hide on site, sale/old price, home banners and blocks | Content editable without code |
@@ -290,3 +290,8 @@ Later: back-in-stock / price-drop alerts, real reviews with moderation, configur
    To decide: which old items are dropped, which stay orderable ("on order") when out of stock, and who decides later
    (automatic rule from the last sale/receipt in `Операции`/`Документы` — join still to be checked —, an admin flag, or both).
    **Until then:** the site uses in-stock products only (no page for out-of-stock ones).
+
+**Keeping the old led.am Google index (2026-11-25, owner's priority).** Old URLs: `/{am,ru,en}/products/category/<alias>.html` for
+categories and `/{lang}/products/category/<name>_<Access code>.html` for products (the suffix = Access КодТовара), plus `/{lang}/about.html`,
+`help_up_menu/*.html`, `users/*.html`. All 301 to the new pages (see CLAUDE.md log). Re-run `tools/old-led-urls/` (dump → mapping SQL)
+before go-live so new categories are included; check Search Console "Pages" after the switch.

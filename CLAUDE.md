@@ -33,7 +33,7 @@ The server rate-limits SSH: batch commands into one connection, wait ~30 s if it
 | `/top-picks/` | static, older concept page |
 | `/admin/` | container `led-admin` → 127.0.0.1:5000 |
 | `/api/` | container `led-api` → 127.0.0.1:5100 |
-| `/catalog`, `/ru/catalog`, `/en/catalog` (+ later `/catalog/...`, `/p/...`), `/_next/` | **Next.js storefront**, container `led-web` → 127.0.0.1:5200 (`web/`) |
+| any path that is **not** a static file (`/laptops/...`, `/product/...`, `/catalog`, `/ru/...`, `/en/...`, old led.am URLs), `/_next/` | **Next.js storefront**, container `led-web` → 127.0.0.1:5200 (`web/`); nginx `try_files $uri $uri/ @web` |
 
 Host nginx: `/etc/nginx/conf.d/led.creativeweb.am.conf` (copy in `deploy/`). The site sends `noindex`.
 
@@ -500,3 +500,14 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   sync = step 4). nginx: `/_next/` and `^/(hy/|ru/|en/)?(catalog|p)(/|$)` → 5200, rest unchanged (copy in `deploy/`).
   Deploy web: `cd /opt/led-computers && docker compose pull web && docker compose up -d web`. Backups `led-compose-backup-20261125-0214.yml`,
   `led.creativeweb.am.conf.bak-20261125-0214`. Static pages still link to `/category.html` until step 4.
+- 2026-11-25 — **Storefront step 4 done: category pages live.** URL scheme (owner): categories `/<section>/<group>/<item>` (no prefix),
+  products `/product/<slug>-<code>`, `/ru` `/en` prefixes, `/catalog` = overview page. Category page (`web/src/app/[lang]/[...slug]`):
+  tree, brand + price filters with counts, chips, sort, grid/list, pages, phone drawer, cards (cart/♡/compare into the shared localStorage
+  store); canonical clean URL (+`?page=N`), filtered = noindex,follow, BreadcrumbList/ItemList JSON-LD, hreflang. **Old led.am indexing
+  kept:** `/api/shop/resolve` + `web/src/proxy.ts` 301 every old URL — product `…_<Access code>.html` → `/product/…` (sold out → its
+  category), 353 old categories → mapped site category (table `url_redirects`, source `old-led`, made by `tools/old-led-urls/`; rerun at
+  go-live), old info/help/user pages → new pages, `/am|/ru|/en` kept. Category renamed/moved/deleted in the admin → automatic 301
+  (`url_redirects` source `slug`); reserved words can't be section slugs (`RESERVED_ROOT`). Cache refresh: API → `web:3000/internal/revalidate`
+  (secret `REVALIDATE_SECRET` in .env) after product syncs, Курсы, catalog edits; `/internal/` 404 from outside. `/ru`, `/en` home = temporary
+  307 to static home until step 7. No build-time prerender (build must not need the API). Product pages (`/product/…`) = step 5 (404 now).
+  DB backup `/root/led-db-backup-20261125-0246-pre-url-redirects.dump`, compose/env/nginx backups `*-20261125-0246`. Deployed.
