@@ -280,3 +280,13 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 | 11 | Go-live: re-import old customers, SMTP/SMS, remove `MAIL_DEV_LOG`, analytics, remove `noindex`, Search Console, domain switch | led.am on the new site |
 
 Later: back-in-stock / price-drop alerts, real reviews with moderation, configurator compatibility from the specs.
+
+**Open questions (to agree with the client).**
+
+1. **Which out-of-stock products the site shows (raised 2026-11-25, not decided).** Access keeps every product forever:
+   16 774 products, 1 167 in stock, 15 607 out of stock. Most are very old (codes 0–10 000: ~9 200 products, 20 in stock —
+   Pentium 4 / Athlon PCs, Core 2 Duo, 2010 laptops), but some are current popular items that are only sold out now (MSI Thin 15,
+   WD SN850X 2TB, Ryzen 7 7800X3D), and customers should be able to order them. The "Прайс-Лист" flag does not separate the two.
+   To decide: which old items are dropped, which stay orderable ("on order") when out of stock, and who decides later
+   (automatic rule from the last sale/receipt in `Операции`/`Документы` — join still to be checked —, an admin flag, or both).
+   **Until then:** catalog lists in-stock products only; every visible product keeps its page.
