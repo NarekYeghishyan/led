@@ -342,7 +342,7 @@ export class StorefrontController {
       '/help_up_menu/delivery': '/delivery.html', '/help_up_menu/how_order': '/how-to-buy.html',
       '/help_up_menu/how_order_2': '/how-to-order.html', '/help_up_menu/how_pay': '/how-to-pay.html', '/help_up_menu/warranty': '/warranty.html',
     };
-    if (OLD[rest]) return OLD[rest] === '/' ? { to: pre || '/' } : page(OLD[rest]);
+    if (OLD[rest]) return page(OLD[rest]); // home included: /?lang=ru until the home page moves to Next.js (step 7)
     throw new NotFoundException('No redirect');
   }
 
