@@ -478,3 +478,10 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
 - 2026-11-25 — Owner: **the site uses in-stock products only for now** (catalog, search, product pages — out of stock → 404, cart re-check
   marks them gone). Which out-of-stock items stay orderable (old vs popular) is an open client question: docs/PROJECT_PLAN.md section 11
   "Open questions". `stock=all` removed from `/api/shop/products`. Deployed.
+- 2026-11-25 — **AI photo search off** (`AI_PHOTOS=off` in server `.env` + compose): the owner doesn't want our own OpenAI/Gemini tokens
+  spent on photos; the client will give its own API key (then set `OPENAI_API_KEY`, remove `AI_PHOTOS=off`, `docker compose up -d api`).
+  Single search and batch answer 503 "AI photo search is off"; queued jobs wait. **Default product images** for products without a photo:
+  `Design/site/img/placeholder/<section>.svg` (6 catalog sections + `default`; site style: blue dot grid, section icon on a white tile,
+  LED lights, wordmark, no text → all languages), made by `Design/site-src/make_placeholders.py`; product cards from `/api/shop/products`
+  now carry `section`. Live at `/img/placeholder/*.svg`. Backups `led-compose-backup-20261125-*`, `led-env-backup-20261125-*`,
+  `led-static-backup-20261125a.tgz`. Deployed.
