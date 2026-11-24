@@ -63,6 +63,17 @@ services:
     ports:
       - "127.0.0.1:5000:80"
 
+  # storefront: Next.js SSR (web/), reads only /api/shop/* over the compose network
+  web:
+    image: ghcr.io/narekyeghishyan/led-web:${TAG:-latest}
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_ORIGIN: http://api:3000
+      SITE_URL: https://led.creativeweb.am
+    ports:
+      - "127.0.0.1:5200:3000"
+
 volumes:
   db-data:
   media:

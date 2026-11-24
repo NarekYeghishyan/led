@@ -1,0 +1,31 @@
+/* Overrides for the Next.js storefront on top of the generated site.css (keep this file small). */
+
+/* language switch: links (one URL per language) instead of the templates' buttons */
+.top .pill.lang a{all:unset;cursor:pointer;padding:2px 7px;border-radius:999px;font-size:12.5px}
+.top .pill.lang a:hover{color:#fff}
+.top .pill.lang a.on{background:#fff;color:var(--navy-900);font-weight:600}
+@media (max-width:600px){.top .pill.lang a{padding:2px 6px}}
+
+/* catalog popup: brands as text tiles (logos come later), product photos in "Popular" */
+#megaBr a.mbr{font-size:12px;font-weight:700;color:#7C8BA3;padding:0 6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#megaBr a.mbr:hover{color:var(--blue-700);border-color:#D4E3FB}
+.mh .im img{max-height:46px;max-width:90%;object-fit:contain;mix-blend-mode:multiply}
+
+/* search is a real form now */
+.search{margin:0}
+
+/* fonts are self-hosted by next/font (same families as the templates' Google Fonts link) */
+body{font-family:var(--font-inter),var(--font-arm),Inter,"Noto Sans Armenian",system-ui,sans-serif}
+
+/* /catalog overview */
+.cat-sections{margin-bottom:36px}
+.cat-sections .c{display:block;text-align:center;padding:22px 14px;background:var(--surface,#fff);border:1px solid var(--line);border-radius:var(--r-md,14px)}
+.cat-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 32px;margin-bottom:56px}
+.cat-groups h3{font-size:17px;font-weight:800;margin-bottom:10px}
+.cat-groups h3 a:hover{color:var(--blue-600)}
+.cat-groups ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.cat-groups li{display:flex;gap:8px;align-items:baseline;font-size:14px;color:#33415A}
+.cat-groups li a:hover{color:var(--blue-700)}
+.cat-groups li small{font-size:11.5px;color:var(--muted);background:var(--bg);border-radius:999px;padding:1px 7px}
+@media (max-width:1000px){.cat-groups{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.cat-groups{grid-template-columns:minmax(0,1fr)}}
