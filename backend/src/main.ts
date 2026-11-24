@@ -25,6 +25,7 @@ import { ProductSiteCategories1764500000000 } from './migrations/1764500000000-p
 import { ProductCategoriesController, ProductCategoriesService } from './product-categories';
 import { PhotoJobs1764600000000 } from './migrations/1764600000000-photo-jobs';
 import { PhotoBatchController, PhotoBatchService } from './photo-batch';
+import { StorefrontController } from './storefront';
 
 for (const name of ['DATABASE_URL', 'JWT_SECRET', 'SYNC_API_KEY']) {
   if (!process.env[name]) throw new Error(`Missing env ${name}`);
@@ -48,7 +49,7 @@ class HealthController {
     TypeOrmModule.forFeature([AdminUser]),
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '12h' } }),
   ],
-  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController, SiteCategoriesController, SiteCategoriesPublicController, SiteIconsController, ProductCategoriesController, PhotoBatchController],
+  controllers: [HealthController, AuthController, SyncController, AdminController, ImportController, CustomersController, ShopController, PhotosController, SiteCategoriesController, SiteCategoriesPublicController, SiteIconsController, ProductCategoriesController, PhotoBatchController, StorefrontController],
   providers: [AuthService, SyncService, ApiKeyGuard, JwtGuard, CustomerGuard, ProductCategoriesService, PhotoBatchService],
 })
 class AppModule {}

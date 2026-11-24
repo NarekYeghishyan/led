@@ -57,9 +57,11 @@ Check: `https://led.creativeweb.am/` and `/category.html` return 200, images loa
 - Agent: replace `agent.py` in `D:\python-script\agent\` on the store server, then
   `net stop LedSyncAgent && net start LedSyncAgent`. Never run a second copy by hand.
 
-### Next step (planned)
-Turn the static templates into the real storefront (React/SSR) fed by `/api` — products, categories,
-stock and prices from the Access sync. Until then the templates are design references.
+### Next step: the real storefront (agreed 2026-11-25)
+**Next.js 16 + React 19 (SSR)** in `web/` (container `led-web`, 127.0.0.1:5200), fed only by `/api/shop/*` (NestJS +
+TypeORM). Plan, decisions (֏ prices, stock, URLs) and the 11 steps: [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) section 11.
+Pages move to Next.js one by one. **Once a page lives in `web/`, design changes go into its React components there, not
+into `Design/site` / `build_shop.py`** — the static templates are then only references.
 
 ## Rules
 - Access is read-only, always. Never send cost/margin columns (see README).

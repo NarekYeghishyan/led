@@ -244,3 +244,39 @@ led-computers/
 | The store PC or internet is down | The site shows the last known data. The agent catches up automatically (it re-diffs on start). |
 | A large table makes polling slow | Hash only the needed columns. Use an Access "modified date" column if one exists. |
 | The ODBC driver bitness doesn't match | Use the Python bitness that matches the installed Access driver (already working) |
+
+## 11. Storefront plan (agreed 2026-11-25)
+
+**Stack.** Storefront = **Next.js 16 + React 19** (server-side rendering, for SEO), new folder `web/`, container `led-web`
+on 127.0.0.1:5200. Backend stays **NestJS + TypeORM** (`led-api`), admin stays **React + Vite** (`led-admin`). Same pattern
+as cvweb.ru and onlineajurd.am. Next.js never touches the database: it only calls `/api/shop/*` (inside the Docker network).
+The static templates in `Design/site/` are the design reference; pages move to Next.js one by one (nginx routes the ported
+ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led-fav`, `led-cmp`) during the move.
+
+**Decisions (owner: "use your defaults", 2026-11-25).**
+
+| Question | Decision |
+|---|---|
+| Currency | Show ֏. Products priced in $ (16 011 of 16 774) = price × latest USD rate from Access `Курсы` (365 on 2026-11-22), rounded to 100 ֏. ֏ products keep their price. **Check a few prices against led.am before go-live.** |
+| Out of stock | Catalog lists in-stock products; a toggle adds out-of-stock products from the price list ("on order"). Every visible product keeps its page ("on order" + "notify me"). Discontinued, deleted, hidden or zero-price products are not shown. |
+| Stock per shop | Access has only one total (`ОстатокНВС`), no per-showroom stock → the site shows the total ("in stock" / "last N" for ≤ 3). |
+| Reviews | Block hidden until real reviews exist. |
+| URLs | `/` HY, `/ru/…`, `/en/…`; `/catalog/<section>/<group>/<sub>`; `/p/<slug>-<code>` (code = Access КодТовара, so a renamed product keeps working: wrong slug → 301 to the right one). 301 from old led.am URLs and the current `.html` test pages. |
+
+**Steps.**
+
+| # | Step | Done when |
+|---|---|---|
+| 1 | Product API (NestJS): `GET /api/shop/products` (site category, search, brand, price, stock, sort, pages, facet counts), `/api/shop/products/:slug`, `/api/shop/products/by-ids` (cart re-check). Fixed field allow-list — never cost/margin/`raw`. Prices in ֏, slugs, visibility rules | curl returns real products for a site category |
+| 2 | Specs and filters: `product_specs` (name parser → Icecat specs → AI from names only), brands normalised, filter set per site category (edited in "Категории сайта"), facet counts | Laptops filter by CPU/RAM/SSD/screen on real data |
+| 3 | Next.js base: `web/`, CSS/tokens from the templates, layout (top bar, header, catalog popup, top menu, footer), HY/RU/EN routing, API client, page cache + refresh trigger from NestJS after a sync, Docker image + GitHub Actions, nginx route | Empty layout live on the test domain |
+| 4 | Category page `/catalog/...`: tree, filters in the URL, sort, pages, server-rendered cards, breadcrumb, meta | Category pages show live products |
+| 5 | Product page `/p/...`: gallery, specs, description, stock, JSON-LD, similar, bought together, cart/♡/compare/1-click | Product pages live |
+| 6 | Shared shop state: cart/favourites/compare with real ids, price/stock re-check, favourites saved to the account, real search (full-text + trigram, RU/HY/EN synonyms) | Cart and search on real data |
+| 7 | Port the remaining pages: home (real New/Sale/Best sellers), search, brand, cart, checkout, account, login/registration/forgot, info pages, assembly. Then retire the static site | Whole site in Next.js |
+| 8 | Admin web fields: descriptions HY/RU/EN, SEO, specs, hide on site, sale/old price, home banners and blocks | Content editable without code |
+| 9 | SEO and the move from led.am: sitemap, canonical, hreflang, 404, **301 from every old led.am URL**, caching | seo-check passes |
+| 10 | Orders: checkout and 1-click write `customer_orders` (`source='site'`), admin Orders page, staff alerts, real order tracking | Order reaches the staff |
+| 11 | Go-live: re-import old customers, SMTP/SMS, remove `MAIL_DEV_LOG`, analytics, remove `noindex`, Search Console, domain switch | led.am on the new site |
+
+Later: back-in-stock / price-drop alerts, real reviews with moderation, configurator compatibility from the specs.
