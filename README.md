@@ -84,6 +84,12 @@ docker compose pull && docker compose up -d
 
 ## AI product photos (admin → product → "Подобрать фото (AI)")
 
+> **Off since 2026-11-25 (`AI_PHOTOS=off` in `/opt/led-computers/.env`).** The owner decided not to spend our own OpenAI/Gemini
+> tokens on photos. The client will give its own API key: put it in `OPENAI_API_KEY`, remove `AI_PHOTOS=off`, then
+> `docker compose up -d api`. While off, the photo buttons and the batch page answer "AI photo search is off" and queued jobs wait.
+> Products without a photo show the site's default image: `Design/site/img/placeholder/<section>.svg` (made by
+> `Design/site-src/make_placeholders.py`; `section` comes with every product card from `/api/shop/products`).
+
 `backend/src/photos.ts`, admin `admin/src/photos.tsx`. Nothing is written until the admin presses Save.
 
 1. **What is the product.** The Access brand column is empty, so `identify()` finds the brand in the name (list `BRANDS`,

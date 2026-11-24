@@ -10,13 +10,13 @@
  */
 import {
   BadRequestException, Body, Controller, Get, Injectable, Logger, NotFoundException, OnApplicationBootstrap,
-  OnApplicationShutdown, Param, ParseIntPipe, Post, Query, Req, UseGuards,
+  OnApplicationShutdown, Param, ParseIntPipe, Post, Query, Req, ServiceUnavailableException, UseGuards,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
 import { Product } from './entities';
-import { addPhotos, findPhotos, PhotoCandidate, PhotoSearchResult, removePhotoFiles } from './photos';
+import { addPhotos, AI_PHOTOS_OFF_MSG, aiPhotosOff, findPhotos, PhotoCandidate, PhotoSearchResult, removePhotoFiles } from './photos';
 
 type Req = { user?: { email?: string } };
 const STATUSES = ['queued', 'running', 'saved', 'review', 'none', 'error', 'accepted', 'skipped'] as const;
@@ -58,6 +58,7 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
 
   /** Queues up to `limit` in-stock products without photos (newest first). */
   async start(limit: number, auto: boolean, by: string | null) {
+    if (aiPhotosOff()) throw new ServiceUnavailableException(AI_PHOTOS_OFF_MSG);
     this.paused = null;
     const n = Math.max(1, Math.min(MAX_BATCH, Math.floor(Number(limit) || 10)));
     const rows: { id: number }[] = await this.ds.query(
@@ -78,12 +79,14 @@ export class PhotoBatchService implements OnApplicationBootstrap, OnApplicationS
 
   kick() {
     if (this.working || this.stopping) return;
+    if (aiPhotosOff()) { this.paused = AI_PHOTOS_OFF_MSG; return; } // queued jobs stay queued
     this.working = true;
     this.loop().catch((e) => this.log.error(`worker stopped: ${(e as Error).message}`)).finally(() => { this.working = false; this.current = null; });
   }
 
   private async loop() {
     while (!this.stopping) {
+      if (aiPhotosOff()) { this.paused = AI_PHOTOS_OFF_MSG; return; }
       const [rows] = await this.ds.query(
         `UPDATE product_photo_jobs SET status = 'running'
          WHERE id = (SELECT id FROM product_photo_jobs WHERE status = 'queued' ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED)

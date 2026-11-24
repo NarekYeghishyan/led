@@ -12,7 +12,10 @@
  *  5. Saving: the photo is cleaned with sharp (white border trimmed, centred on a white square, max 1200 px, WebP)
  *     and stored in MEDIA_DIR, served at /api/media/...
  *
- * Env: AI_RANK, AI_PROVIDER, AI_SEARCH, OPENAI_API_KEY, OPENAI_MODEL, GEMINI_API_KEY, GEMINI_MODEL, ICECAT_USER, ICECAT=0,
+ * AI_PHOTOS=off stops all photo searching (single + batch) so no AI tokens are spent — owner's decision 2026-11-25: our own
+ * OpenAI/Gemini keys are not used for photos; turn it back on when the client gives its own API key (OPENAI_API_KEY).
+ * Products without a photo show the site's default image (Design/site/img/placeholder/<section>.svg).
+ * Env: AI_PHOTOS=off, AI_RANK, AI_PROVIDER, AI_SEARCH, OPENAI_API_KEY, OPENAI_MODEL, GEMINI_API_KEY, GEMINI_MODEL, ICECAT_USER, ICECAT=0,
  *      GOOGLE_CSE_KEY + GOOGLE_CSE_CX, BRAVE_SEARCH_KEY, GEMINI_SEARCH=1 (needs a paid Gemini plan), MEDIA_DIR.
  */
 import {
@@ -593,7 +596,11 @@ export interface PhotoSearchResult {
 const log = new Logger('Photos');
 
 /** Finds candidate photos, the AI rates them, picks the main one + gallery ones. manualUrl = only that page/image. Nothing is saved. */
+export const AI_PHOTOS_OFF_MSG = "AI photo search is off (AI_PHOTOS=off): waiting for the client's own API key";
+export const aiPhotosOff = () => (process.env.AI_PHOTOS || '').trim().toLowerCase() === 'off';
+
 export async function findPhotos(p: Product, manualUrl?: string): Promise<PhotoSearchResult> {
+  if (aiPhotosOff()) throw new ServiceUnavailableException(AI_PHOTOS_OFF_MSG);
   const t0 = Date.now(), lap: string[] = [];
   const mark = (s: string) => lap.push(`${s} ${((Date.now() - t0) / 1000).toFixed(1)}s`);
   const ident = identify(p);

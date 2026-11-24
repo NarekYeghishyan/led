@@ -141,6 +141,19 @@ export class StorefrontController {
     return ids;
   }
 
+  /** Deepest visible site category of a product (manual > rule > AI on equal depth). */
+  private bestPath(t: Tree, placed: { site_category_id: number; source: string }[]) {
+    const rank: Record<string, number> = { manual: 3, rule: 2, ai: 1 };
+    let best: Cat[] | null = null;
+    let bestScore = -1;
+    for (const x of placed) {
+      const path = this.pathOf(t, x.site_category_id);
+      const score = path ? path.length * 10 + (rank[x.source] || 0) : -1;
+      if (path && score > bestScore) { best = path; bestScore = score; }
+    }
+    return best;
+  }
+
   private crumbs(path: Cat[]) {
     return path.map((c, i) => ({ slug: c.slug, path: path.slice(0, i + 1).map((x) => x.slug).join('/'), name: c.names }));
   }
@@ -236,17 +249,26 @@ export class StorefrontController {
     };
   }
 
-  /** Card data for product ids, in the given order. */
+  /**
+   * Card data for product ids, in the given order. `section` = slug of the product's catalog section (or null): the site
+   * shows img/placeholder/<section>.svg when `image` is null.
+   */
   private async cards(ids: number[]) {
     if (!ids.length) return [];
     const [cids, rates] = await this.rateParams();
+    const t = await this.getTree();
+    const placements: { product_id: number; site_category_id: number; source: string }[] = await this.ds.query(
+      `SELECT product_id, site_category_id, source FROM product_site_categories WHERE product_id = ANY($1::int[])`, [ids]);
+    const placedBy = new Map<number, typeof placements>();
+    for (const x of placements) placedBy.set(x.product_id, [...(placedBy.get(x.product_id) || []), x]);
+    const sectionOf = (id: number) => this.bestPath(t, placedBy.get(id) || [])?.[0]?.slug ?? null;
     const rows: (Record<string, unknown> & { id: number; code: number; name: string; customSlug: string | null; quantity: number;
       images: string[]; price: string; unit: string | null })[] = await this.ds.query(
       `SELECT ${PUBLIC_COLS}, ${StorefrontController.PRICE} AS price FROM products p WHERE p.id = ANY($3::int[])`, [cids, rates, ids]);
     const byId = new Map(rows.map((r) => [r.id, r]));
     return ids.map((id) => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r).map((r) => ({
       code: r.code, slug: slugOf(r), name: r.name, brand: brandOf(r.name), price: Number(r.price), unit: r.unit,
-      stock: stockOf(r.quantity), image: r.images?.[0] ?? null,
+      stock: stockOf(r.quantity), image: r.images?.[0] ?? null, section: sectionOf(r.id),
     }));
   }
 
@@ -286,14 +308,7 @@ export class StorefrontController {
     const t = await this.getTree();
     const placed: { site_category_id: number; source: string }[] = await this.ds.query(
       `SELECT site_category_id, source FROM product_site_categories WHERE product_id = $1`, [p.id]);
-    const rank = { manual: 3, rule: 2, ai: 1 } as Record<string, number>;
-    let best: Cat[] | null = null;
-    let bestScore = -1;
-    for (const x of placed) {
-      const path = this.pathOf(t, x.site_category_id);
-      const score = path ? path.length * 10 + (rank[x.source] || 0) : -1;
-      if (path && score > bestScore) { best = path; bestScore = score; }
-    }
+    const best = this.bestPath(t, placed);
 
     let similar: Awaited<ReturnType<StorefrontController['cards']>> = [];
     if (best) {
@@ -310,7 +325,7 @@ export class StorefrontController {
       code: p.code, slug: slugOf(p), name: p.name, brand: brandOf(p.name), price: Number(p.price), currency: 'AMD', unit: p.unit,
       stock: stockOf(p.quantity), images: p.images || [], barcode: p.barcode || null,
       description: p.description || null, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null,
-      weight: p.weight || null, breadcrumb: best ? this.crumbs(best) : [], similar,
+      weight: p.weight || null, section: best?.[0]?.slug ?? null, breadcrumb: best ? this.crumbs(best) : [], similar,
     };
   }
 }
