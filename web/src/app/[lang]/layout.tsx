@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Inter, Noto_Sans_Armenian } from 'next/font/google';
 import { Suspense } from 'react';
 import { getCategories, getMegaExtras, type CatNode } from '@/lib/api';
-import { isLang, LANGS, type Lang } from '@/lib/i18n';
+import { isLang, type Lang } from '@/lib/i18n';
 import { Sprite } from '@/components/Sprite';
 import { TopBar } from '@/components/TopBar';
 import { Header } from '@/components/Header';
@@ -15,8 +15,8 @@ import '@/styles/app.css';
 const inter = Inter({ subsets: ['latin', 'cyrillic'], weight: ['400', '500', '600', '700', '800'], variable: '--font-inter', display: 'swap' });
 const armenian = Noto_Sans_Armenian({ subsets: ['armenian'], weight: ['400', '600', '700'], variable: '--font-arm', display: 'swap' });
 
-export const generateStaticParams = () => LANGS.map((lang) => ({ lang }));
-export const dynamicParams = false;
+// No generateStaticParams: pages render on request (API data cached 60 s, refreshed by the API on changes), never at
+// build time — the image build must not depend on the live API being up.
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL ?? 'https://led.creativeweb.am'),
