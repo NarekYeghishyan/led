@@ -18,6 +18,7 @@ Details: [README.md](README.md), plan and decisions: [docs/PROJECT_PLAN.md](docs
 | `docs/` | plan, workflow, changelog of decisions | yes |
 | `Design/site/` | **static HTML pages** (generated output, published to the testing domain) | yes |
 | `Design/site-src/` | page generator `build_shop.py` + shared snippets (`responsive.html`, `card_fx.html`…) | yes |
+| `web/` | **Next.js 16 storefront** (SSR, React 19): pages move here one by one; design imported by `web/scripts/import_design.py` | yes |
 | `Design/` (rest) | concepts, drafts | no |
 | `Contracts/` | contracts | no |
 
@@ -32,6 +33,7 @@ The server rate-limits SSH: batch commands into one connection, wait ~30 s if it
 | `/top-picks/` | static, older concept page |
 | `/admin/` | container `led-admin` → 127.0.0.1:5000 |
 | `/api/` | container `led-api` → 127.0.0.1:5100 |
+| `/catalog`, `/ru/catalog`, `/en/catalog` (+ later `/catalog/...`, `/p/...`), `/_next/` | **Next.js storefront**, container `led-web` → 127.0.0.1:5200 (`web/`) |
 
 Host nginx: `/etc/nginx/conf.d/led.creativeweb.am.conf` (copy in `deploy/`). The site sends `noindex`.
 
@@ -485,3 +487,16 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   LED lights, wordmark, no text → all languages), made by `Design/site-src/make_placeholders.py`; product cards from `/api/shop/products`
   now carry `section`. Live at `/img/placeholder/*.svg`. Backups `led-compose-backup-20261125-*`, `led-env-backup-20261125-*`,
   `led-static-backup-20261125a.tgz`. Deployed.
+- 2026-11-25 — AI product → site-category placement also off (`AI_CATEGORIES=off` in server `.env`): no own AI tokens at all now;
+  new products are placed by the name rules and by hand. Turn back on with the client's key.
+- 2026-11-25 — **Storefront step 3 done: Next.js base live** (`web/`, container `led-web` on 127.0.0.1:5200, image built by CI
+  `ghcr.io/narekyeghishyan/led-web`). URLs: Armenian without prefix (`/catalog`), `/ru/catalog`, `/en/catalog`; typed `/hy/...` → 301
+  (`web/src/proxy.ts` rewrites to `/hy` internally with marker header `x-led-lang-rewrite`, which nginx blanks). Layout = template chrome
+  in React (TopBar, Header with catalog popup from `/api/shop/categories` + 3 in-stock products and top brands per section from
+  `/api/shop/products`, top menu, Footer, contact button, background/footer canvases, hover effects), self-hosted Inter + Noto Sans
+  Armenian (next/font). Design comes from `Design/site/category.html` via `python web/scripts/import_design.py` → `web/src/styles/site.css`
+  (generated, don't edit) + `icon-symbols.ts` + `public/img`; Next-only CSS in `web/src/styles/app.css`. First page `/catalog` (sections +
+  groups with live counts), localized 404. Pages cached 60 s (fetch tags `categories`/`products`; refresh trigger from NestJS after a
+  sync = step 4). nginx: `/_next/` and `^/(hy/|ru/|en/)?(catalog|p)(/|$)` → 5200, rest unchanged (copy in `deploy/`).
+  Deploy web: `cd /opt/led-computers && docker compose pull web && docker compose up -d web`. Backups `led-compose-backup-20261125-0214.yml`,
+  `led.creativeweb.am.conf.bak-20261125-0214`. Static pages still link to `/category.html` until step 4.

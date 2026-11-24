@@ -267,9 +267,9 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 
 | # | Step | Done when |
 |---|---|---|
-| 1 | Product API (NestJS): `GET /api/shop/products` (site category, search, brand, price, stock, sort, pages, facet counts), `/api/shop/products/:slug`, `/api/shop/products/by-ids` (cart re-check). Fixed field allow-list — never cost/margin/`raw`. Prices in ֏, slugs, visibility rules | curl returns real products for a site category |
+| 1 ✅ | Product API (NestJS): `GET /api/shop/products` (site category, search, brand, price, stock, sort, pages, facet counts), `/api/shop/products/:slug`, `/api/shop/products/by-ids` (cart re-check). Fixed field allow-list — never cost/margin/`raw`. Prices in ֏, slugs, visibility rules | curl returns real products for a site category |
 | 2 | Specs and filters: `product_specs` (name parser → Icecat specs → AI from names only), brands normalised, filter set per site category (edited in "Категории сайта"), facet counts | Laptops filter by CPU/RAM/SSD/screen on real data |
-| 3 | Next.js base: `web/`, CSS/tokens from the templates, layout (top bar, header, catalog popup, top menu, footer), HY/RU/EN routing, API client, page cache + refresh trigger from NestJS after a sync, Docker image + GitHub Actions, nginx route | Empty layout live on the test domain |
+| 3 ✅ | Next.js base (done 2026-11-25, live at /catalog): `web/`, CSS/tokens from the templates, layout (top bar, header, catalog popup, top menu, footer), HY/RU/EN routing, API client, page cache + refresh trigger from NestJS after a sync, Docker image + GitHub Actions, nginx route | Empty layout live on the test domain |
 | 4 | Category page `/catalog/...`: tree, filters in the URL, sort, pages, server-rendered cards, breadcrumb, meta | Category pages show live products |
 | 5 | Product page `/p/...`: gallery, specs, description, stock, JSON-LD, similar, bought together, cart/♡/compare/1-click | Product pages live |
 | 6 | Shared shop state: cart/favourites/compare with real ids, price/stock re-check, favourites saved to the account, real search (full-text + trigram, RU/HY/EN synonyms) | Cart and search on real data |
