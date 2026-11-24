@@ -475,3 +475,6 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   `/api/shop/products/<slug>-<code>` (detail, breadcrumb = deepest site category, 12 similar). Prices ֏ = Access price × latest
   `Курсы` rate, rounded to 100 (USD 365). Brand from the name (`identify()`). No `raw`/cost fields. Rollback image id in
   `/root/led-api-image-before-storefront-*.txt`. Deployed.
+- 2026-11-25 — Owner: **the site uses in-stock products only for now** (catalog, search, product pages — out of stock → 404, cart re-check
+  marks them gone). Which out-of-stock items stay orderable (old vs popular) is an open client question: docs/PROJECT_PLAN.md section 11
+  "Open questions". `stock=all` removed from `/api/shop/products`. Deployed.

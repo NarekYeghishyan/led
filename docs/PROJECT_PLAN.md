@@ -258,7 +258,7 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 | Question | Decision |
 |---|---|
 | Currency | Show ֏. Products priced in $ (16 011 of 16 774) = price × latest USD rate from Access `Курсы` (365 on 2026-11-22), rounded to 100 ֏. ֏ products keep their price. **Check a few prices against led.am before go-live.** |
-| Out of stock | Catalog lists in-stock products; a toggle adds out-of-stock products from the price list ("on order"). Every visible product keeps its page ("on order" + "notify me"). Discontinued, deleted, hidden or zero-price products are not shown. |
+| Out of stock | **For now the site uses in-stock products only** (owner, 2026-11-25): catalog, search, product pages, cart re-check. An out-of-stock product has no page (404) and the cart marks it gone. Discontinued, deleted, hidden or zero-price products are never shown. Which out-of-stock items become orderable later = open question 1 below. |
 | Stock per shop | Access has only one total (`ОстатокНВС`), no per-showroom stock → the site shows the total ("in stock" / "last N" for ≤ 3). |
 | Reviews | Block hidden until real reviews exist. |
 | URLs | `/` HY, `/ru/…`, `/en/…`; `/catalog/<section>/<group>/<sub>`; `/p/<slug>-<code>` (code = Access КодТовара, so a renamed product keeps working: wrong slug → 301 to the right one). 301 from old led.am URLs and the current `.html` test pages. |
@@ -289,4 +289,4 @@ Later: back-in-stock / price-drop alerts, real reviews with moderation, configur
    WD SN850X 2TB, Ryzen 7 7800X3D), and customers should be able to order them. The "Прайс-Лист" flag does not separate the two.
    To decide: which old items are dropped, which stay orderable ("on order") when out of stock, and who decides later
    (automatic rule from the last sale/receipt in `Операции`/`Документы` — join still to be checked —, an admin flag, or both).
-   **Until then:** catalog lists in-stock products only; every visible product keeps its page.
+   **Until then:** the site uses in-stock products only (no page for out-of-stock ones).

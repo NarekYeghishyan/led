@@ -5,8 +5,9 @@
  * Rules:
  * - Only fields in PUBLIC_COLS leave this file. Never `raw`, cost/margin or dealer prices (they live in raw / mirror_rows).
  * - Prices are in ֏: Access price × latest rate of its currency in `Курсы`, rounded to 100 ֏ (֏ prices stay as they are).
- * - A product is shown when it is not deleted, visible, not discontinued and has a price. Lists show in-stock products;
- *   `stock=all` adds out-of-stock ones from the price list ("on order"). Every shown product keeps its page.
+ * - A product is shown when it is not deleted, visible, not discontinued, has a price AND is in stock (owner's decision
+ *   2026-11-25: in-stock items only for now). Which out-of-stock items stay orderable is an open client question
+ *   (docs/PROJECT_PLAN.md section 11 "Open questions") — when decided, change VISIBLE / add the rule here.
  * - Categories = site categories only (`site_categories` + `product_site_categories`), never the Access `Типы`.
  * - URL slug = transliterated name + "-" + Access code; the code finds the product, so renamed products keep working.
  */
@@ -17,10 +18,9 @@ import { identify } from './photos';
 
 const LOW_STOCK = 3; // "last N" on the site
 const MAX_LIMIT = 60;
-const VISIBLE = `p.deleted_at IS NULL AND p.is_visible AND NOT p.discontinued AND p.price > 0`;
+const VISIBLE = `p.deleted_at IS NULL AND p.is_visible AND NOT p.discontinued AND p.price > 0 AND p.quantity > 0`;
 const PUBLIC_COLS = `p.id, p.external_id AS "code", p.name, p.slug AS "customSlug", p.unit, p.quantity, p.images, p.barcode,
-  p.web_description AS "description", p.seo_title AS "seoTitle", p.seo_description AS "seoDescription", p.weight,
-  p.in_price_list AS "inPriceList"`;
+  p.web_description AS "description", p.seo_title AS "seoTitle", p.seo_description AS "seoDescription", p.weight`;
 
 // ---------------------------------------------------------------- slugs
 
@@ -148,8 +148,8 @@ export class StorefrontController {
   // ---------------------------------------------------------------- list
 
   /**
-   * GET /api/shop/products?cat=section/group/sub&q=words&brand=Lenovo,HP&min=&max=&stock=in|all&sort=&page=&limit=
-   * → { items, total, page, pages, limit, facets: { brands, price, stock }, category: { path, children } | null }
+   * GET /api/shop/products?cat=section/group/sub&q=words&brand=Lenovo,HP&min=&max=&sort=&page=&limit=
+   * → { items, total, page, pages, limit, facets: { brands, price }, category: { path, children } | null }
    * Facets ignore their own filter (brand counts ignore the brand filter, the price range ignores min/max).
    */
   @Get()
@@ -159,7 +159,6 @@ export class StorefrontController {
     const page = Math.max(1, Math.min(1000, parseInt(qs.page, 10) || 1));
     const limit = Math.max(1, Math.min(MAX_LIMIT, parseInt(qs.limit, 10) || 24));
     const sort: Sort = (SORTS as readonly string[]).includes(qs.sort) ? (qs.sort as Sort) : 'default';
-    const all = qs.stock === 'all';
 
     let category: { path: ReturnType<StorefrontController['crumbs']>; children: { slug: string; path: string; name: string[] }[] } | null = null;
     let catIds: number[] | null = null;
@@ -196,12 +195,10 @@ export class StorefrontController {
     const rows: Row[] = (await this.ds.query(
       `SELECT p.id, p.external_id AS code, p.name, ${StorefrontController.PRICE} AS price, p.quantity::float AS quantity,
          (jsonb_array_length(p.images) > 0) AS "hasImg"
-       FROM products p WHERE ${where.join(' AND ')} AND (p.quantity > 0 ${all ? 'OR p.in_price_list' : ''})`, params))
+       FROM products p WHERE ${where.join(' AND ')}`, params))
       .map((r: Row) => ({ ...r, price: Number(r.price) }))
       .filter((r: Row) => r.price > 0);
 
-    const stockCounts = { in: 0, order: 0 };
-    for (const r of rows) r.quantity > 0 ? stockCounts.in++ : stockCounts.order++;
 
     // brand / price filters + facets (brand comes from the name: the Access brand column is empty)
     const want = new Set(String(qs.brand || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean));
@@ -217,13 +214,12 @@ export class StorefrontController {
     }
     const hit = rows.filter((r) => inPrice(r) && inBrand(r));
 
-    const inStockFirst = (a: Row, b: Row) => Number(b.quantity > 0) - Number(a.quantity > 0);
     const cmp: Record<Sort, (a: Row, b: Row) => number> = {
-      default: (a, b) => inStockFirst(a, b) || Number(b.hasImg) - Number(a.hasImg) || b.code - a.code,
-      cheap: (a, b) => inStockFirst(a, b) || a.price - b.price,
-      expensive: (a, b) => inStockFirst(a, b) || b.price - a.price,
-      new: (a, b) => inStockFirst(a, b) || b.code - a.code,
-      name: (a, b) => inStockFirst(a, b) || a.name.localeCompare(b.name, 'ru'),
+      default: (a, b) => Number(b.hasImg) - Number(a.hasImg) || b.code - a.code,
+      cheap: (a, b) => a.price - b.price || b.code - a.code,
+      expensive: (a, b) => b.price - a.price || b.code - a.code,
+      new: (a, b) => b.code - a.code,
+      name: (a, b) => a.name.localeCompare(b.name, 'ru'),
     };
     hit.sort(cmp[sort]);
     const pages = Math.max(1, Math.ceil(hit.length / limit));
@@ -235,7 +231,6 @@ export class StorefrontController {
       facets: {
         brands: [...brandCount].map(([v, n]) => ({ v, n })).sort((a, b) => b.n - a.n || a.v.localeCompare(b.v)),
         price: { min: Number.isFinite(lo) ? lo : 0, max: hi },
-        stock: stockCounts,
       },
       category,
     };
@@ -257,7 +252,7 @@ export class StorefrontController {
 
   // ---------------------------------------------------------------- cart / favourites re-check
 
-  /** GET /api/shop/products/by-ids?codes=17053,15221 (Access codes, max 100) → current card data; missing/hidden ones listed in `gone`. */
+  /** GET /api/shop/products/by-ids?codes=17053,15221 (Access codes, max 100) → current card data; sold-out/hidden ones listed in `gone`. */
   @Get('by-ids')
   @Header('Cache-Control', 'no-store')
   async byIds(@Query('codes') codes: string) {
@@ -305,7 +300,7 @@ export class StorefrontController {
       const leaf = best[best.length - 1];
       const ids: { id: number }[] = await this.ds.query(
         `SELECT p.id FROM products p JOIN product_site_categories x ON x.product_id = p.id AND x.site_category_id = ANY($3::int[])
-         WHERE ${VISIBLE} AND p.quantity > 0 AND p.id <> $4 AND ${StorefrontController.PRICE} > 0
+         WHERE ${VISIBLE} AND p.id <> $4 AND ${StorefrontController.PRICE} > 0
          GROUP BY p.id ORDER BY abs(${StorefrontController.PRICE} - $5) LIMIT 12`,
         [cids, rates, this.subtree(t, leaf.id), p.id, Number(p.price)]);
       similar = await this.cards(ids.map((r) => r.id));
@@ -313,7 +308,7 @@ export class StorefrontController {
 
     return {
       code: p.code, slug: slugOf(p), name: p.name, brand: brandOf(p.name), price: Number(p.price), currency: 'AMD', unit: p.unit,
-      stock: stockOf(p.quantity), onOrder: !(p.quantity > 0) && p.inPriceList, images: p.images || [], barcode: p.barcode || null,
+      stock: stockOf(p.quantity), images: p.images || [], barcode: p.barcode || null,
       description: p.description || null, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null,
       weight: p.weight || null, breadcrumb: best ? this.crumbs(best) : [], similar,
     };
