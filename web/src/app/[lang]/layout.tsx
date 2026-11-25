@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { notFound } from 'next/navigation';
 import { Inter, Noto_Sans_Armenian } from 'next/font/google';
 import { Suspense } from 'react';
 import { getCategories, getMegaExtras, type CatNode } from '@/lib/api';
@@ -30,8 +29,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#0E1A2E' };
 
 export default async function LangLayout({ children, params }: { children: React.ReactNode; params: Promise<{ lang: string }> }) {
-  const { lang } = await params;
-  if (!isLang(lang)) notFound();
+  // no notFound() here: Next re-renders this layout for the 404 page without a valid lang, and a 404 inside the 404
+  // gave the bare error document. Unknown values fall back to Armenian (the proxy only lets hy/ru/en through anyway).
+  const p = (await params).lang;
+  const lang: Lang = isLang(p) ? (p as Lang) : 'hy';
   let cats: CatNode[] = [];
   try { cats = await getCategories(); } catch { /* API down: the page still renders, menus empty */ }
   const extras = await getMegaExtras(cats);

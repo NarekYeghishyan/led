@@ -415,6 +415,38 @@ export class StorefrontController {
     return { items, gone: list.filter((c) => !found.has(c)) };
   }
 
+  // ---------------------------------------------------------------- sitemap
+
+  /**
+   * GET /api/shop/sitemap → every public URL path (without language prefix) + last change, for the storefront's
+   * /sitemap.xml (plan step 9): visible in-stock products, visible site categories that have in-stock products, brands.
+   */
+  @Get('sitemap')
+  @Header('Cache-Control', 'public, max-age=300')
+  async sitemap() {
+    const t = await this.getTree();
+    const rows: { code: number; name: string; customSlug: string | null; at: Date }[] = await this.ds.query(
+      `SELECT p.external_id AS code, p.name, p.slug AS "customSlug", GREATEST(p.updated_at, p.synced_at) AS at FROM products p WHERE ${VISIBLE}`);
+    const counts: { site_category_id: number; n: number }[] = await this.ds.query(
+      `SELECT x.site_category_id, COUNT(*)::int AS n FROM product_site_categories x JOIN products p ON p.id = x.product_id
+       WHERE ${VISIBLE} GROUP BY x.site_category_id`);
+    const has = new Set(counts.map((c) => c.site_category_id));
+    const cats: string[] = [];
+    for (const c of t.byId.values()) {
+      const path = this.pathOf(t, c.id);
+      if (!path) continue; // hidden itself or under a hidden parent
+      if (!this.subtree(t, c.id).some((id) => has.has(id))) continue; // empty
+      cats.push('/' + path.map((x) => x.slug).join('/'));
+    }
+    const brands = new Map<string, number>();
+    for (const r of rows) { const b = brandOf(r.name); if (b) brands.set(b, (brands.get(b) || 0) + 1); }
+    return {
+      products: rows.map((r) => ({ path: `/product/${slugOf(r)}`, at: r.at })),
+      categories: cats.sort(),
+      brands: [...brands.keys()].map((b) => b.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')).filter(Boolean).sort(),
+    };
+  }
+
   // ---------------------------------------------------------------- old / renamed URLs
 
   /**

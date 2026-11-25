@@ -32,6 +32,8 @@ const T = {
   contacts: ['Կոնտակտներ', 'Контакты', 'Contacts'],
   language: ['Լեզու', 'Язык', 'Language'],
   catalog: ['Կատալոգ', 'Каталог', 'Catalog'],
+  catalogDesc: ['LED Computers-ի կատալոգը՝ համակարգիչներ, նոութբուքեր, համալրող սարքեր, ծայրամասային սարքեր և ցանցային սարքավորումներ Երևանում։', 'Каталог LED Computers: компьютеры, ноутбуки, комплектующие, периферия и сетевое оборудование в Ереване.', 'LED Computers catalog: computers, laptops, components, peripherals and network equipment in Yerevan.'],
+  asmDesc: ['Հավաքեք համակարգիչ առկա բաղադրիչներից՝ համատեղելիության ստուգումով։ Հավաքումը և փորձարկումը՝ անվճար։', 'Соберите компьютер из комплектующих в наличии с проверкой совместимости. Сборка и тестирование — бесплатно.', 'Build a PC from in-stock parts with compatibility checks. Assembly and testing are free.'],
   search: ['Որոնել ապրանքներ, բրենդներ և մոդելներ…', 'Поиск товаров, брендов и моделей…', 'Search products, brands and models…'],
   find: ['Որոնել', 'Найти', 'Search'],
   account: ['Անձնական էջ', 'Кабинет', 'Account'],

@@ -95,3 +95,5 @@ body:has(.sbar.show) .fab{bottom:92px}
 .buy .addc svg{flex:none}
 .buy .qty button{width:26px}
 .buy .qty input{width:28px}
+/* catalog page: its heading is the H1 (SEO) with the section-heading look */
+.sh h1{font-size:28px;font-weight:800;letter-spacing:-.5px;margin:0}

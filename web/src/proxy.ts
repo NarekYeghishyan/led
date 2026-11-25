@@ -53,5 +53,5 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   // not for Next's own files, the API or images
-  matcher: ['/((?!_next|api|internal|img).*)'],
+  matcher: ['/((?!_next|api|internal|img|robots.txt|sitemap.xml).*)'],
 };

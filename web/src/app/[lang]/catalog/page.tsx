@@ -11,6 +11,8 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   const l = (isLang(lang) ? lang : 'hy') as Lang;
   return {
     title: t(l, 'catalog'),
+    description: t(l, 'catalogDesc'),
+    robots: process.env.SITE_INDEX === '1' ? undefined : { index: false, follow: true },
     alternates: { canonical: href(l, '/catalog'), languages: { hy: '/catalog', ru: '/ru/catalog', en: '/en/catalog', 'x-default': '/catalog' } },
   };
 }
@@ -20,8 +22,8 @@ export default async function CatalogPage({ params }: P) {
   const cats = await getCategories();
   return (
     <main className="wrap catpage">
-      <nav className="crumbs"><a href="/">{t(lang, 'home')}</a><span>/</span><b>{t(lang, 'catalog')}</b></nav>
-      <div className="sh"><h2 style={{ fontSize: 28 }}>{t(lang, 'catalog')}</h2></div>
+      <nav className="crumbs"><a href={href(lang, '/')}>{t(lang, 'home')}</a><span>/</span><b>{t(lang, 'catalog')}</b></nav>
+      <div className="sh"><h1 style={{ fontSize: 28 }}>{t(lang, 'catalog')}</h1></div>
       <div className="cgrid cat-sections">
         {cats.map((c) => (
           <a key={c.s} className="c" href={href(lang, `/${c.s}`)}>
