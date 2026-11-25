@@ -64,7 +64,7 @@ export function search(docs: Doc[], q: string) {
   let vocab: string[] | null = null;
   words = words.map((w) => {
     if (w.w.length < 4 || /^\d+$/.test(w.w) || has(w)) return w;
-    vocab ??= [...new Set(docs.flatMap((d) => d.text.split(' ')))].filter((x) => x.length >= 3);
+    vocab ??= [...new Set([...Object.keys(SYN), ...docs.flatMap((d) => d.text.split(' '))])].filter((x) => x.length >= 3);
     const max = w.w.length >= 7 ? 2 : 1;
     let best: string | null = null, bd = max + 1;
     for (const v of vocab) { const d = dist(w.w, v, max); if (d < bd) { bd = d; best = v; } }
