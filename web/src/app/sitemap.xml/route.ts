@@ -1,7 +1,7 @@
 /**
  * /sitemap.xml (plan step 9): home, catalog, brands, info pages, every visible site category with in-stock products,
  * every in-stock product and brand page — each URL once per language (hy without prefix, /ru, /en) with
- * <xhtml:link rel="alternate" hreflang> to the other two + x-default. Data: GET /api/shop/sitemap.
+ * <loc> + <lastmod> (hreflang is in the page heads). Data: GET /api/shop/sitemap.
  * Served always, but robots.txt only points to it when SITE_INDEX=1 (test domain stays out of search engines).
  */
 const API = process.env.API_ORIGIN ?? 'https://led.creativeweb.am';
@@ -27,11 +27,20 @@ export async function GET() {
     ...data.brands.map((b) => ({ path: `/brand/${b}` })),
     ...data.products,
   ];
-  const urls = entries.flatMap(({ path, at }) => LANGS.map(([, pre]) => {
-    const alts = LANGS.map(([l, p]) => `<xhtml:link rel="alternate" hreflang="${l}" href="${esc(loc(p, path))}"/>`).join('')
-      + `<xhtml:link rel="alternate" hreflang="x-default" href="${esc(loc('', path))}"/>`;
-    return `<url><loc>${esc(loc(pre, path))}</loc>${at ? `<lastmod>${new Date(at).toISOString().slice(0, 10)}</lastmod>` : ''}${alts}</url>`;
-  }));
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`;
+  // Plain format: <url><loc>…</loc><lastmod>2026-11-25T08:18:54+00:00</lastmod></url>, one block per URL.
+  // hreflang alternates live in each page's <head>, so they are not repeated here.
+  const iso = (d: string | number) => new Date(d).toISOString().slice(0, 19) + '+00:00';
+  const newest = data.products.reduce((m, p) => Math.max(m, +new Date(p.at) || 0), 0) || Date.now();
+  const urls = entries.flatMap(({ path, at }) => LANGS.map(([, pre]) =>
+    `<url>
+<loc>${esc(loc(pre, path))}</loc>
+<lastmod>${iso(at || newest)}</lastmod>
+</url>`));
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('
+')}
+</urlset>
+`;
   return new Response(xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=600' } });
 }
