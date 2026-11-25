@@ -144,6 +144,22 @@ const T = {
   gPorts: ['Կապ և միակցիչներ', 'Связь и разъёмы', 'Connectivity'],
   gPower: ['Սնուցում', 'Питание', 'Power'],
   gBody: ['Իրան և այլն', 'Корпус и прочее', 'Body and other'],
+  recent: ['Վերջին որոնումներ', 'Недавние запросы', 'Recent searches'],
+  clear: ['Մաքրել', 'Очистить', 'Clear'],
+  didYouMean: ['Գուցե նկատի ունեիք՝', 'Возможно, вы имели в виду', 'Did you mean'],
+  productsH: ['Ապրանքներ', 'Товары', 'Products'],
+  allResults: ['Բոլոր արդյունքները ({n})', 'Все результаты ({n})', 'All results ({n})'],
+  nothingFound: ['Ոչինչ չի գտնվել', 'Ничего не найдено', 'Nothing found'],
+  searchH: ['Որոնում', 'Поиск', 'Search'],
+  searchFor: ['«{q}»', '«{q}»', '“{q}”'],
+  searchEmptyQ: ['Մուտքագրեք ապրանքի, բրենդի կամ մոդելի անունը', 'Введите название товара, бренда или модели', 'Type a product, brand or model'],
+  searchNone: ['«{q}» հարցմամբ ոչինչ չի գտնվել։ Ստուգեք ուղղագրությունը կամ փորձեք ավելի կարճ հարցում։',
+    'По запросу «{q}» ничего не найдено. Проверьте написание или попробуйте запрос короче.',
+    'Nothing found for “{q}”. Check the spelling or try a shorter query.'],
+  showingFix: ['Ցուցադրվում են «{fix}» արդյունքները', 'Показаны результаты по запросу «{fix}»', 'Showing results for “{fix}”'],
+  allCats: ['Բոլորը', 'Все', 'All'],
+  goneItems: ['{n} ապրանք այլևս առկա չէ և հեռացվեց', '{n} товар(ов) больше нет в наличии — убраны', '{n} item(s) are no longer available and were removed'],
+  priceChanged: ['Որոշ գներ թարմացվել են', 'Некоторые цены обновились', 'Some prices were updated'],
 } satisfies Record<string, [string, string, string]>;
 
 export type TKey = keyof typeof T;
@@ -164,5 +180,5 @@ export const STATIC = {
   credit: '/credit.html', about: '/about.html', buy: '/how-to-buy.html', order: '/how-to-order.html', track: '/track-order.html',
   pay: '/how-to-pay.html', delivery: '/delivery.html', warranty: '/warranty.html', exchange: '/exchange.html',
   contacts: '/contacts.html', login: '/login.html', account: '/account.html', compare: '/compare.html',
-  favorites: '/favorites.html', cart: '/cart.html', search: '/search.html',
+  favorites: '/favorites.html', cart: '/cart.html',
 } as const;

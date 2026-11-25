@@ -23,7 +23,10 @@ export interface SpecFacet { k: string; names: string[]; values: { v: string; n:
 export interface Spec { k: string; v: string; names: string[]; group: string }
 export interface ProductList {
   items: ProductCard[]; total: number; page: number; pages: number; limit: number; sort: string;
-  facets: { brands: { v: string; n: number }[]; price: { min: number; max: number }; specs: SpecFacet[] };
+  facets: { brands: { v: string; n: number }[]; price: { min: number; max: number }; specs: SpecFacet[];
+    cats?: { path: string; name: string[]; n: number }[] };
+  /** search: the corrected query when words were replaced (typos) */
+  fix?: string | null;
   category: { path: Crumb[]; children: { slug: string; path: string; name: string[] }[] } | null;
 }
 

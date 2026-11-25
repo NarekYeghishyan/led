@@ -9,6 +9,7 @@ import { TopBar } from '@/components/TopBar';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BgFx, Fab, HeaderHeight, HoverFx } from '@/components/Effects';
+import { StoreSync } from '@/components/StoreSync';
 import '@/styles/site.css';
 import '@/styles/app.css';
 
@@ -39,6 +40,7 @@ export default async function LangLayout({ children, params }: { children: React
         <Sprite cats={cats} />
         <BgFx />
         <Fab lang={lang as Lang} />
+        <StoreSync lang={lang as Lang} />
         <Suspense fallback={null}><TopBar lang={lang as Lang} /></Suspense>
         <Header lang={lang as Lang} cats={cats} extras={extras} />
         {children}

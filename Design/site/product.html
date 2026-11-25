@@ -2363,19 +2363,24 @@ body.oc-lock{overflow:hidden}
   const T={rec:['Вы искали','Դուք փնտրել եք','Recent'],clr:['Очистить','Մաքրել','Clear'],pop:['Популярные запросы','Հանրաճանաչ որոնումներ','Popular searches'],
     prod:['Товары','Ապրանքներ','Products'],cat:['Категории','Կատեգորիաներ','Categories'],all:['Все результаты','Բոլոր արդյունքները','All results'],none:['Ничего не нашли по запросу','Ոչինչ չգտնվեց','Nothing found for'],dym:['Возможно, вы имели в виду','Գուցե նկատի ունեիք','Did you mean']};
   const t=k=>T[k][L()];
+  const PRE=()=>['/ru','','/en'][L()];
   document.querySelectorAll('.search').forEach(box=>{const inp=box.querySelector('input'),btn=box.querySelector('button');if(!inp||box.dataset.sx)return;box.dataset.sx=1;
     inp.setAttribute('type','search');inp.setAttribute('enterkeyhint','search');inp.setAttribute('autocomplete','off');inp.setAttribute('aria-label','search');
-    const q0=new URLSearchParams(location.search).get('q');if(q0&&/search\.html$/.test(location.pathname))inp.value=q0;
-    const dd=document.createElement('div');dd.className='sx';box.appendChild(dd);let idx=-1;
-    const go=q=>{q=(q||inp.value).trim();if(!q){inp.focus();return}remember(q);location.href='/search.html?q='+encodeURIComponent(q)};
+    const q0=new URLSearchParams(location.search).get('q');if(q0&&/search(\.html)?$/.test(location.pathname))inp.value=q0;
+    const dd=document.createElement('div');dd.className='sx';box.appendChild(dd);let idx=-1,seq=0,tmr=0;
+    const go=q=>{q=(q||inp.value).trim();if(!q){inp.focus();return}remember(q);location.href=PRE()+'/search?q='+encodeURIComponent(q)};
     const paint=()=>{const q=inp.value.trim();idx=-1;
       if(!q){const r=recent();dd.innerHTML=(r.length?`<h6>${t('rec')}<button type="button" data-clr>${t('clr')}</button></h6>`+r.map(x=>`<a data-q="${esc(x)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="nm">${esc(x)}</span></a>`).join(''):'')+
         `<h6>${t('pop')}</h6><div class="chips">${POP.map(x=>`<a data-q="${esc(x)}">${esc(x)}</a>`).join('')}</div>`;return}
-      const res=search(q),cats=[...new Set(res.map(x=>x.cat))].slice(0,3);
-      if(!res.length){const s=suggest(q);dd.innerHTML=`<div class="none">${t('none')} «${esc(q)}»${s?`<br>${t('dym')}: <a data-q="${esc(s)}" style="display:inline;padding:0;color:var(--blue-600);font-weight:600">${esc(s)}</a>`:''}</div>`;return}
-      dd.innerHTML=(cats.length?`<h6>${t('cat')}</h6>`+cats.map(c=>`<a data-q="${esc(q)}" data-c="${c}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nm">${CATS[c][L()]} <small>${res.filter(x=>x.cat===c).length}</small></span></a>`).join(''):'')+
-        `<h6>${t('prod')}</h6>`+res.slice(0,5).map(x=>`<a href="/product.html" data-p="${x.id}"><img src="${x.img}" alt=""><span class="nm">${hl(x.t,q)}<small>${esc(x.spec)}</small></span><b>${fmt(x.p)}</b></a>`).join('')+
-        `<a class="all" data-q="${esc(q)}">${t('all')} (${res.length}) →</a>`;};
+      const my=++seq;clearTimeout(tmr);tmr=setTimeout(()=>fetch('/api/shop/suggest?q='+encodeURIComponent(q)).then(r=>r.ok?r.json():null).then(d=>{
+        if(!d||my!==seq)return;
+        if(!d.items.length){dd.innerHTML=`<div class="none">${t('none')} «${esc(q)}»${d.fix?`<br>${t('dym')}: <a data-q="${esc(d.fix)}" style="display:inline;padding:0;color:var(--blue-600);font-weight:600">${esc(d.fix)}</a>`:''}</div>`;return}
+        const nm=n=>n[[0,1,2][L()]]||n[0];
+        dd.innerHTML=(d.cats.length?`<h6>${t('cat')}</h6><div class="chips">`+d.cats.map(c=>`<a data-q="${esc(q)}" data-c="${esc(c.path)}">${esc(nm(c.name))} <small>${c.n}</small></a>`).join('')+'</div>':'')+
+          `<h6>${t('prod')}</h6>`+d.items.map(x=>{const m=/^(.*?)\s*\((.*)\)?$/.exec(x.name)||[0,x.name,''];
+            return `<a href="${PRE()}/product/${x.slug}" data-p="${x.code}"><img src="${x.image||'/img/placeholder/'+(x.section||'default')+'.svg'}" alt=""><span class="nm">${hl(m[1],d.fix||q)}<small>${esc((m[2]||'').replace(/\)$/,''))}</small></span><b>${fmt(x.price)}</b></a>`}).join('')+
+          `<a class="all" data-q="${esc(d.fix||q)}">${t('all')} (${d.total}) →</a>`;
+      }).catch(()=>{}),180);};
     const show=()=>{paint();dd.classList.add('open')},hide=()=>dd.classList.remove('open');
     inp.addEventListener('focus',show);inp.addEventListener('input',show);
     inp.addEventListener('keydown',e=>{const it=[...dd.querySelectorAll('a')];
@@ -2386,7 +2391,7 @@ body.oc-lock{overflow:hidden}
     dd.addEventListener('mousedown',e=>e.preventDefault());
     dd.addEventListener('click',e=>{const c=e.target.closest('[data-clr]');if(c){localStorage.removeItem(RK);paint();return}
       const a=e.target.closest('a');if(!a)return;if(a.dataset.p){remember(inp.value);return}e.preventDefault();
-      if(a.dataset.c){remember(a.dataset.q);location.href='/search.html?q='+encodeURIComponent(a.dataset.q)+'&cat='+a.dataset.c;return}
+      if(a.dataset.c){remember(a.dataset.q);location.href=PRE()+'/'+a.dataset.c;return}
       inp.value=a.dataset.q;go(a.dataset.q);});
     document.addEventListener('click',e=>{if(!box.contains(e.target))hide()});
     new MutationObserver(()=>{if(dd.classList.contains('open'))paint()}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

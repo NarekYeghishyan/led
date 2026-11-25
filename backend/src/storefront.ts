@@ -16,6 +16,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { identify } from './photos';
 import { SPECS, SPEC_KEYS, specNum, specsOf } from './specs';
+import { norm, search } from './search';
 
 const LOW_STOCK = 3; // "last N" on the site
 const MAX_LIMIT = 60;
@@ -200,7 +201,7 @@ export class StorefrontController {
       catIds = this.subtree(t, node!.id);
     }
 
-    const words = String(qs.q || '').toLowerCase().split(/\s+/).map((w) => w.trim()).filter((w) => w.length >= 1).slice(0, 8);
+    const q = String(qs.q || '').slice(0, 200);
     const [cids, rates] = await this.rateParams();
     const params: unknown[] = [cids, rates];
     const where = [VISIBLE];
@@ -208,17 +209,23 @@ export class StorefrontController {
       params.push(catIds);
       where.push(`EXISTS (SELECT 1 FROM product_site_categories x WHERE x.product_id = p.id AND x.site_category_id = ANY($${params.length}::int[]))`);
     }
-    for (const w of words) {
-      params.push(`%${w.replace(/[\\%_]/g, (m) => `\\${m}`)}%`);
-      where.push(`(p.name ILIKE $${params.length} OR p.barcode ILIKE $${params.length} OR p.external_id::text = '${/^\d+$/.test(w) ? w : '-'}')`);
-    }
-    const rows: Row[] = (await this.ds.query(
+    let rows: Row[] = (await this.ds.query(
       `SELECT p.id, p.external_id AS code, p.name, ${StorefrontController.PRICE} AS price, p.quantity::float AS quantity,
          (jsonb_array_length(p.images) > 0) AS "hasImg"
        FROM products p WHERE ${where.join(' AND ')}`, params))
       .map((r: Row) => ({ ...r, price: Number(r.price) }))
       .filter((r: Row) => r.price > 0);
 
+    // search (search.ts): every word must match name / brand / category names in RU-HY-EN; typos corrected → `fix`
+    let score: Map<number, number> | null = null;
+    let fix: string | null = null;
+    if (q.trim()) {
+      const idx = await this.searchIndex();
+      const r = search(rows.map((x) => ({ id: x.id, code: x.code, name: x.name, brand: brandOf(x.name), text: idx.text(x.id, x.name) })), q);
+      score = r.hits; fix = r.fix;
+      rows = rows.filter((x) => r.hits.has(x.id));
+    }
+    const words = q.trim() ? [q] : [];
 
     // brand / price filters + facets (brand comes from the name: the Access brand column is empty)
     const want = new Set(String(qs.brand || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean));
@@ -255,7 +262,7 @@ export class StorefrontController {
     const specFacets = (qs.cat || words.length) ? this.specFacets(rows.filter((r) => inPrice(r) && inBrand(r)), specWant, inSpecs) : [];
 
     const cmp: Record<Sort, (a: Row, b: Row) => number> = {
-      default: (a, b) => Number(b.hasImg) - Number(a.hasImg) || b.code - a.code,
+      default: (a, b) => (score ? (score.get(b.id) || 0) - (score.get(a.id) || 0) : 0) || Number(b.hasImg) - Number(a.hasImg) || b.code - a.code,
       cheap: (a, b) => a.price - b.price || b.code - a.code,
       expensive: (a, b) => b.price - a.price || b.code - a.code,
       new: (a, b) => b.code - a.code,
@@ -272,9 +279,59 @@ export class StorefrontController {
         brands: [...brandCount].map(([v, n]) => ({ v, n })).sort((a, b) => b.n - a.n || a.v.localeCompare(b.v)),
         price: { min: Number.isFinite(lo) ? lo : 0, max: hi },
         specs: specFacets,
+        cats: score ? await this.catFacet(hit.map((r) => r.id)) : [],
       },
-      category,
+      category, fix,
     };
+  }
+
+  // ---------------------------------------------------------------- search helpers
+
+  private index: { at: number; cats: Map<number, string>; leaf: Map<number, Cat[]> } | null = null;
+
+  /** Per product: normalized names of its site-category paths (RU/HY/EN) + deepest path. Rebuilt every 60 s. */
+  private async searchIndex() {
+    if (!this.index || Date.now() - this.index.at > 60_000) {
+      const t = await this.getTree();
+      const placed: { product_id: number; site_category_id: number; source: string }[] = await this.ds.query(
+        `SELECT product_id, site_category_id, source FROM product_site_categories`);
+      const by = new Map<number, typeof placed>();
+      for (const x of placed) by.set(x.product_id, [...(by.get(x.product_id) || []), x]);
+      const cats = new Map<number, string>(), leaf = new Map<number, Cat[]>();
+      for (const [id, list] of by) {
+        const names = new Set<string>();
+        for (const x of list) for (const c of this.pathOf(t, x.site_category_id) || []) c.names.forEach((n) => names.add(n));
+        cats.set(id, norm([...names].join(' ')));
+        const best = this.bestPath(t, list);
+        if (best) leaf.set(id, best);
+      }
+      this.index = { at: Date.now(), cats, leaf };
+    }
+    const ix = this.index;
+    return { ...ix, text: (id: number, name: string) => `${norm(name)} ${norm(brandOf(name) || '')} ${ix.cats.get(id) || ''}` };
+  }
+
+  /** Search results by category (deepest category of each product), most first: chips on the search page. */
+  private async catFacet(ids: number[]) {
+    const ix = await this.searchIndex();
+    const n = new Map<string, { path: string; name: string[]; n: number }>();
+    for (const id of ids) {
+      const p = ix.leaf.get(id);
+      if (!p) continue;
+      const path = p.map((c) => c.slug).join('/');
+      const cur = n.get(path) || { path, name: p[p.length - 1].names, n: 0 };
+      cur.n++; n.set(path, cur);
+    }
+    return [...n.values()].sort((a, b) => b.n - a.n).slice(0, 12);
+  }
+
+  /** GET /api/shop/suggest?q= → header dropdown: { total, fix, cats (top 4), items (top 5 cards) }. Same matching as the list. */
+  @Get('suggest')
+  @Header('Cache-Control', 'public, max-age=30')
+  async suggest(@Query('q') q: string) {
+    if (!String(q || '').trim()) return { total: 0, fix: null, cats: [], items: [] };
+    const r = await this.list({ q: String(q), limit: '5' });
+    return { total: r.total, fix: r.fix, cats: r.facets.cats.slice(0, 4), items: r.items };
   }
 
   /**
@@ -391,7 +448,7 @@ export class StorefrontController {
     }
     if (rest.startsWith('/products/category/')) return app('/catalog'); // old category without a mapping
     const term = /(?:^|&)term=([^&]*)/.exec(query)?.[1];
-    if (rest === '/search') return page(term ? `/search.html?q=${term}` : '/search.html');
+    if (rest === '/search') return app(term ? `/search?q=${term}` : '/search');
     const OLD: Record<string, string> = {
       '/': '/', '/home': '/', '/index': '/', '/about': '/about.html', '/jobs': '/about.html', '/comments': '/about.html',
       '/contacts': '/contacts.html', '/credit_sale': '/credit.html', '/assembly': '/assembly.html', '/products/cart': '/cart.html',

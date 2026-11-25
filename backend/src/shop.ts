@@ -330,4 +330,35 @@ export class ShopController {
                FROM customer_order_items i LEFT JOIN products p ON p.external_id = i.product_external_id WHERE i.order_id = o.id), '[]') AS items
       FROM customer_orders o WHERE o.customer_id = $1 ORDER BY o.ordered_at DESC NULLS LAST, o.id DESC`, [req.customerId]);
   }
+
+  /** GET /api/shop/me/wishlist → { codes } (Access product codes, newest first). The site merges them with its local list. */
+  @Get('me/wishlist')
+  @UseGuards(CustomerGuard)
+  async wishlist(@Req() req: CustomerReq) {
+    const rows: { c: number }[] = await this.ds.query(
+      `SELECT product_external_id AS c FROM customer_wishlist WHERE customer_id = $1 ORDER BY added_at DESC LIMIT 500`, [req.customerId]);
+    return { codes: rows.map((r) => r.c) };
+  }
+
+  /** POST /api/shop/me/wishlist { add?: number[], remove?: number[] } → { codes }. Max 500 per list; unknown codes are ignored. */
+  @Post('me/wishlist')
+  @UseGuards(CustomerGuard)
+  async wishlistChange(@Body() body: { add?: unknown; remove?: unknown }, @Req() req: CustomerReq) {
+    if (req.adminView) return this.wishlist(req); // an admin viewing as the customer doesn't change their list
+    const codes = (v: unknown) => (Array.isArray(v) ? v : []).map((x) => parseInt(String(x), 10)).filter((n) => n > 0 && n < 1e9).slice(0, 500);
+    const add = codes(body?.add), remove = codes(body?.remove);
+    if (remove.length) {
+      await this.ds.query(`DELETE FROM customer_wishlist WHERE customer_id = $1 AND product_external_id = ANY($2::int[])`, [req.customerId, remove]);
+    }
+    if (add.length) {
+      await this.ds.query(
+        `INSERT INTO customer_wishlist (customer_id, product_external_id)
+         SELECT $1, p.external_id FROM products p WHERE p.external_id = ANY($2::int[]) AND p.deleted_at IS NULL
+         ON CONFLICT DO NOTHING`, [req.customerId, add]);
+      await this.ds.query(
+        `DELETE FROM customer_wishlist WHERE customer_id = $1 AND product_external_id NOT IN
+           (SELECT product_external_id FROM customer_wishlist WHERE customer_id = $1 ORDER BY added_at DESC LIMIT 500)`, [req.customerId]);
+    }
+    return this.wishlist(req);
+  }
 }

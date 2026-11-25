@@ -3,7 +3,7 @@
  * API's facets.specs, backend/src/specs.ts). Page 1 and empty values are left out; spec keys are written sorted so one
  * filter set has one URL.
  */
-export interface CatQuery { brand: string[]; min?: number; max?: number; sort?: string; page?: number; specs: Record<string, string[]> }
+export interface CatQuery { q?: string; cat?: string; brand: string[]; min?: number; max?: number; sort?: string; page?: number; specs: Record<string, string[]> }
 export const SORTS = ['default', 'cheap', 'expensive', 'new', 'name'] as const;
 const RESERVED = new Set(['brand', 'min', 'max', 'sort', 'page', 'q', 'cat', 'limit', 'stock']);
 const SPEC_KEY = /^[a-z][a-z_]{1,15}$/;
@@ -21,7 +21,10 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): C
     const v = list(one(k));
     if (v.length) specs[k] = v;
   }
+  const q = (one('q') || one('term') || '').trim().slice(0, 100); // term = old led.am search links
+  const cat = (one('cat') || '').trim();
   return {
+    q: q || undefined, cat: /^[a-z0-9-]+(\/[a-z0-9-]+){0,2}$/.test(cat) ? cat : undefined,
     brand: list(one('brand')),
     min: num('min'), max: num('max'),
     sort: sort && (SORTS as readonly string[]).includes(sort) && sort !== 'default' ? sort : undefined,
@@ -33,6 +36,8 @@ export function parseQuery(sp: Record<string, string | string[] | undefined>): C
 export function toSearch(q: CatQuery, change: Partial<CatQuery> = {}) {
   const v = { ...q, page: undefined, ...change }; // any filter change goes back to page 1
   const p = new URLSearchParams();
+  if (v.q) p.set('q', v.q);
+  if (v.cat) p.set('cat', v.cat);
   if (v.brand.length) p.set('brand', v.brand.join(','));
   for (const k of Object.keys(v.specs).sort()) if (v.specs[k].length) p.set(k, v.specs[k].join(','));
   if (v.min) p.set('min', String(v.min));
@@ -53,4 +58,4 @@ export function withSpec(q: CatQuery, k: string, v: string): Partial<CatQuery> {
 }
 
 /** Filters or sorting active → this URL is a variant of the category page (canonical = clean URL, noindex). */
-export const isFiltered = (q: CatQuery) => !!(q.brand.length || q.min || q.max || q.sort || Object.keys(q.specs).length);
+export const isFiltered = (q: CatQuery) => !!(q.cat || q.brand.length || q.min || q.max || q.sort || Object.keys(q.specs).length);

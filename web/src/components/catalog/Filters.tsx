@@ -36,7 +36,8 @@ export function Filters({ lang, base, q, brands, price, specs = [], total, child
       {children}
       <div className="fh">
         <b>{t(lang, 'filters')}</b>
-        <a href={base} onClick={(e) => { e.preventDefault(); router.push(base, { scroll: false }); }}>{t(lang, 'reset')}</a>
+        <a href={base + toSearch({ q: q.q, brand: [], specs: {} })}
+          onClick={(e) => { e.preventDefault(); router.push(base + toSearch({ q: q.q, brand: [], specs: {} }), { scroll: false }); }}>{t(lang, 'reset')}</a>
       </div>
       <details open>
         <summary>{t(lang, 'price')}</summary>

@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CatNode, ProductCard } from '@/lib/api';
 import { href, money, pick, STATIC, t, type Lang } from '@/lib/i18n';
+import { SearchBox } from './SearchBox';
 import { Icon } from './Icon';
 
 export interface MegaExtras { [section: string]: { hot: ProductCard[]; brands: string[] } }
@@ -85,10 +86,7 @@ export function Header({ lang, cats, extras }: { lang: Lang; cats: CatNode[]; ex
             onMouseEnter={() => hoverOpen()} onMouseLeave={() => { if (!hovered.current) clearTimeout(openT.current); }}>
             <span className="bars" aria-hidden="true"><i /><i /><i /></span><span>{t(lang, 'catalog')}</span>
           </a>
-          <form className="search" action={STATIC.search} method="get" role="search">
-            <input name="q" placeholder={t(lang, 'search')} aria-label="search" autoComplete="off" />
-            <button>{t(lang, 'find')}</button>
-          </form>
+          <SearchBox lang={lang} />
           <Acts lang={lang} />
         </div>
         <nav className="cats" style={{ ['--cats' as string]: Math.min(cats.length, 8) }}
