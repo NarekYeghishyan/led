@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { money, STATIC, t, type Lang } from '@/lib/i18n';
 import { add, has, toast, toggle, type StoreItem } from '@/lib/store';
 import { Icon } from '../Icon';
@@ -43,6 +44,8 @@ export function BuyActions({ lang, item, max, phone }: { lang: Lang; item: Store
 
 function StickyBar({ lang, item, onAdd }: { lang: Lang; item: StoreItem; onAdd: () => void }) {
   const [show, setShow] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     const el = document.querySelector('.buy');
     if (!el) return;
@@ -50,7 +53,10 @@ function StickyBar({ lang, item, onAdd }: { lang: Lang; item: StoreItem; onAdd: 
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  return (
+  useEffect(() => { document.body.classList.toggle('sbar-on', show); return () => document.body.classList.remove('sbar-on'); }, [show]);
+  // rendered into <body>: inside the sticky buy box its z-index would only count within that box (cards painted over it)
+  if (!mounted) return null;
+  return createPortal(
     <div className={`sbar${show ? ' show' : ''}`}>
       <div className="wrap">
         {item.img ? <img src={item.img} alt="" /> : null}
@@ -58,6 +64,7 @@ function StickyBar({ lang, item, onAdd }: { lang: Lang; item: StoreItem; onAdd: 
         <div className="p"><b>{money(item.p)}</b></div>
         <button className="addc" onClick={onAdd}><Icon name="cart" /><span>{t(lang, 'addCart')}</span></button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
