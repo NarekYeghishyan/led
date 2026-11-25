@@ -29,7 +29,7 @@ const KEY_ICON: Record<string, string> = { main: 'doc', cpu: 'cpu', display: 'mo
 function leftovers(spec: string, values: string[]) {
   const norm = (x: string) => x.toLowerCase().replace(/["″]/g, '').replace(/\s+/g, '');
   const vals = values.map(norm);
-  return spec.split(' · ').filter((p) => p && !vals.some((v) => v && (norm(p).includes(v) || v.includes(norm(p)))));
+  return spec.split(' · ').filter((p) => p && !/^win(dows)?\s?1[01]/i.test(p) && !vals.some((v) => v && (norm(p).includes(v) || v.includes(norm(p)))));
 }
 
 const load = cache(async (lang: Lang, raw: string) => {

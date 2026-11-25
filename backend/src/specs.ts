@@ -37,6 +37,7 @@ export const SPECS: Record<string, SpecDef> = {
   iface: { names: ['Интерфейс', 'Ինտերֆեյս', 'Interface'], group: 'ports' },
   rpm: { names: ['Скорость вращения', 'Պտտման արագություն', 'Spindle speed'], group: 'memory', num: true },
   gpu: { names: ['Видеокарта', 'Վիդեոքարտ', 'Graphics'], group: 'graphics' },
+  gpu_model: { names: ['Модель графики', 'Գրաֆիկայի մոդել', 'Graphics model'], group: 'graphics', noFilter: true },
   os: { names: ['Операционная система', 'Օպերացիոն համակարգ', 'Operating system'], group: 'main' },
   power_w: { names: ['Мощность', 'Հզորություն', 'Power'], group: 'power', num: true },
   power_va: { names: ['Мощность (ВА)', 'Հզորություն (ՎԱ)', 'Power (VA)'], group: 'power', num: true },
@@ -157,7 +158,11 @@ export function parseSpecs(name: string): Specs {
   if (kind === 'laptop' || kind === 'pc') {
     const gpu = /\b((?:GeForce\s+)?RTX\s?\d{4}(?:\s?Ti)?|(?:GeForce\s+)?GTX\s?\d{3,4}|Radeon\s+RX\s?\d{4}\w*|Arc\s+[AB]\d{3}\w*)\b/i.exec(all);
     if (gpu) s.gpu = gpu[1].replace(/GeForce\s+/i, '').replace(/\s+/g, ' ').toUpperCase().replace('RADEON', 'Radeon').replace('ARC', 'Arc');
-    else if (kind === 'laptop') s.gpu = 'integrated';
+    else if (kind === 'laptop') {
+      s.gpu = 'integrated';
+      const name = parts.find((p) => /(Graphics|Radeon|Arc|Iris|UHD|Adreno)/i.test(p));
+      if (name) s.gpu_model = name;
+    }
     const os = /\b(Win(?:dows)?\s?1[01](?:\s?(?:Pro|Home))?|Free\s?DOS|DOS|No\s?OS|Linux|Chrome\s?OS|macOS)\b/i.exec(all);
     s.os = os ? (/^win/i.test(os[1]) ? `Windows ${/1[01]/.exec(os[1])![0]}${/pro/i.test(os[1]) ? ' Pro' : ''}` : /dos|no\s?os/i.test(os[1]) ? 'no' : os[1]) : (kind === 'laptop' ? 'no' : '');
     if (!s.os) delete s.os;
