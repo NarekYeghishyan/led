@@ -575,3 +575,4 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   (`NX_HTML` in shop_shared.html, auth.html header link); nginx 301 `login|registration|forgot-password|account.html`; old
   led.am `/users/login|registration|forgot|profile` → new pages. Checked live: wrong login shows the API error. Backups:
   nginx `/root/led.creativeweb.am.conf.bak-20261125-*`, static `led-static-backup-20261125e.tgz`. Deployed + published.
+- 2026-11-25 — Home instalment card: template look restored — text full width of the card, grey facts box (15 min / in store / up to 36 months, no prices) under the button, as in the template's narrow layout. Deployed.
