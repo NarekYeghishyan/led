@@ -40,6 +40,15 @@ export function getProducts(params: Record<string, string | number | undefined>)
   return get<ProductList>(`/shop/products?${q}`, ['products'], 60);
 }
 
+export interface ProductDetail {
+  code: number; slug: string; name: string; brand: string | null; price: number; currency: string; unit: string | null;
+  stock: { qty: number; state: StockState }; images: string[]; barcode: string | null; description: string | null;
+  seoTitle: string | null; seoDescription: string | null; weight: number | string | null; section: string | null;
+  breadcrumb: Crumb[]; similar: ProductCard[];
+}
+/** GET /api/shop/products/<slug>-<code>; NotFound when unknown or out of stock. */
+export const getProduct = (slug: string) => get<ProductDetail>(`/shop/products/${encodeURIComponent(slug)}`, ['products'], 60);
+
 /** Popup data per section: 3 in-stock products + top brands. One cached call per section. */
 export async function getMegaExtras(sections: CatNode[]) {
   const out: Record<string, { hot: ProductCard[]; brands: string[] }> = {};

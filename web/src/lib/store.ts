@@ -16,9 +16,9 @@ function set(k: StoreKey, v: StoreItem[]) {
   dispatchEvent(new Event('led:store'));
 }
 export const has = (k: StoreKey, id: string) => get(k).some((x) => x.id === id);
-export function add(k: StoreKey, item: StoreItem) {
+export function add(k: StoreKey, item: StoreItem, n = 1) {
   const v = get(k), i = v.findIndex((x) => x.id === item.id);
-  if (i >= 0) { if (k !== 'cart') return; v[i].q = (v[i].q || 1) + 1; } else v.push(k === 'cart' ? { q: 1, ...item } : item);
+  if (i >= 0) { if (k !== 'cart') return; v[i].q = (v[i].q || 1) + n; } else v.push(k === 'cart' ? { ...item, q: n } : item);
   if (k === 'cmp' && v.length > 4) v.shift();
   set(k, v);
 }

@@ -42,3 +42,11 @@ body{font-family:var(--font-inter),var(--font-arm),Inter,"Noto Sans Armenian",sy
 .seo{margin:40px 0 56px}
 .prod .img img.ph{object-fit:contain;background:#F4F8FE}
 .prod .img:has(img.ph){background:#F4F8FE}
+
+/* product page: default image is a drawing, never crop it */
+.stage.ph{cursor:default}
+.stage.ph img{object-fit:contain}
+.stage img,.thumbs img{background:#fff}
+@media (max-width:860px){.pdp,.cols{grid-template-columns:minmax(0,1fr)}.gal{grid-template-columns:minmax(0,1fr)}}
+.pinfo h1,.sbar .t b{overflow-wrap:anywhere}
+.specs dd{overflow-wrap:anywhere}
