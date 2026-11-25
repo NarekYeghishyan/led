@@ -473,5 +473,7 @@ button.pc-tile:hover { border-color: var(--accent); }
 
 /* orders (step 10): status tabs */
 .seg { display: inline-flex; gap: 4px; flex-wrap: wrap; }
-.seg button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 13px; }
+.seg button { color: var(--text, #1f2937); border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 13px; }
 .seg button.on { background: #1468DC; border-color: #1468DC; color: #fff; }
+.seg button:hover:not(.on) { border-color: #1468DC; color: #1468DC; background: var(--panel); }
+.seg button.on:hover { background: #1468DC; color: #fff; }
