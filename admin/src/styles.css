@@ -532,3 +532,4 @@ button.pc-tile:hover { border-color: var(--accent); }
 .pb-table td, .pb-table th { padding: 2px; }
 .pb-table input { width: 100%; box-sizing: border-box; }
 .pb-table th input { font-weight: 700; }
+.pb-chk input { width: auto; margin: 0; }

@@ -607,3 +607,10 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   no failed requests, no broken images, no sideways overflow. Flows: add to cart → cart → checkout (errors, terms) → order → tracking
   (wrong phone = not found) → 1-click from the product page → search dropdown. Fix: phone mask no longer blocks the order forms' own
   check (`data-own-check`), so an empty checkout marks every missing field. Test orders LED-105003…105005 deleted. Deployed.
+- 2026-11-25 — Admin "Страницы сайта": **block constructor** instead of raw HTML (`admin/src/page-builder.tsx`). The body is still stored as
+  HTML (same `site_blocks` 'info', same server cleaning, no site change); the admin parses it into the site's blocks — numbers row,
+  card (icon + heading + paragraphs / subheadings / checklist (✓ or ✗) / steps / icon tiles / icon items / table / labels), two cards
+  side by side, note (yellow / blue) — and writes the same markup back (round-trip checked: all 9 pages × 3 languages identical).
+  Visual text editor (bold, italic, link), icon picker from the site sprite, ↑↓ / duplicate / delete, "+ add block", copy blocks from
+  another language, preview with the site's real CSS and icons. Unknown parts (contacts cards, map, contact form) stay fixed blocks;
+  "HTML (для специалиста)" mode kept. Admin orders status tabs: text colour fixed. Deployed.

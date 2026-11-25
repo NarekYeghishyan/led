@@ -21,7 +21,7 @@ const PAGES: [string, string, string, string][] = [ // key, RU name, EN name, si
 const FIELDS: (keyof F)[] = ['title', 'h1', 'lead', 'html'];
 const TX = {
   title: ['Страницы сайта', 'Site pages'],
-  note: ['Тексты информационных страниц на трёх языках. Сначала показан текущий текст шаблона; сохраняются только изменённые поля. «Как в шаблоне» возвращает исходный текст. Скрипты и формы вырезаются; [[form]] на странице контактов — место формы обратной связи.', 'Texts of the info pages in three languages. The current template text is shown first; only changed fields are saved. "As template" restores the original. Scripts and forms are removed; [[form]] on the contacts page marks the contact form.'],
+  note: ['Тексты информационных страниц на трёх языках. Содержимое собирается из блоков: карточки, цифры, шаги, списки, плитки, таблицы, заметки — справа видно, как будет на сайте. Сохраняются только изменения; «как в шаблоне» возвращает исходный текст.', 'Texts of the info pages in three languages. The content is built from blocks: cards, numbers, steps, lists, tiles, tables, notes — the right side shows how it looks on the site. Only changes are saved; "as template" restores the original.'],
   f_title: ['Заголовок вкладки браузера', 'Browser tab title'], f_h1: ['Заголовок страницы', 'Page heading'], f_lead: ['Подзаголовок', 'Lead line'], f_html: ['Содержимое страницы', 'Page content'],
   blocks: ['Конструктор', 'Constructor'], htmlMode: ['HTML (для специалиста)', 'HTML (expert)'],
   copyFrom: ['Взять блоки из', 'Copy blocks from'], copySure: ['Заменить содержимое этого языка копией? Тексты потом нужно перевести.', 'Replace this language with a copy? Translate the texts afterwards.'],
