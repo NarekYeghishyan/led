@@ -470,3 +470,8 @@ button.pc-tile:hover { border-color: var(--accent); }
 .pb-actions input { flex: 1; min-width: 220px; }
 .tag.info { background: #e6effc; color: #1458b8; }
 .tag.warn { background: #fdf0e1; color: #a35a00; }
+
+/* orders (step 10): status tabs */
+.seg { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.seg button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 13px; }
+.seg button.on { background: #1468DC; border-color: #1468DC; color: #fff; }

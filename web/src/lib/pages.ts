@@ -18,7 +18,7 @@ export const STATIC_FILE: Record<InfoKey, string> = {
 export const NEXT: Partial<Record<InfoKey, string>> = {
   credit: '/credit', about: '/about', buy: '/how-to-buy', order: '/how-to-order', pay: '/how-to-pay', delivery: '/delivery',
   warranty: '/warranty', exchange: '/exchange', contacts: '/contacts',
-  login: '/login', register: '/registration', forgot: '/forgot-password', account: '/account',
+  login: '/login', register: '/registration', forgot: '/forgot-password', account: '/account', track: '/track-order',
 };
 
 export const pageUrl = (lang: Lang, k: InfoKey) => (NEXT[k] ? href(lang, NEXT[k]!) : STATIC_FILE[k]);

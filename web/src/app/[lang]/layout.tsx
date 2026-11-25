@@ -10,6 +10,8 @@ import { Footer } from '@/components/Footer';
 import { BgFx, Fab, HeaderHeight, HoverFx } from '@/components/Effects';
 import { StoreSync } from '@/components/StoreSync';
 import { PhoneMask } from '@/components/PhoneMask';
+import { OneClick } from '@/components/orders/Orders';
+import '@/styles/orders.css';
 import '@/styles/site.css';
 import '@/styles/app.css';
 
@@ -44,6 +46,7 @@ export default async function LangLayout({ children, params }: { children: React
         <Fab lang={lang as Lang} />
         <StoreSync lang={lang as Lang} />
         <PhoneMask />
+        <OneClick lang={lang as Lang} />
         <Suspense fallback={null}><TopBar lang={lang as Lang} /></Suspense>
         <Header lang={lang as Lang} cats={cats} extras={extras} />
         {children}

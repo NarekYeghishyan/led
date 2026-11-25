@@ -1005,7 +1005,7 @@ const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
 const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
 /* moved .html pages → their Next.js path (the account pages; info pages follow) */
-const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account','/about.html':'/about','/contacts.html':'/contacts','/credit.html':'/credit','/exchange.html':'/exchange','/delivery.html':'/delivery','/how-to-buy.html':'/how-to-buy','/how-to-order.html':'/how-to-order','/how-to-pay.html':'/how-to-pay','/warranty.html':'/warranty'};
+const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account','/about.html':'/about','/contacts.html':'/contacts','/credit.html':'/credit','/exchange.html':'/exchange','/delivery.html':'/delivery','/how-to-buy.html':'/how-to-buy','/how-to-order.html':'/how-to-order','/how-to-pay.html':'/how-to-pay','/warranty.html':'/warranty','/assembly.html':'/assembly'};
 const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{let h=a.dataset.nx||a.getAttribute('href');const m=/^(\/[\w-]+\.html)(.*)$/.exec(h);if(m&&NX_HTML[m[1]])h=NX_HTML[m[1]]+m[2];if(!NX_PAGES.test(h)&&!(m&&NX_HTML[m[1]]))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
@@ -1067,7 +1067,7 @@ const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
 const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
 /* moved .html pages → their Next.js path (the account pages; info pages follow) */
-const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account','/about.html':'/about','/contacts.html':'/contacts','/credit.html':'/credit','/exchange.html':'/exchange','/delivery.html':'/delivery','/how-to-buy.html':'/how-to-buy','/how-to-order.html':'/how-to-order','/how-to-pay.html':'/how-to-pay','/warranty.html':'/warranty','/assembly.html':'/assembly'};
+const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account','/about.html':'/about','/contacts.html':'/contacts','/credit.html':'/credit','/exchange.html':'/exchange','/delivery.html':'/delivery','/how-to-buy.html':'/how-to-buy','/how-to-order.html':'/how-to-order','/how-to-pay.html':'/how-to-pay','/warranty.html':'/warranty','/assembly.html':'/assembly','/checkout.html':'/checkout','/track-order.html':'/track-order'};
 const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{let h=a.dataset.nx||a.getAttribute('href');const m=/^(\/[\w-]+\.html)(.*)$/.exec(h);if(m&&NX_HTML[m[1]])h=NX_HTML[m[1]]+m[2];if(!NX_PAGES.test(h)&&!(m&&NX_HTML[m[1]]))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

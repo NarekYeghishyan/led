@@ -8,6 +8,7 @@ import { CategoriesPage, DashboardPage, ImportPage, LogsPage, TablePage, TablesP
 import { CustomerPage, CustomersPage } from './customers';
 import { SiteCategoriesPage } from './site-categories';
 import { HomeBlocksPage } from './home-blocks';
+import { OrderPage, OrdersPage } from './orders';
 import { InfoPagesPage } from './info-pages';
 import { ProductCategoriesPage } from './product-categories';
 import { PhotoBatchPage } from './photo-batch';
@@ -85,6 +86,7 @@ function Layout() {
         <nav>
           <NavLink to="/" end><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/></svg>{t('nav.dashboard')}</NavLink>
           <NavLink to="/products?stock=in"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></svg>{t('nav.products')}</NavLink>
+          <NavLink to="/orders"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>{t('nav.orders')}</NavLink>
           <NavLink to="/customers"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/></svg>{t('nav.customers')}</NavLink>
           <NavLink to="/home"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/></svg>{t('nav.home')}</NavLink>
           <NavLink to="/pages"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7"/></svg>{t('nav.pages')}</NavLink>
@@ -115,6 +117,8 @@ createRoot(document.getElementById('root')!).render(
             <Route index element={<DashboardPage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/:id" element={<ProductPage />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="orders/:id" element={<OrderPage />} />
             <Route path="customers" element={<CustomersPage />} />
             <Route path="customers/:id" element={<CustomerPage />} />
             <Route path="categories" element={<CategoriesPage />} />

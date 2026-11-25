@@ -42,16 +42,18 @@ const T = {
   paid: ['Оплачен', 'Վճարված է', 'Paid'],
   fill: ['Заполните профиль: имя и e-mail помогут при заказе и восстановлении пароля.', 'Լրացրեք պրոֆիլը․ անունը և էլ. հասցեն կօգնեն պատվերի և գաղտնաբառի վերականգնման ժամանակ։', 'Complete your profile: a name and email help with orders and password recovery.'],
 } satisfies Record<string, [string, string, string]>;
-const ST: [string, string, string][] = [['Принят', 'Ընդունված', 'Received'], ['В обработке', 'Մշակվում է', 'In progress'], ['Выполнен', 'Կատարված', 'Completed']];
+const ST: [string, string, string][] = [['Принят', 'Ընդունված', 'Received'], ['В обработке', 'Մշակվում է', 'In progress'], ['Выполнен', 'Կատարված', 'Completed'], ['Отменён', 'Չեղարկված', 'Cancelled']];
+const TRK: [string, string, string] = ['Отследить заказ', 'Հետևել պատվերին', 'Track order'];
 const TYPES: [string, string, string][] = [['Частное лицо', 'Ֆիզիկական անձ', 'Private person'], ['Дилер', 'Դիլեր', 'Dealer'], ['Юридическое лицо', 'Իրավաբանական անձ', 'Corporation']];
-const PAY: Record<string, [string, string, string]> = { cash: ['Наличными', 'Կանխիկ', 'Cash'], card: ['Картой', 'Քարտով', 'Card'], bank: ['Перечислением', 'Փոխանցումով', 'Bank transfer'], credit: ['Рассрочка', 'Ապառիկ', 'Instalments'] };
-const STATUS: Record<string, number> = { received: 0, process: 1, resolved: 2 };
+const PAY: Record<string, [string, string, string]> = { cash: ['Наличными', 'Կանխիկ', 'Cash'], card: ['Картой', 'Քարտով', 'Card'], bank: ['Перечислением', 'Փոխանցումով', 'Bank transfer'], credit: ['Рассрочка', 'Ապառիկ', 'Instalments'], inst: ['Рассрочка', 'Ապառիկ', 'Instalments'] };
+// old led.am statuses + site orders (step 10): new 0, confirmed/shipped 1, done 2, cancelled 3
+const STATUS: Record<string, number> = { received: 0, process: 1, resolved: 2, new: 0, confirmed: 1, shipped: 1, done: 2, cancelled: 3 };
 const HYM = ['հունվարի', 'փետրվարի', 'մարտի', 'ապրիլի', 'մայիսի', 'հունիսի', 'հուլիսի', 'օգոստոսի', 'սեպտեմբերի', 'հոկտեմբերի', 'նոյեմբերի', 'դեկտեմբերի'];
 type Sec = 'ov' | 'orders' | 'profile' | 'adr' | 'pwd';
 const SECS: [Sec, string][] = [['ov', 'grid'], ['orders', 'ix-box'], ['profile', 'user'], ['adr', 'pin'], ['pwd', 'shield']];
 
 type ApiOrder = { id: number; legacyId: number | null; orderedAt: string | null; total: number | null; shipping: boolean | null; shippingCost: number | null;
-  currency: string | null; paymentType: string | null; shopAddress: string | null; city: string | null; address: string | null; status: string; paid: boolean | null;
+  currency: string | null; paymentType: string | null; shopAddress: string | null; city: string | null; address: string | null; status: string; paid: boolean | null; number?: string | null; kind?: string | null; delivery?: string | null;
   items: { article: string | null; name: string | null; price: number | null; qty: number | null; total: number | null }[] };
 
 export function Account({ lang }: { lang: Lang }) {
@@ -159,7 +161,7 @@ export function Account({ lang }: { lang: Lang }) {
     return (
       <div key={o.id} className={`ac-ord${isOpen ? ' open' : ''}`}>
         <button className="ac-oh" type="button" onClick={() => setOpen((v) => { const n = new Set(v); if (n.has(o.id)) n.delete(o.id); else n.add(o.id); return n; })}>
-          <div><b>{t('order')} № {o.legacyId || `S-${o.id}`}</b><small>{dfmt(o.orderedAt)}</small></div>
+          <div><b>{t('order')} № {o.number || o.legacyId || `S-${o.id}`}</b><small>{dfmt(o.orderedAt)}</small></div>
           <div className="sm"><small>{items.reduce((a, x) => a + x.q, 0)} {t('items')}</small></div>
           <span className={`ac-st s${s}`}>{tt(ST[s])}</span><b>{fmt(tot, o.currency)}</b>
           <svg className="chv" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="m6 9 6 6 6-6" /></svg>
@@ -170,7 +172,8 @@ export function Account({ lang }: { lang: Lang }) {
               <div>{x.nm}<br /><small>{x.art ? `${x.art} · ` : ''}{x.q} × {fmt(x.p, o.currency)}</small></div><b>{fmt(x.tot, o.currency)}</b></div>
           ))}
           {o.shipping && o.shippingCost ? <div className="ac-it"><span className="ac-noimg"><Icon name="pin" /></span><div>{t('ship')}</div><b>{fmt(o.shippingCost, o.currency)}</b></div> : null}
-          <div className="ac-tl">{ST.map((x, i) => <span key={i} className={i <= s ? 'on' : undefined}>{tt(x)}</span>)}</div>
+          {o.number ? <a className="ac-trk" href={`${href(lang, '/track-order')}?n=${o.number}`}>→ {tt(TRK)}</a> : null}
+          <div className="ac-tl">{ST.slice(0, 3).map((x, i) => <span key={i} className={i <= s ? 'on' : undefined}>{tt(x)}</span>)}</div>
           <small style={{ color: 'var(--muted)' }}>
             {o.paymentType ? `${t('pay')}: ${PAY[o.paymentType] ? tt(PAY[o.paymentType]) : o.paymentType}${o.paid ? ` (${t('paid')})` : ''} · ` : ''}{t('dlv')}: {dl}
           </small>

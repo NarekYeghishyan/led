@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { href, money, t, type Lang } from '@/lib/i18n';
 import { add, has, toast, toggle, type StoreItem } from '@/lib/store';
 import { Icon } from '../Icon';
+import { openOneClick } from '../orders/Orders';
 
 /** Buy box actions: qty + add to cart (shared localStorage cart), order by phone, wishlist / compare. Sticky bottom bar after scrolling past. */
 export function BuyActions({ lang, item, max, phone }: { lang: Lang; item: StoreItem; max: number; phone: string }) {
@@ -28,7 +29,8 @@ export function BuyActions({ lang, item, max, phone }: { lang: Lang; item: Store
         </div>
         <button className="addc" onClick={cart}><Icon name="cart" /><span>{t(lang, 'addCart')}</span></button>
       </div>
-      <a className="oneclick" href={`tel:${phone}`}><Icon name="call" /><span>{t(lang, 'callOrder')}</span></a>
+      <button type="button" className="oneclick" onClick={() => openOneClick([{ ...item, q }])}><Icon name="call" /><span>{t(lang, 'oneClick')}</span></button>
+      <a className="oneclick-tel" href={`tel:${phone}`}><Icon name="phone" /><span>{t(lang, 'callOrder')}</span></a>
       <div className="sec-act">
         <button className="fv" aria-pressed={fav} onClick={() => { const v = toggle('fav', item); toast(t(lang, v ? 'favOn' : 'favOff'), v ? t(lang, 'go') : undefined, href(lang, '/favorites')); }}>
           <Icon name="heart" /><span>{t(lang, 'toFav')}</span>

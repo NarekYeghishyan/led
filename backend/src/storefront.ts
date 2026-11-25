@@ -118,6 +118,15 @@ export class StorefrontController {
     return [[...m.keys()], [...m.values()]];
   }
 
+  /** Current ֏ price, name and stock of sellable products by Access code — the order endpoint re-prices the cart with it (never trusts the browser). */
+  async orderLines(codes: number[]): Promise<{ code: number; name: string; quantity: number; price: number }[]> {
+    if (!codes.length) return [];
+    const rows = await this.ds.query(
+      `SELECT p.external_id AS code, p.name, p.quantity::float AS quantity, ${StorefrontController.PRICE}::float AS price
+       FROM products p WHERE ${VISIBLE} AND p.external_id = ANY($3::int[])`, [...(await this.rateParams()), codes]);
+    return rows.filter((r: { price: number | null }) => r.price && r.price > 0);
+  }
+
   private async getTree() {
     await loadSpecEdits(this.ds); // admin spec corrections (spec-edits.ts), cached 60 s
     if (this.tree && Date.now() - this.tree.at < 60_000) return this.tree;

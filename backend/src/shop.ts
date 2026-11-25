@@ -22,7 +22,7 @@ const DAY = 24 * 3600 * 1000;
 const PHONE8 = `right(regexp_replace(coalesce(c.phone, ''), '\\D', '', 'g'), 8)`;
 
 /** Error with a code the site translates (HY/RU/EN). */
-const fail = (status: HttpStatus, code: string, message: string) => new HttpException({ statusCode: status, code, message }, status);
+export const fail = (status: HttpStatus, code: string, message: string) => new HttpException({ statusCode: status, code, message }, status);
 
 /** Armenian number → 8 national digits (91123456), or '' if it is not a phone number. */
 export function phone8(v: unknown) {
@@ -38,7 +38,7 @@ const fmtPhone = (p8: string) => `+374${p8}`;
 
 // ---------------------------------------------------------------- tiny in-memory rate limiter (one API instance)
 const hits = new Map<string, number[]>();
-function limit(key: string, max: number, windowMs: number) {
+export function limit(key: string, max: number, windowMs: number) {
   const now = Date.now();
   const arr = (hits.get(key) || []).filter((t) => now - t < windowMs);
   if (arr.length >= max) throw fail(HttpStatus.TOO_MANY_REQUESTS, 'too_many', 'Too many attempts, try again later');
@@ -46,7 +46,7 @@ function limit(key: string, max: number, windowMs: number) {
   hits.set(key, arr);
   if (hits.size > 20000) for (const [k, v] of hits) if (!v.some((t) => now - t < 3600_000)) hits.delete(k);
 }
-const ip = (req: Request) => req.ip || 'unknown';
+export const ip = (req: Request) => req.ip || 'unknown';
 
 function readCookie(req: Request, name: string) {
   for (const part of String(req.headers.cookie || '').split(';')) {
@@ -63,17 +63,24 @@ export class CustomerGuard implements CanActivate {
   constructor(private jwt: JwtService, @InjectDataSource() private ds: DataSource) {}
   async canActivate(ctx: ExecutionContext) {
     const req = ctx.switchToHttp().getRequest<CustomerReq>();
-    const token = readCookie(req, COOKIE);
-    if (!token) throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
-    let p: { sub: number; kind: string; v: number; imp?: string };
-    try { p = this.jwt.verify(token); } catch { throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in'); }
-    if (p?.kind !== 'customer') throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
-    const [c] = await this.ds.query(`SELECT blocked, token_version FROM customers WHERE id = $1`, [p.sub]);
-    if (!c || c.blocked || c.token_version !== (p.v ?? 0)) throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
+    const p = await sessionOf(this.jwt, this.ds, req);
+    if (!p) throw fail(HttpStatus.UNAUTHORIZED, 'no_session', 'Not logged in');
     req.customerId = p.sub;
     if (p.imp) req.adminView = p.imp;
     return true;
   }
+}
+
+/** The logged-in customer of this request (valid, not blocked, current token version), or null. Used by optional-login endpoints (orders). */
+export async function sessionOf(jwt: JwtService, ds: DataSource, req: Request) {
+  const token = readCookie(req, COOKIE);
+  if (!token) return null;
+  let p: { sub: number; kind: string; v: number; imp?: string };
+  try { p = jwt.verify(token); } catch { return null; }
+  if (p?.kind !== 'customer') return null;
+  const [c] = await ds.query(`SELECT blocked, token_version FROM customers WHERE id = $1`, [p.sub]);
+  if (!c || c.blocked || c.token_version !== (p.v ?? 0)) return null;
+  return p;
 }
 
 const ME_COLS = `c.id, c.name, c.phone, c.email, c.login, c.city, c.country, c.address, c.postal_code AS "postalCode", c.type,
@@ -324,7 +331,7 @@ export class ShopController {
       SELECT o.id, o.legacy_id AS "legacyId", o.source, o.ordered_at AS "orderedAt", o.contact_person AS "contactPerson",
              o.contact_phone AS "contactPhone", o.city, o.address, o.total::float AS total, o.shipping,
              o.shipping_cost::float AS "shippingCost", o.currency, o.payment_type AS "paymentType", o.shop_address AS "shopAddress",
-             o.status, o.paid,
+             o.status, o.paid, o.number, o.kind, o.delivery,
              COALESCE((SELECT json_agg(json_build_object('article', i.article, 'name', COALESCE(i.name, p.name), 'price', i.price::float,
                'qty', i.qty, 'total', i.total::float) ORDER BY i.id)
                FROM customer_order_items i LEFT JOIN products p ON p.external_id = i.product_external_id WHERE i.order_id = o.id), '[]') AS items

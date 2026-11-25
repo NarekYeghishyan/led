@@ -4,12 +4,13 @@
  * led-cmp, items "p<Access code>"); StoreSync in the layout has already re-checked prices and stock on this page load.
  * Markup and classes = the templates' shop pages (Design/site-src/shop_pages.html → styles/shop.css), minus the demo
  * parts: no invented delivery fees, promo codes, instalment maths or "best LED score". 1-click and checkout come with
- * real orders (step 10); until then checkout opens the static checkout page and "order by phone" dials the store.
+ * real orders (step 10): checkout = /checkout, 1-click = components/orders/Orders.tsx.
  */
 import { useEffect, useState } from 'react';
-import { href, money, pick, specValue, STATIC, t, type Lang, type TKey } from '@/lib/i18n';
+import { href, money, pick, specValue, t, type Lang, type TKey } from '@/lib/i18n';
 import { add, codeOf, get, set, toast, toggle, type StoreItem, type StoreKey } from '@/lib/store';
 import { Icon } from '../Icon';
+import { openOneClick } from '../orders/Orders';
 
 const PHONE = '+37410502802';
 
@@ -73,7 +74,7 @@ export function CartPage({ lang }: { lang: Lang }) {
   };
   const go = () => {
     try { sessionStorage.setItem('led-co', JSON.stringify({ ...JSON.parse(sessionStorage.getItem('led-co') || '{}'), ship, promo: false })); } catch { /* */ }
-    location.href = lang === 'hy' ? STATIC.checkout : `${STATIC.checkout}?lang=${lang}`;
+    location.href = href(lang, '/checkout');
   };
   return (
     <>
@@ -124,7 +125,8 @@ export function CartPage({ lang }: { lang: Lang }) {
           <div className="sp-ln"><span>{t(lang, 'shipH')}</span><b>{ship === 'pick' ? t(lang, 'free') : t(lang, 'byManager')}</b></div>
           <div className="sp-tot"><span>{t(lang, 'total')}</span><b>{money(goods)}</b></div>
           <button className="sp-b p big" onClick={go}>{t(lang, 'checkout')}</button>
-          <a className="sp-b big" href={`tel:${PHONE}`}>{t(lang, 'callOrder')}</a>
+          <button className="sp-b big" onClick={() => openOneClick(v, true)}>{t(lang, 'oneClick')}</button>
+          <a className="sp-tel" href={`tel:${PHONE}`}><Icon name="call" />010 502-802</a>
           <div className="sp-safe"><Icon name="sp-shield" />{t(lang, 'safe')}</div>
           <div className="sp-pay"><span>ArCa</span><span>VISA</span><span>Mastercard</span><span>Idram</span></div>
         </aside>

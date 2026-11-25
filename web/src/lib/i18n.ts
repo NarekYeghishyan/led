@@ -120,6 +120,7 @@ const T = {
   spBrand: ['Բրենդ', 'Бренд', 'Brand'],
   spCode: ['Կոդ', 'Код', 'Code'],
   addCart: ['Ավելացնել զամբյուղ', 'В корзину', 'Add to cart'],
+  oneClick: ['Գնել 1 քայլով', 'Купить в 1 клик', 'Buy in 1 click'],
   callOrder: ['Պատվիրել զանգով', 'Заказать по телефону', 'Order by phone'],
   toFav: ['Ընտրյալներ', 'В избранное', 'Wishlist'],
   inStockN: ['· {n} հատ պահեստում', '· {n} шт. на складе', '· {n} pcs in stock'],
