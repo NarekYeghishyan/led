@@ -67,7 +67,7 @@ for sel, body in css_rules(css):
         have_rules |= {_n(sel) + "|" + _n(s) + "{" + _n(b) for s, b in css_rules(body)}
     else:
         have_rules.add("|" + _n(sel) + "{" + _n(body))
-SKIP = re.compile(r"^(body|html|\.mega|\.mg\b|\.mg-|\.mg\.|\.tb\b|\.tb-|\.tb\.)")
+SKIP = re.compile(r"^(body|html|\.mega|\.mg\b|\.mg-|\.mg\.)")
 home_out = []
 for block in re.findall(r"<style[^>]*>(.*?)</style>", (SITE / "index.html").read_text(encoding="utf-8"), re.S):
     for sel, body in css_rules(block):

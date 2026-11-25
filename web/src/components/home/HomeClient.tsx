@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { href, money, t, type Lang } from '@/lib/i18n';
 import { add, toast, type StoreItem } from '@/lib/store';
 import { Icon } from '../Icon';
+import type { Build } from '@/lib/builds';
 import { GM_ART, GM_ICON, GM_TOP } from './art';
 
 export type Slide = { tag: string; title: string; spec: string; price: number; img: string; url: string; item: StoreItem };
@@ -146,5 +147,77 @@ export function CreditCalc({ lang, price }: { lang: Lang; price: number }) {
         <div><span>3</span><span>36</span></div>
       </div>
     </>
+  );
+}
+
+/** "Top ready builds" (template index.html #topBuilds): tabs auto-rotate every 7 s (pause on hover), animated PC tower,
+ *  4 spec chips, real parts (lib/builds.ts) with their links, total = sum of real prices, cart adds every part. */
+const TB: Record<string, [string, string, string]> = {
+  ttl: ['Լավագույն պատրաստի հավաքումներ', 'Топ готовых сборок', 'Top ready builds'],
+  office: ['Գրասենյակ', 'Офис', 'Office'], gamer: ['Խաղային', 'Игровой', 'Gaming'], pro: ['Ուլտրա', 'Ультра', 'Ultra'],
+  kOffice: ['Աշխատանքի և ուսման համար', 'Для работы и учёбы', 'For work & study'],
+  kGamer: ['Խաղերի համար', 'Для игр', 'For gaming'], kPro: ['Սթրիմի և 3D‑ի համար', 'Для стрима и 3D', 'For streaming & 3D'],
+  badge: ['Առկա է', 'В наличии', 'In stock'], parts: ['Մասերը', 'Комплектующие', 'Parts'],
+  cart: ['Զամբյուղ', 'В корзину', 'Add to cart'], cfg: ['Կարգավորել', 'Настроить', 'Configure'],
+  add: ['Հավաքման մասերը ավելացվեցին զամբյուղ', 'Комплектующие сборки добавлены в корзину', 'Build parts added to cart'],
+  go: ['Անցնել', 'Перейти', 'View'], sum: ['մասերի գումարը', 'сумма комплектующих', 'sum of the parts'],
+};
+const TBC = { office: ['#4F8EF7', '#A5C8FF'], gamer: ['#A855F7', '#22D3EE'], pro: ['#F97316', '#FACC15'] } as const;
+const TBI = ['cpu', 'monitor', 'server', 'doc'];
+export function TopBuilds({ lang, builds, cfgUrl }: { lang: Lang; builds: Build[]; cfgUrl: string }) {
+  const L = { hy: 0, ru: 1, en: 2 }[lang];
+  const tx = (k: string) => TB[k][L];
+  const [cur, setCur] = useState(Math.min(1, builds.length - 1));
+  const [hold, setHold] = useState(false);
+  const [open, setOpen] = useState(false);
+  const DUR = 7000;
+  useEffect(() => {
+    if (hold || open || builds.length < 2) return;
+    const id = setTimeout(() => setCur((c) => (c + 1) % builds.length), DUR);
+    return () => clearTimeout(id);
+  }, [cur, hold, open, builds.length]);
+  if (!builds.length) return null;
+  const b = builds[cur];
+  const kick = { office: 'kOffice', gamer: 'kGamer', pro: 'kPro' }[b.k];
+  const toCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    for (const p of b.parts) {
+      const u = href(lang, `/product/${p.slug}`), img = p.image || `/img/placeholder/${p.section || 'default'}.svg`;
+      add('cart', { id: `p${p.code}`, code: p.code, t: p.name, img, p: p.price, url: u });
+    }
+    toast(tx('add'), tx('go'), href(lang, '/cart'));
+  };
+  return (
+    <div className={`tb${hold ? ' hold' : ''}`} style={{ '--c1': TBC[b.k][0], '--c2': TBC[b.k][1], '--dur': `${DUR}ms` } as React.CSSProperties}
+      onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)}>
+      <div className="tb-h">
+        <b className="tb-ttl">{tx('ttl')}</b>
+        <div className="tb-tabs" role="tablist">
+          {builds.map((x, i) => <button key={x.k + (i === cur ? cur : '')} role="tab" className={i === cur ? 'on' : ''} onClick={() => { setCur(i); setOpen(false); }}>{tx(x.k)}<i /></button>)}
+        </div>
+      </div>
+      <div className="tb-card in" key={b.k}>
+        <div className="tb-pc">
+          <span className="tb-badge">{tx('badge')}</span>
+          <div className="tb-case"><span className="tb-fan" /><span className="tb-fan" /><span className="tb-fan" />{b.parts.some((p) => p.role === 'gpu') ? <span className="tb-gpu" /> : null}<span className="tb-strip" /></div>
+        </div>
+        <div className="tb-info">
+          <small className="k">{tx(kick)}</small>
+          <h4>LED {tx(b.k)}</h4>
+          <ul className="tb-spec">{b.spec.map((s, i) => <li key={i}><Icon name={TBI[i]} /><span>{s}</span></li>)}</ul>
+          <details className="tb-parts" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
+            <summary>{tx('parts')} ({b.parts.length})</summary>
+            <ul>{b.parts.map((p) => <li key={p.code}><a href={href(lang, `/product/${p.slug}`)}>{p.name}</a><b>{money(p.price)}</b></li>)}</ul>
+          </details>
+          <div className="tb-buy">
+            <div className="tb-pr"><b>{money(b.price)}</b><small>{tx('sum')}</small></div>
+            <div className="tb-act">
+              <a className="btn g tb-cart" href="#" title={tx('cart')} aria-label={tx('cart')} onClick={toCart}><Icon name="cart" /></a>
+              <a className="btn p tb-cfg" href={cfgUrl}>{tx('cfg')} <Icon name="arrow" /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

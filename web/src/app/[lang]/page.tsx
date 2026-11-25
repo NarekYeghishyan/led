@@ -12,8 +12,9 @@ import { href, pick, STATIC, t, type Lang } from '@/lib/i18n';
 import { ProductCard, splitName } from '@/components/ProductCard';
 import { Icon } from '@/components/Icon';
 import { pageUrl } from '@/lib/pages';
-import { BestTabs, CreditCalc, GamingCard, HeroSlider, type Slide } from '@/components/home/HomeClient';
+import { BestTabs, CreditCalc, TopBuilds, GamingCard, HeroSlider, type Slide } from '@/components/home/HomeClient';
 import { BRAND_LOGOS, CHAIN, QK_NEW, QK_SALE } from '@/components/home/art';
+import { getBuilds } from '@/lib/builds';
 import '@/styles/home.css';
 
 type P = { params: Promise<{ lang: string }> };
@@ -49,7 +50,7 @@ const countLeaves = (n: CatNode[]): number => n.reduce((s, c) => s + (c.c?.lengt
 
 export default async function Home({ params }: P) {
   const lang = (await params).lang as Lang;
-  const { cats, all, fresh, bySection } = await load();
+  const [{ cats, all, fresh, bySection }, builds] = await Promise.all([load(), getBuilds().catch(() => [])]);
   const url = (p: Card) => href(lang, `/product/${p.slug}`);
   const img = (p: Card) => p.image || `/img/placeholder/${p.section || 'default'}.svg`;
 
@@ -143,6 +144,7 @@ export default async function Home({ params }: P) {
             <ul className="perks">{(['b1', 'b2', 'b3'] as const).map((k) => <li key={k}><Icon name="check" /><span>{t(lang, k)}</span></li>)}</ul>
             <div className="btns"><a className="btn p" href={STATIC.assembly}>{t(lang, 'bGo')} <Icon name="arrow" /></a></div>
           </div>
+          <TopBuilds lang={lang} builds={builds} cfgUrl={STATIC.assembly} />
         </div>
         <div className="credit">
           <span className="eyebrow">{t(lang, 'crEyebrow')}</span>
