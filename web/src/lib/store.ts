@@ -11,7 +11,7 @@ const K: Record<StoreKey, string> = { cart: 'led-cart', fav: 'led-fav', cmp: 'le
 export function get(k: StoreKey): StoreItem[] {
   try { const v = JSON.parse(localStorage.getItem(K[k]) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; }
 }
-function set(k: StoreKey, v: StoreItem[]) {
+export function set(k: StoreKey, v: StoreItem[]) {
   try { localStorage.setItem(K[k], JSON.stringify(v)); } catch { /* private mode */ }
   dispatchEvent(new Event('led:store'));
 }
@@ -110,11 +110,11 @@ export async function syncStore(url: (slug: string) => string) {
 
 /** The templates' bottom toast (.sp-toast in site.css) with an optional button. */
 let el: HTMLDivElement | null = null, timer: ReturnType<typeof setTimeout> | undefined;
-export function toast(msg: string, btn?: string, go?: string) {
+export function toast(msg: string, btn?: string, go?: string | (() => void)) {
   if (!el) { el = document.createElement('div'); el.className = 'sp-toast'; document.body.appendChild(el); }
   el.textContent = '';
   const s = document.createElement('span'); s.textContent = msg; el.appendChild(s);
-  if (btn && go) { const b = document.createElement('button'); b.textContent = btn; b.onclick = () => { location.href = go; }; el.appendChild(b); }
+  if (btn && go) { const b = document.createElement('button'); b.textContent = btn; b.onclick = () => { if (typeof go === 'function') { go(); el?.classList.remove('on'); } else location.href = go; }; el.appendChild(b); }
   const e = el;
   requestAnimationFrame(() => e.classList.add('on'));
   clearTimeout(timer); timer = setTimeout(() => e.classList.remove('on'), 4200);

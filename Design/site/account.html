@@ -842,7 +842,7 @@ document.addEventListener('DOMContentLoaded',function(){
       nav.classList.add('ac-nav');
       nav.innerHTML=`<div class="ip-menu"><div class="ac-who"><span class="ac-av">${ini}</span><div><b>${esc(who)}</b><small>${esc(u.name?u.phone||u.email||'':u.email||'')}</small>${ti>0?`<br><span class="ac-tag">${tt(T.types[ti])}</span>`:''}</div></div>`+
         `<div class="ac-tabs">`+M.map(([k,i])=>`<a href="#${k}" data-s="${k}"${k===sec?' class="on"':''}>${ic(i)}<span>${t(k)}</span></a>`).join('')+`</div>`+
-        `<hr><a href="/favorites.html">${ic('heart')}<span>${t('fav')}</span></a><a href="/compare.html">${ic('cmp')}<span>${t('cmp')}</span></a><a href="/cart.html">${ic('cart')}<span>${t('cart')}</span></a>`+
+        `<hr><a href="/favorites">${ic('heart')}<span>${t('fav')}</span></a><a href="/compare">${ic('cmp')}<span>${t('cmp')}</span></a><a href="/cart">${ic('cart')}<span>${t('cart')}</span></a>`+
         `<hr><a href="#" class="ac-out">${ic('arrow')}<span>${t('out')}</span></a></div>`;
       const S=window.LEDStore, c=k=>S?S.count(k):0;
       const orderHTML=o=>`<div class="ac-ord" data-n="${esc(o.n)}"><button class="ac-oh" type="button"><div><b>${t('order')} № ${esc(o.n)}</b><small>${dfmt(o.d)}</small></div>
@@ -862,9 +862,9 @@ document.addEventListener('DOMContentLoaded',function(){
         ${!u.name||!u.email?`<p class="ac-fill"><a href="#profile" data-s="profile">${t('fill')}</a></p>`:''}</div>
         <div class="ac-stats" style="margin-top:18px">
           <a href="#orders" data-s="orders"><span class="ic">${ic('ix-box')}</span><b>${ORD.length||u.orderCount||0}</b><small>${t('orders')}</small></a>
-          <a href="/favorites.html"><span class="ic">${ic('heart')}</span><b>${c('fav')}</b><small>${t('fav')}</small></a>
-          <a href="/compare.html"><span class="ic">${ic('cmp')}</span><b>${c('cmp')}</b><small>${t('cmp')}</small></a>
-          <a href="/cart.html"><span class="ic">${ic('cart')}</span><b>${c('cart')}</b><small>${t('cart')}</small></a></div>
+          <a href="/favorites"><span class="ic">${ic('heart')}</span><b>${c('fav')}</b><small>${t('fav')}</small></a>
+          <a href="/compare"><span class="ic">${ic('cmp')}</span><b>${c('cmp')}</b><small>${t('cmp')}</small></a>
+          <a href="/cart"><span class="ic">${ic('cart')}</span><b>${c('cart')}</b><small>${t('cart')}</small></a></div>
         <div class="ip-card" style="margin-top:18px"><h2 style="justify-content:space-between"><span style="display:flex;gap:12px;align-items:center"><span class="ic">${ic('ix-box')}</span>${t('recent')}</span>${ORD.length>2?`<a href="#orders" data-s="orders" style="font-size:14px;color:var(--blue-600)">${t('all')}</a>`:''}</h2>${ORD.length?ORD.slice(0,2).map(orderHTML).join(''):`<div class="ac-empty">${t('none')}</div>`}</div>
       </section>
       <section class="ac-sec${sec==='orders'?' on':''}" data-s="orders"><div class="ip-card"><h2><span class="ic">${ic('ix-box')}</span>${t('orders')}</h2>
@@ -1180,7 +1180,7 @@ function add(k,item){const v=get(k),i=v.findIndex(x=>x.id===item.id);
 const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
-const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart.html',fav:'/favorites.html',cmp:'/compare.html'};
+const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart',fav:'/favorites',cmp:'/compare'};
 function act(k){return document.querySelector(`.acts .act use[href="${ICON[k]}"]`)?.closest('.act')}
 function paint(k,bump=true){const a=act(k);if(!a)return;let em=a.querySelector('em');const n=count(k);
  if(!n){em&&em.remove();return}if(!em){em=document.createElement('em');a.appendChild(em)}
@@ -1222,9 +1222,7 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 <script>/* LED shop store: cart / favourites / compare in localStorage (demo until the API exists) */
 (function(){
 const K={cart:'led-cart',fav:'led-fav',cmp:'led-cmp'};
-const SEED={cart:[{id:'lenovo-ideapad-slim-3-15',q:1},{id:'hp-pavilion-15',q:1}],
- fav:[{id:'asus-zenbook-14-oled'},{id:'msi-thin-gf63'},{id:'lenovo-yoga-7-2-in-1-14'},{id:'dell-inspiron-14'}],
- cmp:[{id:'lenovo-ideapad-slim-3-15'},{id:'hp-pavilion-15'},{id:'asus-vivobook-16'}]};
+const SEED={cart:[],fav:[],cmp:[]}; /* real products only (no demo seed) */
 const slug=t=>(t||'').toLowerCase().replace(/[″"]/g,'').replace(/[^a-z0-9а-яё]+/gi,'-').replace(/^-|-$/g,'');
 const get=k=>{let v=null;try{v=JSON.parse(localStorage.getItem(K[k]))}catch(e){}return Array.isArray(v)?v:SEED[k].map(x=>({...x}))};
 const subs=[];
@@ -1236,7 +1234,13 @@ function add(k,item){const v=get(k),i=v.findIndex(x=>x.id===item.id);
 const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
-const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart.html',fav:'/favorites.html',cmp:'/compare.html'};
+/* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
+const NX=p=>({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+p;
+const NX_PAGES=/^\/(cart|favorites|compare|search)(\?|#|$)/;
+const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
+document.addEventListener('DOMContentLoaded',fixLinks);
+new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={get cart(){return NX('/cart')},get fav(){return NX('/favorites')},get cmp(){return NX('/compare')}};
 function act(k){return document.querySelector(`.acts .act use[href="${ICON[k]}"]`)?.closest('.act')}
 function paint(k,bump=true){const a=act(k);if(!a)return;let em=a.querySelector('em');const n=count(k);
  if(!n){em&&em.remove();return}if(!em){em=document.createElement('em');a.appendChild(em)}

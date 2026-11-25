@@ -928,7 +928,7 @@ function add(k,item){const v=get(k),i=v.findIndex(x=>x.id===item.id);
 const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
-const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart.html',fav:'/favorites.html',cmp:'/compare.html'};
+const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart',fav:'/favorites',cmp:'/compare'};
 function act(k){return document.querySelector(`.acts .act use[href="${ICON[k]}"]`)?.closest('.act')}
 function paint(k,bump=true){const a=act(k);if(!a)return;let em=a.querySelector('em');const n=count(k);
  if(!n){em&&em.remove();return}if(!em){em=document.createElement('em');a.appendChild(em)}
@@ -982,9 +982,7 @@ window.LEDStore={get,set,add,remove,toggle,has,count,toast,slug,subscribe:f=>sub
 <script>/* LED shop store: cart / favourites / compare in localStorage (demo until the API exists) */
 (function(){
 const K={cart:'led-cart',fav:'led-fav',cmp:'led-cmp'};
-const SEED={cart:[{id:'lenovo-ideapad-slim-3-15',q:1},{id:'hp-pavilion-15',q:1}],
- fav:[{id:'asus-zenbook-14-oled'},{id:'msi-thin-gf63'},{id:'lenovo-yoga-7-2-in-1-14'},{id:'dell-inspiron-14'}],
- cmp:[{id:'lenovo-ideapad-slim-3-15'},{id:'hp-pavilion-15'},{id:'asus-vivobook-16'}]};
+const SEED={cart:[],fav:[],cmp:[]}; /* real products only (no demo seed) */
 const slug=t=>(t||'').toLowerCase().replace(/[″"]/g,'').replace(/[^a-z0-9а-яё]+/gi,'-').replace(/^-|-$/g,'');
 const get=k=>{let v=null;try{v=JSON.parse(localStorage.getItem(K[k]))}catch(e){}return Array.isArray(v)?v:SEED[k].map(x=>({...x}))};
 const subs=[];
@@ -996,7 +994,13 @@ function add(k,item){const v=get(k),i=v.findIndex(x=>x.id===item.id);
 const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
-const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart.html',fav:'/favorites.html',cmp:'/compare.html'};
+/* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
+const NX=p=>({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+p;
+const NX_PAGES=/^\/(cart|favorites|compare|search)(\?|#|$)/;
+const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
+document.addEventListener('DOMContentLoaded',fixLinks);
+new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={get cart(){return NX('/cart')},get fav(){return NX('/favorites')},get cmp(){return NX('/compare')}};
 function act(k){return document.querySelector(`.acts .act use[href="${ICON[k]}"]`)?.closest('.act')}
 function paint(k,bump=true){const a=act(k);if(!a)return;let em=a.querySelector('em');const n=count(k);
  if(!n){em&&em.remove();return}if(!em){em=document.createElement('em');a.appendChild(em)}
@@ -1449,7 +1453,7 @@ function checkout(){
  const days=[0,1,2,3,4].map(i=>{const dt=new Date();dt.setDate(dt.getDate()+i+1);return [i,i===0?ct('tomorrow'):(L()===1?['կիր','երկ','երք','չրք','հնգ','ուրբ','շբթ'][dt.getDay()]+', '+dt.getDate()+' '+['հնվ','փտվ','մրտ','ապր','մյս','հնս','հլս','օգս','սպտ','հկտ','նյմ','դկտ'][dt.getMonth()]:dt.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{weekday:'short',day:'numeric',month:'short'}))]});
  const adrs=(()=>{try{return JSON.parse(localStorage.getItem('led-adr'))||[]}catch(e){return[]}})();
  const PAY=[['cash','ix-wallet'],['card','card'],['idram','phone'],['inst','doc'],...(who==='com'?[['bank','store']]:[])];
- root.innerHTML=head('ix-box',ct('h'),`${n} ${T.items} · ${fmt(tot)}`,`<div class="sp-steps"><a href="/cart.html" class="on" style="display:flex;gap:6px;align-items:center;color:inherit;text-decoration:none"><i>✓</i>${T.cart}</a><b></b><span class="on"><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+
+ root.innerHTML=head('ix-box',ct('h'),`${n} ${T.items} · ${fmt(tot)}`,`<div class="sp-steps"><a href="/cart" class="on" style="display:flex;gap:6px;align-items:center;color:inherit;text-decoration:none"><i>✓</i>${T.cart}</a><b></b><span class="on"><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+
  `<form class="sp-cart co" id="coForm" novalidate><div>
   <div class="sp-card co-s"><h3><i>1</i>${ct('c1')}</h3>
    ${u?`<p class="co-hint">${ic('user')}${ct('hello')} <b>${u.fname||u.login}</b></p>`:`<p class="co-hint">${ic('user')}${ct('have')} <a href="/login.html">${ct('in')}</a></p>`}
@@ -1471,7 +1475,7 @@ function checkout(){
   <div class="sp-card co-s"><h3><i>4</i>${ct('c4')}</h3><textarea name="cmt" placeholder="${ct('cmt')}">${co.cmt||''}</textarea>
    <label class="co-chk"><input type="checkbox" name="call"${co.call!==false?' checked':''}>${ct('call')}</label></div>
  </div>
- <aside class="sp-card sp-side"><h3 style="display:flex;justify-content:space-between">${ct('items')} <a href="/cart.html" style="font-size:13.5px;color:var(--blue-600)">${ct('edit')}</a></h3>
+ <aside class="sp-card sp-side"><h3 style="display:flex;justify-content:space-between">${ct('items')} <a href="/cart" style="font-size:13.5px;color:var(--blue-600)">${ct('edit')}</a></h3>
   <div class="co-its">${v.map(x=>`<div><span class="im"><img src="${x.img}" alt=""><i>${x.q}</i></span><span class="t">${x.t}</span><b>${fmt(x.p*x.q)}</b></div>`).join('')}</div>
   <div class="sp-ln"><span>${T.goods} (${n})</span><b>${fmt(old)}</b></div>
   ${old>goods?`<div class="sp-ln disc"><span>−%</span><b>−${fmt(old-goods)}</b></div>`:''}

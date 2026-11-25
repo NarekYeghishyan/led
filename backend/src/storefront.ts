@@ -60,10 +60,10 @@ const brandOf = (name: string) => {
 };
 
 /** Up to 5 specs for the card's hover panel, in SPECS order (labels included so the site needs no copy of them). */
-const cardSpecs = (name: string) => Object.entries(specsOf(name))
-  .filter(([k]) => k !== 'cpu' || !specsOf(name).cpu_model)
-  .sort(([a], [b]) => SPEC_KEYS.indexOf(a) - SPEC_KEYS.indexOf(b)).slice(0, 5)
-  .map(([k, v]) => ({ k, v, names: SPECS[k].names }));
+const cardSpecs = (name: string, all = false) => Object.entries(specsOf(name))
+  .filter(([k]) => all || k !== 'cpu' || !specsOf(name).cpu_model)
+  .sort(([a], [b]) => SPEC_KEYS.indexOf(a) - SPEC_KEYS.indexOf(b)).slice(0, all ? 99 : 5)
+  .map(([k, v]) => ({ k, v, names: SPECS[k].names, ...(all ? { group: SPECS[k].group } : {}) }));
 
 export type StockState = 'in' | 'low' | 'order';
 const stockOf = (qty: number): { qty: number; state: StockState } => {
@@ -367,7 +367,7 @@ export class StorefrontController {
    * Card data for product ids, in the given order. `section` = slug of the product's catalog section (or null): the site
    * shows img/placeholder/<section>.svg when `image` is null.
    */
-  private async cards(ids: number[]) {
+  private async cards(ids: number[], allSpecs = false) {
     if (!ids.length) return [];
     const [cids, rates] = await this.rateParams();
     const t = await this.getTree();
@@ -383,21 +383,21 @@ export class StorefrontController {
     return ids.map((id) => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r).map((r) => ({
       code: r.code, slug: slugOf(r), name: r.name, brand: brandOf(r.name), price: Number(r.price), unit: r.unit,
       stock: stockOf(r.quantity), image: r.images?.[0] ?? null, section: sectionOf(r.id),
-      specs: cardSpecs(r.name),
+      specs: cardSpecs(r.name, allSpecs),
     }));
   }
 
   // ---------------------------------------------------------------- cart / favourites re-check
 
-  /** GET /api/shop/products/by-ids?codes=17053,15221 (Access codes, max 100) → current card data; sold-out/hidden ones listed in `gone`. */
+  /** GET /api/shop/products/by-ids?codes=17053,15221[&full=1] (Access codes, max 100) → current card data; sold-out/hidden ones listed in `gone`. */
   @Get('products/by-ids')
   @Header('Cache-Control', 'no-store')
-  async byIds(@Query('codes') codes: string) {
+  async byIds(@Query('codes') codes: string, @Query('full') full?: string) {
     const list = [...new Set(String(codes || '').split(',').map((s) => parseInt(s, 10)).filter((n) => n > 0))].slice(0, 100);
     if (!list.length) return { items: [], gone: [] };
     const rows: { id: number; code: number }[] = await this.ds.query(
       `SELECT p.id, p.external_id AS code FROM products p WHERE ${VISIBLE} AND p.external_id = ANY($1::int[])`, [list]);
-    const items = await this.cards(rows.map((r) => r.id));
+    const items = await this.cards(rows.map((r) => r.id), full === '1'); // full=1: all specs with groups (compare page)
     const found = new Set(items.map((i) => i.code));
     return { items, gone: list.filter((c) => !found.has(c)) };
   }
@@ -451,13 +451,14 @@ export class StorefrontController {
     if (rest === '/search') return app(term ? `/search?q=${term}` : '/search');
     const OLD: Record<string, string> = {
       '/': '/', '/home': '/', '/index': '/', '/about': '/about.html', '/jobs': '/about.html', '/comments': '/about.html',
-      '/contacts': '/contacts.html', '/credit_sale': '/credit.html', '/assembly': '/assembly.html', '/products/cart': '/cart.html',
-      '/products/compare': '/compare.html', '/users/registration': '/registration.html', '/users/login': '/login.html',
+      '/contacts': '/contacts.html', '/credit_sale': '/credit.html', '/assembly': '/assembly.html', '/products/cart': '/cart',
+      '/products/compare': '/compare', '/users/registration': '/registration.html', '/users/login': '/login.html',
       '/users/forgot': '/forgot-password.html', '/users/profile': '/account.html', '/help_up_menu/change': '/exchange.html',
       '/help_up_menu/delivery': '/delivery.html', '/help_up_menu/how_order': '/how-to-buy.html',
       '/help_up_menu/how_order_2': '/how-to-order.html', '/help_up_menu/how_pay': '/how-to-pay.html', '/help_up_menu/warranty': '/warranty.html',
     };
-    if (OLD[rest]) return page(OLD[rest]); // home included: /?lang=ru until the home page moves to Next.js (step 7)
+    // targets with ".html" are static templates (language in ?lang=); the others are Next.js pages (language prefix)
+    if (OLD[rest]) return /\.html$|^\/$/.test(OLD[rest]) ? page(OLD[rest]) : app(OLD[rest]); // home: /?lang=ru until it moves (step 7)
     throw new NotFoundException('No redirect');
   }
 

@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { STATIC, t, type Lang } from '@/lib/i18n';
+import { href, t, type Lang } from '@/lib/i18n';
 import { add, has, toast, toggle, type StoreItem } from '@/lib/store';
 import { Icon } from './Icon';
 
@@ -16,8 +16,8 @@ export function CardButtons({ lang, item, part }: { lang: Lang; item: StoreItem;
   }, [part, item.id]);
   if (part === 'cart') {
     return (
-      <a className="cart" href={STATIC.cart} aria-label={t(lang, 'cart')}
-        onClick={(e) => { e.preventDefault(); e.stopPropagation(); add('cart', item); toast(t(lang, 'addedCart'), t(lang, 'go'), STATIC.cart); }}>
+      <a className="cart" href={href(lang, '/cart')} aria-label={t(lang, 'cart')}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); add('cart', item); toast(t(lang, 'addedCart'), t(lang, 'go'), href(lang, '/cart')); }}>
         <Icon name="cart" />
       </a>
     );
@@ -25,14 +25,14 @@ export function CardButtons({ lang, item, part }: { lang: Lang; item: StoreItem;
   if (part === 'fav') {
     return (
       <span className={`fav${on ? ' on' : ''}`} role="button" tabIndex={0} aria-pressed={on} aria-label={t(lang, 'favorites')}
-        onClick={(e) => { e.stopPropagation(); const v = toggle('fav', item); toast(t(lang, v ? 'favOn' : 'favOff'), v ? t(lang, 'go') : undefined, STATIC.favorites); }}>
+        onClick={(e) => { e.stopPropagation(); const v = toggle('fav', item); toast(t(lang, v ? 'favOn' : 'favOff'), v ? t(lang, 'go') : undefined, href(lang, '/favorites')); }}>
         <Icon name="heart" />
       </span>
     );
   }
   return (
     <button className="cmpb" type="button" aria-pressed={on}
-      onClick={(e) => { e.stopPropagation(); const v = toggle('cmp', item); toast(t(lang, v ? 'cmpOn' : 'cmpOff'), v ? t(lang, 'go') : undefined, STATIC.compare); }}>
+      onClick={(e) => { e.stopPropagation(); const v = toggle('cmp', item); toast(t(lang, v ? 'cmpOn' : 'cmpOff'), v ? t(lang, 'go') : undefined, href(lang, '/compare')); }}>
       <Icon name="cmp" /><span>{t(lang, 'compareBtn')}</span>
     </button>
   );

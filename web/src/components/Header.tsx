@@ -182,9 +182,9 @@ function Acts({ lang }: { lang: Lang }) {
   return (
     <div className="acts">
       <A to={n.user ? STATIC.account : STATIC.login} icon="user" label={t(lang, 'account')} />
-      <A to={STATIC.compare} icon="cmp" label={t(lang, 'compare')} count={n.cmp} />
-      <A to={STATIC.favorites} icon="heart" label={t(lang, 'favorites')} count={n.fav} />
-      <A to={STATIC.cart} icon="cart" label={t(lang, 'cart')} count={n.cart} />
+      <A to={href(lang, '/compare')} icon="cmp" label={t(lang, 'compare')} count={n.cmp} />
+      <A to={href(lang, '/favorites')} icon="heart" label={t(lang, 'favorites')} count={n.fav} />
+      <A to={href(lang, '/cart')} icon="cart" label={t(lang, 'cart')} count={n.cart} />
     </div>
   );
 }

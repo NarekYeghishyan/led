@@ -420,7 +420,7 @@ function checkout(){
  const days=[0,1,2,3,4].map(i=>{const dt=new Date();dt.setDate(dt.getDate()+i+1);return [i,i===0?ct('tomorrow'):(L()===1?['կիր','երկ','երք','չրք','հնգ','ուրբ','շբթ'][dt.getDay()]+', '+dt.getDate()+' '+['հնվ','փտվ','մրտ','ապր','մյս','հնս','հլս','օգս','սպտ','հկտ','նյմ','դկտ'][dt.getMonth()]:dt.toLocaleDateString(['ru-RU','hy-AM','en-GB'][L()],{weekday:'short',day:'numeric',month:'short'}))]});
  const adrs=(()=>{try{return JSON.parse(localStorage.getItem('led-adr'))||[]}catch(e){return[]}})();
  const PAY=[['cash','ix-wallet'],['card','card'],['idram','phone'],['inst','doc'],...(who==='com'?[['bank','store']]:[])];
- root.innerHTML=head('ix-box',ct('h'),`${n} ${T.items} · ${fmt(tot)}`,`<div class="sp-steps"><a href="/cart.html" class="on" style="display:flex;gap:6px;align-items:center;color:inherit;text-decoration:none"><i>✓</i>${T.cart}</a><b></b><span class="on"><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+
+ root.innerHTML=head('ix-box',ct('h'),`${n} ${T.items} · ${fmt(tot)}`,`<div class="sp-steps"><a href="/cart" class="on" style="display:flex;gap:6px;align-items:center;color:inherit;text-decoration:none"><i>✓</i>${T.cart}</a><b></b><span class="on"><i>2</i>${T.step2}</span><b></b><span><i>3</i>${T.step3}</span></div>`)+
  `<form class="sp-cart co" id="coForm" novalidate><div>
   <div class="sp-card co-s"><h3><i>1</i>${ct('c1')}</h3>
    ${u?`<p class="co-hint">${ic('user')}${ct('hello')} <b>${u.fname||u.login}</b></p>`:`<p class="co-hint">${ic('user')}${ct('have')} <a href="/login.html">${ct('in')}</a></p>`}
@@ -442,7 +442,7 @@ function checkout(){
   <div class="sp-card co-s"><h3><i>4</i>${ct('c4')}</h3><textarea name="cmt" placeholder="${ct('cmt')}">${co.cmt||''}</textarea>
    <label class="co-chk"><input type="checkbox" name="call"${co.call!==false?' checked':''}>${ct('call')}</label></div>
  </div>
- <aside class="sp-card sp-side"><h3 style="display:flex;justify-content:space-between">${ct('items')} <a href="/cart.html" style="font-size:13.5px;color:var(--blue-600)">${ct('edit')}</a></h3>
+ <aside class="sp-card sp-side"><h3 style="display:flex;justify-content:space-between">${ct('items')} <a href="/cart" style="font-size:13.5px;color:var(--blue-600)">${ct('edit')}</a></h3>
   <div class="co-its">${v.map(x=>`<div><span class="im"><img src="${x.img}" alt=""><i>${x.q}</i></span><span class="t">${x.t}</span><b>${fmt(x.p*x.q)}</b></div>`).join('')}</div>
   <div class="sp-ln"><span>${T.goods} (${n})</span><b>${fmt(old)}</b></div>
   ${old>goods?`<div class="sp-ln disc"><span>−%</span><b>−${fmt(old-goods)}</b></div>`:''}

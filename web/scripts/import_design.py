@@ -34,6 +34,13 @@ pcss = "\n\n".join(b.strip() for b in pblocks if b.strip() not in have and ".pdp
 assert pcss, "product page CSS block not found"
 (WEB / "src" / "styles" / "product.css").write_text(header.replace("category.html", "product.html") + pcss + "\n", encoding="utf-8")
 
+# 1c. shop pages CSS (cart / favourites / compare / checkout / brand: .sp-*, .br-*): cart.html's block that category.html lacks
+cart_html = (SITE / "cart.html").read_text(encoding="utf-8")
+sblocks = [b.strip() for b in re.findall(r"<style[^>]*>(.*?)</style>", cart_html, re.S) if b.strip() not in have and ".sp-" in b]
+assert sblocks, "shop pages CSS block not found"
+(WEB / "src" / "styles" / "shop.css").write_text(header.replace("category.html", "cart.html") + "\n\n".join(sblocks) + "\n", encoding="utf-8")
+html += "".join(re.findall(r'<symbol id="sp-[^"]+".*?</symbol>', cart_html, re.S))  # sp-* icons join the sprite below
+
 # 2. icon sprite: every <symbol> on the page (main sprite after <body> + the info pages' ix-* icons), first one per id wins
 seen, parts = set(), []
 for sm in re.finditer(r'<symbol id="([^"]+)".*?</symbol>', html, re.S):

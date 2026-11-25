@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { money, STATIC, t, type Lang } from '@/lib/i18n';
+import { href, money, t, type Lang } from '@/lib/i18n';
 import { add, has, toast, toggle, type StoreItem } from '@/lib/store';
 import { Icon } from '../Icon';
 
@@ -16,7 +16,7 @@ export function BuyActions({ lang, item, max, phone }: { lang: Lang; item: Store
     return () => { removeEventListener('led:store', r); removeEventListener('storage', r); };
   }, [item.id]);
   const lim = Math.max(1, max);
-  const cart = () => { add('cart', item, q); toast(t(lang, 'addedCart'), t(lang, 'go'), STATIC.cart); };
+  const cart = () => { add('cart', item, q); toast(t(lang, 'addedCart'), t(lang, 'go'), href(lang, '/cart')); };
   return (
     <>
       <div className="cta">
@@ -30,10 +30,10 @@ export function BuyActions({ lang, item, max, phone }: { lang: Lang; item: Store
       </div>
       <a className="oneclick" href={`tel:${phone}`}><Icon name="call" /><span>{t(lang, 'callOrder')}</span></a>
       <div className="sec-act">
-        <button className="fv" aria-pressed={fav} onClick={() => { const v = toggle('fav', item); toast(t(lang, v ? 'favOn' : 'favOff'), v ? t(lang, 'go') : undefined, STATIC.favorites); }}>
+        <button className="fv" aria-pressed={fav} onClick={() => { const v = toggle('fav', item); toast(t(lang, v ? 'favOn' : 'favOff'), v ? t(lang, 'go') : undefined, href(lang, '/favorites')); }}>
           <Icon name="heart" /><span>{t(lang, 'toFav')}</span>
         </button>
-        <button className="cp" aria-pressed={cmp} onClick={() => { const v = toggle('cmp', item); toast(t(lang, v ? 'cmpOn' : 'cmpOff'), v ? t(lang, 'go') : undefined, STATIC.compare); }}>
+        <button className="cp" aria-pressed={cmp} onClick={() => { const v = toggle('cmp', item); toast(t(lang, v ? 'cmpOn' : 'cmpOff'), v ? t(lang, 'go') : undefined, href(lang, '/compare')); }}>
           <Icon name="cmp" /><span>{t(lang, 'compareBtn')}</span>
         </button>
       </div>
