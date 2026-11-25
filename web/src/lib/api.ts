@@ -97,3 +97,5 @@ export interface HomeBlocks {
 export const getHomeBlocks = () => get<HomeBlocks>('/shop/blocks/home', ['blocks'], 60);
 export const getByCodes = (codes: number[]) =>
   get<{ items: ProductCard[] }>(`/shop/products/by-ids?codes=${codes.join(',')}`, ['products'], 60);
+/** Info page texts edited in the admin "Страницы сайта": { page: { hy|ru|en: { title?, h1?, lead?, html? } } } */
+export const getInfoBlocks = () => get<Record<string, Partial<Record<'hy' | 'ru' | 'en', { title?: string; h1?: string; lead?: string; html?: string }>>>>('/shop/blocks/info', ['blocks'], 60);

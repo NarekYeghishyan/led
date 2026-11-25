@@ -5,6 +5,8 @@
  *   tabs:   string[]   "Best offers" tabs in order: 'new' and/or section slugs; empty = automatic (New + every section)
  *   hide:   string[]   home blocks not shown (ids in HOME_BLOCKS)
  * Admin: GET/PUT /api/admin/site-blocks/:key (logged in change_log, entity 'site_block'); site: GET /api/shop/blocks/:key.
+ * 'info': { [page]: { [hy|ru|en]: { title, h1, lead, html } } } — edited texts of the info pages (empty field = template
+ *   text). html goes through html-clean.ts (formatting only).
  * Data is cleaned against a whitelist — nothing but these fields is stored.
  */
 import { BadRequestException, Body, Controller, Get, Header, Param, Put, Req, UseGuards } from '@nestjs/common';
@@ -12,11 +14,14 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { JwtGuard } from './auth';
 import { revalidateSite } from './revalidate';
+import { cleanHtml } from './html-clean';
 
 type Req = { user?: { email?: string } };
 type L3 = Record<'hy' | 'ru' | 'en', string>;
 export const HOME_BLOCKS = ['cfgPromo', 'gaming', 'quick', 'stats', 'trust', 'best', 'build', 'credit', 'b2b', 'brands'] as const;
-const KEYS = ['home'] as const;
+const KEYS = ['home', 'info'] as const;
+/** info pages whose texts the admin can edit (the storefront InfoPage keys; login/account pages are forms, not texts) */
+export const INFO_PAGES = ['credit', 'about', 'buy', 'order', 'pay', 'delivery', 'warranty', 'exchange', 'contacts'] as const;
 
 const txt = (v: unknown, max = 120): L3 => {
   const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
@@ -47,6 +52,22 @@ function cleanHome(b: Record<string, unknown>) {
   };
 }
 
+function cleanInfo(b: Record<string, unknown>) {
+  const out: Record<string, Record<string, Record<string, string>>> = {};
+  for (const pg of INFO_PAGES) {
+    const p = (b?.[pg] || {}) as Record<string, Record<string, unknown>>;
+    for (const l of ['hy', 'ru', 'en']) {
+      const x = p?.[l] || {};
+      const v = { title: String(x.title ?? '').trim().slice(0, 120), h1: String(x.h1 ?? '').trim().slice(0, 160),
+        lead: String(x.lead ?? '').trim().slice(0, 400), html: cleanHtml(String(x.html ?? '')) };
+      const kept = Object.fromEntries(Object.entries(v).filter(([, y]) => y));
+      if (Object.keys(kept).length) ((out[pg] ||= {})[l] = kept);
+    }
+  }
+  return out;
+}
+const clean = (key: string, b: Record<string, unknown>) => (key === 'info' ? cleanInfo(b) : cleanHome(b));
+
 @Controller('admin/site-blocks')
 @UseGuards(JwtGuard)
 export class SiteBlocksController {
@@ -56,13 +77,13 @@ export class SiteBlocksController {
   async get(@Param('key') key: string) {
     if (!(KEYS as readonly string[]).includes(key)) throw new BadRequestException('Unknown block');
     const [r] = await this.ds.query(`SELECT data, updated_at AS "updatedAt", updated_by AS "updatedBy" FROM site_blocks WHERE key = $1`, [key]);
-    return { data: cleanHome(r?.data || {}), updatedAt: r?.updatedAt ?? null, updatedBy: r?.updatedBy ?? null, blocks: HOME_BLOCKS };
+    return { data: clean(key, r?.data || {}), updatedAt: r?.updatedAt ?? null, updatedBy: r?.updatedBy ?? null, blocks: HOME_BLOCKS, pages: INFO_PAGES };
   }
 
   @Put(':key')
   async put(@Param('key') key: string, @Body() b: Record<string, unknown>, @Req() req: Req) {
     if (!(KEYS as readonly string[]).includes(key)) throw new BadRequestException('Unknown block');
-    const data = cleanHome(b || {});
+    const data = clean(key, b || {});
     const who = req.user?.email ?? 'admin';
     const [old] = await this.ds.query(`SELECT data FROM site_blocks WHERE key = $1`, [key]);
     await this.ds.query(
@@ -84,6 +105,6 @@ export class SiteBlocksPublicController {
   async get(@Param('key') key: string) {
     if (!(KEYS as readonly string[]).includes(key)) throw new BadRequestException('Unknown block');
     const [r] = await this.ds.query(`SELECT data FROM site_blocks WHERE key = $1`, [key]);
-    return cleanHome(r?.data || {});
+    return clean(key, r?.data || {});
   }
 }

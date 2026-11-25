@@ -8,9 +8,25 @@ import content from '@/content/info.json';
 import { href, type Lang } from '@/lib/i18n';
 import { fixLinks, NEXT, pageUrl, type InfoKey } from '@/lib/pages';
 import { Icon } from '../Icon';
+import { getInfoBlocks } from '@/lib/api';
 
 type Block = { title: string; icon: string; h1: string; lead: string; html: string };
-export const block = (k: InfoKey, lang: Lang) => (content as unknown as Record<string, Record<Lang, Block>>)[k][lang];
+/** the template text of a page (content/info.json, made by import_design.py) */
+export const templateBlock = (k: InfoKey, lang: Lang) => (content as unknown as Record<string, Record<Lang, Block>>)[k][lang];
+const FORM = /<form\b[\s\S]*?<\/form>/;
+/**
+ * Page text = the admin's edit ("Страницы сайта", /api/shop/blocks/info) over the template text, field by field.
+ * Edited HTML is already cleaned on the server (formatting only); its [[form]] placeholder = the template's form
+ * (the contact form), which is not editable.
+ */
+export async function block(k: InfoKey, lang: Lang): Promise<Block> {
+  const base = templateBlock(k, lang);
+  const ed = (await getInfoBlocks().catch(() => null))?.[k]?.[lang];
+  if (!ed) return base;
+  const form = FORM.exec(base.html)?.[0] ?? '';
+  return { ...base, title: ed.title || base.title, h1: ed.h1 || base.h1, lead: ed.lead || base.lead,
+    html: ed.html ? ed.html.replace('[[form]]', form) : base.html };
+}
 
 /** [hy, ru, en] */
 const T: Record<string, [string, string, string]> = {
@@ -29,8 +45,8 @@ const LI: Record<Lang, number> = { hy: 0, ru: 1, en: 2 };
 export const label = (k: string, lang: Lang) => T[k][LI[lang]];
 
 /** Page metadata: title from the template block; personal pages (login, account…) are never indexed. */
-export function infoMeta(k: InfoKey, lang: Lang, index = false): Metadata {
-  const b = block(k, lang);
+export async function infoMeta(k: InfoKey, lang: Lang, index = false): Promise<Metadata> {
+  const b = await block(k, lang);
   const path = NEXT[k]!;
   const langs = Object.fromEntries((['hy', 'ru', 'en'] as Lang[]).map((x) => [x, href(x, path)]));
   return {
@@ -40,8 +56,8 @@ export function infoMeta(k: InfoKey, lang: Lang, index = false): Metadata {
   };
 }
 
-export function InfoPage({ k, lang, nav, children }: { k: InfoKey; lang: Lang; nav?: React.ReactNode; children?: React.ReactNode }) {
-  const b = block(k, lang);
+export async function InfoPage({ k, lang, nav, children }: { k: InfoKey; lang: Lang; nav?: React.ReactNode; children?: React.ReactNode }) {
+  const b = await block(k, lang);
   const item = (x: InfoKey) => (
     <a key={x} href={pageUrl(lang, x)} className={x === k ? 'on' : undefined} aria-current={x === k ? 'page' : undefined}>
       <Icon name={IC[x]} /><span>{label(x, lang)}</span>
