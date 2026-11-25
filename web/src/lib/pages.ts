@@ -16,6 +16,8 @@ export const STATIC_FILE: Record<InfoKey, string> = {
 };
 /** pages already in Next.js → their path (without language prefix) */
 export const NEXT: Partial<Record<InfoKey, string>> = {
+  credit: '/credit', about: '/about', buy: '/how-to-buy', order: '/how-to-order', pay: '/how-to-pay', delivery: '/delivery',
+  warranty: '/warranty', exchange: '/exchange', contacts: '/contacts',
   login: '/login', register: '/registration', forgot: '/forgot-password', account: '/account',
 };
 

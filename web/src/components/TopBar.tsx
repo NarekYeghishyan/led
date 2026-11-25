@@ -1,9 +1,10 @@
 'use client';
-/** Top bar: tagline, Instalments · About · Help ▾ · Contacts (static pages for now), phone list, language, currency. */
+/** Top bar: tagline, Instalments · About · Help ▾ · Contacts , phone list, language, currency. */
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { LANGS, STATIC, t, type Lang } from '@/lib/i18n';
+import { LANGS, t, type Lang } from '@/lib/i18n';
 import { Icon } from './Icon';
+import { pageUrl } from '@/lib/pages';
 
 const PHONES = [['010 502‑802', '+37410502802'], ['011 502‑802', '+37411502802'], ['099 502‑802', '+37499502802'], ['095 502‑802', '+37495502802']];
 const HELP = [['buy', 'cart'], ['order', 'ix-box'], ['track', 'truck'], ['pay', 'ix-wallet'], ['delivery', 'truck'], ['warranty', 'shield'], ['exchange', 'ix-ref']] as const;
@@ -26,17 +27,17 @@ export function TopBar({ lang }: { lang: Lang }) {
       <span className="hide">{t(lang, 'store')}</span>
       <span className="sp" />
       <span style={{ display: 'contents' }}>
-        <a className="tl cr" href={STATIC.credit}>{t(lang, 'credit')}</a>
-        <a className="tl" href={STATIC.about}>{t(lang, 'about')}</a>
+        <a className="tl cr" href={pageUrl(lang, 'credit')}>{t(lang, 'credit')}</a>
+        <a className="tl" href={pageUrl(lang, 'about')}>{t(lang, 'about')}</a>
         <div className={`hlp${help ? ' open' : ''}`} ref={helpRef}>
           <a className="tl" tabIndex={0} role="button" aria-haspopup="true" aria-expanded={help} onClick={() => setHelp(!help)}>
             {t(lang, 'help')}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="m6 9 6 6 6-6" /></svg>
           </a>
           <div className="hlp-m">
-            {HELP.map(([k, ic]) => <a key={k} href={STATIC[k]}><Icon name={ic} /><span>{t(lang, k)}</span></a>)}
+            {HELP.map(([k, ic]) => <a key={k} href={pageUrl(lang, k)}><Icon name={ic} /><span>{t(lang, k)}</span></a>)}
           </div>
         </div>
-        <a className="tl" href={STATIC.contacts}>{t(lang, 'contacts')}</a>
+        <a className="tl" href={pageUrl(lang, 'contacts')}>{t(lang, 'contacts')}</a>
       </span>
       <div className={`ph${ph ? ' open' : ''}`} ref={phRef} tabIndex={0} aria-haspopup="true" aria-expanded={ph}
         onClick={(e) => { if (!(e.target as Element).closest('a')) setPh(!ph); }}>

@@ -72,6 +72,15 @@ export function InfoForms({ lang }: { lang: Lang }) {
       api<Me>('/register', { method: 'POST', body: { phone: d.phone, password: d.password } })
         .then((u) => { cache(u); location.href = `${account}#profile`; }))));
 
+    // contacts "write to us": no message inbox on the server yet → opens the visitor's mail app with the message filled in
+    root.querySelectorAll<HTMLFormElement>('form.ip-form:not([data-api]):not(.fp-1):not(.fp-2)').forEach((f) => off.push(bind(f, lang, async (d) => {
+      const sel = f.querySelector<HTMLSelectElement>('select[name=dept]');
+      const dept = sel?.selectedOptions[0]?.text || '';
+      const to = sel && sel.selectedIndex === sel.options.length - 1 ? 'service@led.am' : 'led@led.am'; // last option = service centre
+      const body = `${d.msg}\n\n${d.name}${d.phone ? `\n${d.phone}` : ''}\n${d.email}`;
+      location.href = `mailto:${to}?subject=${encodeURIComponent(`led.am — ${dept}`)}&body=${encodeURIComponent(body)}`;
+    })));
+
     // forgot password: 3 steps
     root.querySelectorAll<HTMLElement>('.fp-w').forEach((w) => {
       const f1 = w.querySelector<HTMLFormElement>('.fp-1'), f2 = w.querySelector<HTMLFormElement>('.fp-2'), f3 = w.querySelector<HTMLElement>('.fp-3');

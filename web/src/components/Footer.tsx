@@ -1,11 +1,12 @@
 import type { CatNode } from '@/lib/api';
-import { href, pick, STATIC, t, type Lang } from '@/lib/i18n';
+import { href, pick, t, type Lang } from '@/lib/i18n';
 import { Icon } from './Icon';
+import { pageUrl } from '@/lib/pages';
 import { FooterFx } from './Effects';
 
 export function Footer({ lang, cats }: { lang: Lang; cats: CatNode[] }) {
-  const help = [['order', STATIC.order], ['deliveryPay', STATIC.delivery], ['credit', STATIC.credit], ['warrantyRet', STATIC.warranty],
-    ['contacts', STATIC.contacts]] as const;
+  const help = [['order', pageUrl(lang, 'order')], ['deliveryPay', pageUrl(lang, 'delivery')], ['credit', pageUrl(lang, 'credit')], ['warrantyRet', pageUrl(lang, 'warranty')],
+    ['contacts', pageUrl(lang, 'contacts')]] as const;
   return (
     <footer>
       <FooterFx />

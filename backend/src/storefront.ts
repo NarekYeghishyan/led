@@ -450,12 +450,12 @@ export class StorefrontController {
     const term = /(?:^|&)term=([^&]*)/.exec(query)?.[1];
     if (rest === '/search') return app(term ? `/search?q=${term}` : '/search');
     const OLD: Record<string, string> = {
-      '/': '/', '/home': '/', '/index': '/', '/about': '/about.html', '/jobs': '/about.html', '/comments': '/about.html',
-      '/contacts': '/contacts.html', '/credit_sale': '/credit.html', '/assembly': '/assembly.html', '/products/cart': '/cart',
+      '/': '/', '/home': '/', '/index': '/', '/about': '/about', '/jobs': '/about', '/comments': '/about',
+      '/contacts': '/contacts', '/credit_sale': '/credit', '/assembly': '/assembly.html', '/products/cart': '/cart',
       '/products/compare': '/compare', '/users/registration': '/registration', '/users/login': '/login',
-      '/users/forgot': '/forgot-password', '/users/profile': '/account', '/help_up_menu/change': '/exchange.html',
-      '/help_up_menu/delivery': '/delivery.html', '/help_up_menu/how_order': '/how-to-buy.html',
-      '/help_up_menu/how_order_2': '/how-to-order.html', '/help_up_menu/how_pay': '/how-to-pay.html', '/help_up_menu/warranty': '/warranty.html',
+      '/users/forgot': '/forgot-password', '/users/profile': '/account', '/help_up_menu/change': '/exchange',
+      '/help_up_menu/delivery': '/delivery', '/help_up_menu/how_order': '/how-to-buy',
+      '/help_up_menu/how_order_2': '/how-to-order', '/help_up_menu/how_pay': '/how-to-pay', '/help_up_menu/warranty': '/warranty',
     };
     // targets with ".html" are static templates (language in ?lang=); the others are Next.js pages (language prefix)
     if (OLD[rest]) return /\.html$/.test(OLD[rest]) ? page(OLD[rest]) : app(OLD[rest]);
