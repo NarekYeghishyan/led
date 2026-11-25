@@ -564,3 +564,14 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   Configurator links still go to static `/assembly.html`. Old `/?lang=ru|en` → 301 `/ru|/en` (proxy.ts); nginx `/` → Next.js,
   `/index.html` → `/`. Static templates link home with the language prefix (`NX()` in shop_shared.html). Backups: nginx
   `/root/led.creativeweb.am.conf.bak-20261125-*`, static `led-static-backup-20261125d.tgz`. Deployed + published.
+- 2026-11-25 — **Step 7: account pages live in Next.js**: `/login`, `/registration`, `/forgot-password`, `/account` (+ `/ru`, `/en`).
+  Reusable info-page frame `web/src/components/info/InfoPage.tsx` (breadcrumb, side menu, call box, hero) — the info pages
+  (about, delivery…) move into it next. Template content blocks (`Design/site-src/*_content*.html`) are imported by
+  `import_design.py` into `web/src/content/info.json` (+ `styles/info.css`); **edit the content in site-src and rerun the
+  importer**. `web/src/lib/pages.ts` = which pages moved (NEXT map) + link fixing. Forms: `InfoForms.tsx` (template validation,
+  `/api/shop` login / register / 3-step reset); account = `Account.tsx` (React port: overview, orders, profile, addresses,
+  password, log out everywhere, admin "view as customer" banner); `lib/auth.ts` (API, error texts, `led-user` cache);
+  `PhoneMask.tsx` on every page. Header account link → `/account` or `/login`. Static templates link to the new pages
+  (`NX_HTML` in shop_shared.html, auth.html header link); nginx 301 `login|registration|forgot-password|account.html`; old
+  led.am `/users/login|registration|forgot|profile` → new pages. Checked live: wrong login shows the API error. Backups:
+  nginx `/root/led.creativeweb.am.conf.bak-20261125-*`, static `led-static-backup-20261125e.tgz`. Deployed + published.
