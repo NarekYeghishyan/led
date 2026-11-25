@@ -290,6 +290,9 @@ Later: back-in-stock / price-drop alerts, real reviews with moderation, configur
    To decide: which old items are dropped, which stay orderable ("on order") when out of stock, and who decides later
    (automatic rule from the last sale/receipt in `Операции`/`Документы` — join still to be checked —, an admin flag, or both).
    **Until then:** the site uses in-stock products only (no page for out-of-stock ones).
+2. **Delivery prices (raised 2026-11-25, not decided).** The cart template had demo numbers (courier in Yerevan 1 000 ֏, free
+   from 100 000 ֏; across Armenia 2 500 ֏). To decide: real courier / region prices, free-delivery threshold, pick-up points.
+   **Until then:** the cart shows the three ways without a price ("the manager confirms the delivery cost"); pick-up is free.
 
 **Keeping the old led.am Google index (2026-11-25, owner's priority).** Old URLs: `/{am,ru,en}/products/category/<alias>.html` for
 categories and `/{lang}/products/category/<name>_<Access code>.html` for products (the suffix = Access КодТовара), plus `/{lang}/about.html`,

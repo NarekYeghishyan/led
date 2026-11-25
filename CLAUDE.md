@@ -543,3 +543,14 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   favourites of 127 customers copied in; admin "view as customer" can't change it). Static cart/favourites pages don't re-check by
   themselves yet (step 7 moves them to Next.js). DB backup `/root/led-db-backup-20261125-1413-pre-wishlist.dump`, static
   `led-static-backup-20261125b.tgz`, API rollback id `/root/led-api-image-before-search-*.txt`. Deployed + published.
+- 2026-11-25 — Product page fix: the sticky buy bar is rendered into `<body>` (portal) — inside the sticky buy box its z-index
+  only counted within that box and the similar-products cards were painted over it; call button moves above the bar.
+- 2026-11-25 — **Step 7 started: cart, favourites, compare live in Next.js** (`/cart`, `/favorites`, `/compare`, + `/ru`, `/en`;
+  `web/src/components/shop/ShopPages.tsx`, styles `web/src/styles/shop.css` + `sp-*` icons imported from cart.html by
+  `import_design.py`). Live store with undo on remove; compare rows = real specs (`/api/shop/products/by-ids?full=1`), grouped,
+  cheapest marked. No demo numbers: delivery shown without a price (open client question 2 in PROJECT_PLAN), no promo code,
+  no instalment maths; checkout still opens static `/checkout.html` (moves with orders, step 10), "order by phone" dials the store.
+  All links go to the new pages: Next.js components and the static templates (`shop_shared.html`: `S.URL` getters + `NX()`
+  link fixer adds /ru|/en from `led-lang`); template demo cart seed removed. nginx: `/cart.html`, `/favorites.html`,
+  `/compare.html`, `/search.html` → 301 to the new page (`?lang=ru|en` → prefix); old led.am `/products/cart|compare` → new pages.
+  Backups: nginx `/root/led.creativeweb.am.conf.bak-20261125-*`, static `led-static-backup-20261125c.tgz`. Deployed + published.
