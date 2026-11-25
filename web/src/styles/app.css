@@ -90,3 +90,8 @@ body:has(.sbar.show) .fab{bottom:92px}
 /* brands: word-mark logos stay on one line inside the tile */
 .br-t .br-wm{width:auto!important;max-width:100%;white-space:nowrap;font-size:18px;overflow:hidden;text-overflow:ellipsis}
 .ptitle a.brand,a.brand{text-decoration:none}
+/* product buy box: "add to cart" stays on one line (Armenian label is long) */
+.buy .addc{flex:1;min-width:0;padding:0 8px;gap:6px;font-size:13.5px;white-space:nowrap}
+.buy .addc svg{flex:none}
+.buy .qty button{width:26px}
+.buy .qty input{width:28px}
