@@ -35,6 +35,7 @@ export function ProductCard({ p, lang }: { p: P; lang: Lang }) {
   const img = p.image || `/img/placeholder/${p.section || 'default'}.svg`;
   return (
     <div className="prod" data-href={url}>
+      {p.oldPrice ? <span className="badge">−{Math.round((1 - p.price / p.oldPrice) * 100)}%</span> : null}
       <div className="img"><a href={url} tabIndex={-1} aria-hidden="true"><img src={img} className={p.image ? 'cover' : 'cover ph'} alt={title} loading="lazy" /></a></div>
       <span className={`stock${p.stock.state === 'low' ? ' low' : ''}`}>
         {p.stock.state === 'low' ? t(lang, 'lastN', { n: p.stock.qty }) : t(lang, 'inStockLong')}
@@ -42,7 +43,7 @@ export function ProductCard({ p, lang }: { p: P; lang: Lang }) {
       <h4><a href={url}>{title}</a></h4>
       {spec ? <div className="spec">{spec}</div> : p.brand ? <div className="spec">{p.brand}</div> : null}
       <div className="pr">
-        <div><b>{money(p.price)}</b></div>
+        <div><b>{money(p.price)}</b>{p.oldPrice ? <s>{money(p.oldPrice)}</s> : null}</div>
         <CardButtons lang={lang} item={{ id: `p${p.code}`, code: p.code, t: p.name, img, spec, p: p.price, url }} part="cart" />
       </div>
       <div className="more-info">

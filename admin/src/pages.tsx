@@ -5,6 +5,7 @@ import {
 } from './api';
 import { useI18n, type TKey } from './i18n';
 import { ProductPhotos } from './photos';
+import { ProductWeb, type WebFields } from './product-web';
 import { CatChip, ProductSiteCats, useSiteCats } from './product-categories';
 
 /** Loads data and reloads it every `refreshMs` (live view of the store). */
@@ -239,6 +240,7 @@ interface ProductFull {
   syncedAt: string | null; createdAt: string; categoryExternalId: number | null; currencyExternalId: number | null;
   category: { name: string } | null; currency: { name: string } | null;
   slug: string | null; isVisible: boolean; images: string[]; webDescription: string | null;
+  web: WebFields['web']; oldPrice: number | null; specEdit: Record<string, string>;
   priceList: number | null; dealerPrice1: number | null; dealerPrice2: number | null;
 }
 
@@ -282,16 +284,7 @@ export function ProductPage() {
           <dl>{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
           <p className="muted small">{t('product.lastSynced', { synced: fmt.date(p.syncedAt), created: fmt.date(p.createdAt) })}</p>
         </section>
-        <section className="card">
-          <h2>{t('product.web')}</h2>
-          <p className="muted small">{t('product.webNote')}</p>
-          <dl>
-            <div><dt>{t('product.visible')}</dt><dd>{yn(p.isVisible)}</dd></div>
-            <div><dt>{t('product.slug')}</dt><dd>{p.slug || '—'}</dd></div>
-            <div><dt>{t('product.images')}</dt><dd>{p.images?.length || 0}</dd></div>
-            <div><dt>{t('product.description')}</dt><dd>{p.webDescription || '—'}</dd></div>
-          </dl>
-        </section>
+        <ProductWeb p={p} price={null} />
       </div>
       <ProductSiteCats id={p.id} />
       <ProductPhotos id={p.id} images={p.images || []} />

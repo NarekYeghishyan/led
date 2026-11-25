@@ -16,13 +16,15 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { identify } from './photos';
 import { SPECS, SPEC_KEYS, specNum, specsOf } from './specs';
+import { loadSpecEdits } from './spec-edits';
 import { norm, search } from './search';
 
 const LOW_STOCK = 3; // "last N" on the site
 const MAX_LIMIT = 100; // configurator rows load a whole category
 const VISIBLE = `p.deleted_at IS NULL AND p.is_visible AND NOT p.discontinued AND p.price > 0 AND p.quantity > 0`;
 const PUBLIC_COLS = `p.id, p.external_id AS "code", p.name, p.slug AS "customSlug", p.unit, p.quantity, p.images, p.barcode,
-  p.web_description AS "description", p.seo_title AS "seoTitle", p.seo_description AS "seoDescription", p.weight`;
+  p.web_description AS "description", p.seo_title AS "seoTitle", p.seo_description AS "seoDescription", p.weight, p.web,
+  p.old_price AS "oldPrice"`;
 
 // ---------------------------------------------------------------- slugs
 
@@ -64,6 +66,9 @@ const cardSpecs = (name: string, all = false) => Object.entries(specsOf(name))
   .filter(([k]) => all || k !== 'cpu' || !specsOf(name).cpu_model)
   .sort(([a], [b]) => SPEC_KEYS.indexOf(a) - SPEC_KEYS.indexOf(b)).slice(0, all ? 99 : 5)
   .map(([k, v]) => ({ k, v, names: SPECS[k].names, ...(all ? { group: SPECS[k].group } : {}) }));
+
+/** admin old price (֏) — only when above the current price (else no crossed-out price) */
+const oldOf = (v: unknown, price: number) => (Number(v) > price ? Math.round(Number(v)) : null);
 
 export type StockState = 'in' | 'low' | 'order';
 const stockOf = (qty: number): { qty: number; state: StockState } => {
@@ -114,6 +119,7 @@ export class StorefrontController {
   }
 
   private async getTree() {
+    await loadSpecEdits(this.ds); // admin spec corrections (spec-edits.ts), cached 60 s
     if (this.tree && Date.now() - this.tree.at < 60_000) return this.tree;
     const rows: { id: number; parent_id: number | null; slug: string; name_ru: string; name_hy: string; name_en: string;
       is_visible: boolean; sort: number }[] = await this.ds.query(
@@ -176,6 +182,7 @@ export class StorefrontController {
   @Get('products')
   @Header('Cache-Control', 'public, max-age=30')
   async list(@Query() qs: Record<string, string>) {
+    await loadSpecEdits(this.ds);
     const t = await this.getTree();
     const page = Math.max(1, Math.min(1000, parseInt(qs.page, 10) || 1));
     const limit = Math.max(1, Math.min(MAX_LIMIT, parseInt(qs.limit, 10) || 24));
@@ -382,7 +389,7 @@ export class StorefrontController {
     const byId = new Map(rows.map((r) => [r.id, r]));
     return ids.map((id) => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r).map((r) => ({
       code: r.code, slug: slugOf(r), name: r.name, brand: brandOf(r.name), price: Number(r.price), unit: r.unit,
-      stock: stockOf(r.quantity), image: r.images?.[0] ?? null, section: sectionOf(r.id),
+      stock: stockOf(r.quantity), image: r.images?.[0] ?? null, section: sectionOf(r.id), oldPrice: oldOf(r.oldPrice, Number(r.price)),
       specs: cardSpecs(r.name, allSpecs),
     }));
   }
@@ -500,6 +507,7 @@ export class StorefrontController {
       code: p.code, slug: slugOf(p), name: p.name, brand: brandOf(p.name), price: Number(p.price), currency: 'AMD', unit: p.unit,
       stock: stockOf(p.quantity), images: p.images || [], barcode: p.barcode || null,
       description: p.description || null, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null,
+      web: p.web || {}, oldPrice: oldOf(p.oldPrice, Number(p.price)),
       weight: p.weight || null, section: best?.[0]?.slug ?? null,
       specs: Object.entries(specsOf(p.name)).sort(([a], [b]) => SPEC_KEYS.indexOf(a) - SPEC_KEYS.indexOf(b)).map(([k, v]) => ({ k, v, names: SPECS[k].names, group: SPECS[k].group })), breadcrumb: best ? this.crumbs(best) : [], similar,
     };

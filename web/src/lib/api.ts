@@ -16,6 +16,7 @@ export interface ProductCard {
   code: number; slug: string; name: string; brand: string | null; price: number; unit: string | null;
   stock: { qty: number; state: StockState }; image: string | null; section: string | null;
   specs?: { k: string; v: string; names: string[] }[];
+  oldPrice?: number | null;
 }
 export interface Crumb { slug: string; path: string; name: string[] }
 /** Spec filter from the API: key, label [ru, hy, en], values with counts (counts ignore the key's own selection). */
@@ -52,7 +53,15 @@ export interface ProductDetail {
   stock: { qty: number; state: StockState }; images: string[]; barcode: string | null; description: string | null;
   seoTitle: string | null; seoDescription: string | null; weight: number | string | null; section: string | null;
   breadcrumb: Crumb[]; similar: ProductCard[]; specs: Spec[];
+  /** admin web texts per language: desc, title (SEO), meta (SEO description) */
+  web?: Partial<Record<'desc' | 'title' | 'meta', Partial<Record<'hy' | 'ru' | 'en', string>>>>;
+  oldPrice?: number | null;
 }
+/** admin text in the visitor's language, else hy → ru → en, else the old single-language field */
+export const webText = (p: ProductDetail, k: 'desc' | 'title' | 'meta', lang: 'hy' | 'ru' | 'en', old: string | null) => {
+  const w = p.web?.[k];
+  return w?.[lang] || w?.hy || w?.ru || w?.en || old || null;
+};
 /** GET /api/shop/products/<slug>-<code>; NotFound when unknown or out of stock. */
 export const getProduct = (slug: string) => get<ProductDetail>(`/shop/products/${encodeURIComponent(slug)}`, ['products'], 60);
 

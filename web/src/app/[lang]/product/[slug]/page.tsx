@@ -8,7 +8,7 @@ import type { Metadata } from 'next';
 import { brandSlug } from '@/lib/brands';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
-import { getProduct, NotFound, resolvePath } from '@/lib/api';
+import { getProduct, NotFound, resolvePath, webText } from '@/lib/api';
 import { href, money, pick, specValue, t, type Lang, type TKey } from '@/lib/i18n';
 import { ProductCard, splitName } from '@/components/ProductCard';
 import { Gallery } from '@/components/product/Gallery';
@@ -57,8 +57,8 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   const langs = Object.fromEntries((['hy', 'ru', 'en'] as Lang[]).map((x) => [x, href(x, `/product/${p.slug}`)]));
   const img = p.images[0];
   return {
-    title: p.seoTitle || `${title} — ${money(p.price)} — ${t(lang, 'buyIn')}`,
-    description: p.seoDescription || t(lang, 'prodDesc', { name: p.name, price: money(p.price) }),
+    title: webText(p, 'title', lang, p.seoTitle) || `${title} — ${money(p.price)} — ${t(lang, 'buyIn')}`,
+    description: webText(p, 'meta', lang, p.seoDescription) || t(lang, 'prodDesc', { name: p.name, price: money(p.price) }),
     alternates: { canonical: langs[lang], languages: { ...langs, 'x-default': langs.hy } },
     openGraph: { type: 'website', title, url: SITE + langs[lang], images: img ? [{ url: img.startsWith('http') ? img : SITE + img }] : undefined },
     robots: INDEXABLE ? undefined : { index: false, follow: true },
@@ -71,6 +71,7 @@ export default async function ProductPage({ params }: P) {
   const p = await load(lang, slug);
   const { title, spec } = splitName(p.name);
   const url = href(lang, `/product/${p.slug}`);
+  const desc = webText(p, 'desc', lang, p.description);
   const placeholder = `/img/placeholder/${p.section || 'default'}.svg`;
   const keys = KEY_ORDER.map((k) => p.specs.find((x) => x.k === k)).filter((x): x is NonNullable<typeof x> => !!x)
     .filter((x, _, a) => !(x.k === 'cpu' && a.some((y) => y.k === 'cpu_model'))).slice(0, 4);
@@ -82,7 +83,7 @@ export default async function ProductPage({ params }: P) {
   const jsonLd = [
     { '@context': 'https://schema.org', '@type': 'Product', name: p.name, sku: String(p.code),
       ...(p.barcode ? { gtin: p.barcode } : {}), ...(p.brand ? { brand: { '@type': 'Brand', name: p.brand } } : {}),
-      image: (p.images.length ? p.images : [placeholder]).map(abs), ...(p.description ? { description: p.description.slice(0, 5000) } : {}),
+      image: (p.images.length ? p.images : [placeholder]).map(abs), ...(desc ? { description: desc.slice(0, 5000) } : {}),
       offers: { '@type': 'Offer', url: SITE + url, priceCurrency: 'AMD', price: String(p.price), availability: 'https://schema.org/InStock',
         itemCondition: 'https://schema.org/NewCondition', seller: { '@type': 'Organization', name: 'LED Computers' } } },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList',
@@ -115,7 +116,7 @@ export default async function ProductPage({ params }: P) {
 
         <aside className="buy">
           <div>
-            <div className="now"><b>{money(p.price)}</b></div>
+            <div className="now"><b>{money(p.price)}</b>{p.oldPrice ? <><s>{money(p.oldPrice)}</s><em>−{Math.round((1 - p.price / p.oldPrice) * 100)}%</em></> : null}</div>
             <div className="avail"><i></i><b>{t(lang, 'inStockLong')}</b>
               <span>{p.stock.state === 'low' ? ` · ${t(lang, 'lastN', { n: p.stock.qty })}` : ` ${t(lang, 'inStockN', { n: p.stock.qty })}`}</span></div>
             <BuyActions lang={lang} item={item} max={p.stock.qty} phone={PHONE} />
@@ -157,10 +158,10 @@ export default async function ProductPage({ params }: P) {
               </div>
             </div>
           </section>
-          {p.description ? (
+          {desc ? (
             <section className="psec" id="about">
               <h2>{t(lang, 'descH')}</h2>
-              <div className="card desc">{p.description.split(/\n{2,}|\r\n\r\n/).map((s, i) => <p key={i}>{s}</p>)}</div>
+              <div className="card desc">{desc.split(/\n{2,}|\r\n\r\n/).map((s, i) => <p key={i}>{s}</p>)}</div>
             </section>
           ) : null}
         </div>

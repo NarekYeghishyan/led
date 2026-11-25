@@ -8,6 +8,7 @@
  * Every spec key is defined once in SPECS (labels [ru, hy, en], product-page group, sort). Values are language-neutral
  * (numbers with units, model names); yes/no values are the tokens 'yes'/'no' and translated by the site (YES_NO).
  */
+import { specEditsOf } from './spec-edits';
 
 export type SpecGroup = 'main' | 'cpu' | 'display' | 'memory' | 'graphics' | 'ports' | 'power' | 'body';
 export interface SpecDef { names: [string, string, string]; group: SpecGroup; num?: boolean; noFilter?: boolean }
@@ -224,5 +225,9 @@ export function specsOf(name: string): Specs {
     if (cache.size > 50000) cache.clear();
     cache.set(name, v);
   }
-  return v;
+  const e = specEditsOf(name); // admin corrections (spec-edits.ts): a value replaces, '' removes the key
+  if (!e) return v;
+  const out: Specs = { ...v };
+  for (const [k, x] of Object.entries(e)) { if (x) out[k] = x; else delete out[k]; }
+  return out;
 }

@@ -54,6 +54,11 @@ export class Product {
   @Column({ name: 'is_visible', type: 'boolean', default: true }) isVisible: boolean;
   @Column({ name: 'seo_title', type: 'text', nullable: true }) seoTitle: string | null;
   @Column({ name: 'seo_description', type: 'text', nullable: true }) seoDescription: string | null;
+  /** { desc, title, meta: { hy, ru, en } } — description, SEO title, meta description per language (product-web.ts) */
+  @Column({ type: 'jsonb', default: {} }) web: Record<string, Record<string, string>>;
+  @Column({ name: 'old_price', type: 'numeric', precision: 14, scale: 2, nullable: true, transformer: numeric }) oldPrice: number | null; // ֏
+  /** admin corrections of the parsed specs: { key: value | '' (hide) } */
+  @Column({ name: 'spec_edit', type: 'jsonb', default: {} }) specEdit: Record<string, string>;
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' }) updatedAt: Date;
 }
