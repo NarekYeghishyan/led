@@ -77,13 +77,23 @@ export function HeroSlider({ lang, slides }: { lang: Lang; slides: Slide[] }) {
       <div className="sl-stage"
         onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; setTilt(`rotateY(${x * 16}deg) rotateX(${-y * 12}deg)`); }}
         onPointerLeave={() => setTilt(null)}
+        // the click is handled here: with the 3D tilt the card moves under the cursor between press and release, so the
+        // browser sends the click to this common parent instead of the link. Side card → show it; inside the front card → open the product.
+        onClick={(e) => {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+          e.preventDefault();
+          const k = Number((e.target as HTMLElement).closest<HTMLElement>('.sl-card')?.dataset.k ?? cur);
+          if (k !== cur) { go(k); return; }
+          const b = e.currentTarget.querySelector('.sl-card[data-p="0"]')?.getBoundingClientRect();
+          if (b && e.clientX >= b.left && e.clientX <= b.right && e.clientY >= b.top && e.clientY <= b.bottom) window.location.href = slides[cur].url;
+        }}
         onTouchStart={(e) => { x0.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => { if (x0.current === null) return; const d = e.changedTouches[0].clientX - x0.current; x0.current = null; if (Math.abs(d) > 40) go(cur + (d < 0 ? 1 : -1)); }}>
         <div className="sl-floor" aria-hidden="true" />
         {slides.map((x, k) => (
-          <a key={x.url} className="sl-card" href={x.url} data-p={pos(k)} aria-label={x.title}
+          <a key={x.url} className="sl-card" href={x.url} data-p={pos(k)} data-k={k} aria-label={x.title}
             style={k === cur && tilt ? { ['--tilt' as string]: tilt } : undefined}
-            onClick={(e) => { if (k !== cur) { e.preventDefault(); go(k); } }}>
+            >
             <img src={x.img} className="cover" alt="" />
           </a>
         ))}
