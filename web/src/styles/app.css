@@ -97,3 +97,11 @@ body:has(.sbar.show) .fab{bottom:92px}
 .buy .qty input{width:28px}
 /* catalog page: its heading is the H1 (SEO) with the section-heading look */
 .sh h1{font-size:28px;font-weight:800;letter-spacing:-.5px;margin:0}
+
+/* Home "Best offers": title + link on one row, tabs on their own row, one line each, scroll sideways when long */
+#best .sh{flex-wrap:wrap;align-items:center;row-gap:12px}
+#best .sh h2{white-space:nowrap;flex:1 1 auto}
+#best .sh>a{white-space:nowrap}
+#best .tabs{order:3;flex:1 1 100%;display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:4px 2px 6px}
+#best .tabs::-webkit-scrollbar{display:none}
+#best .tabs span{white-space:nowrap;flex:0 0 auto}
