@@ -452,8 +452,8 @@ export class StorefrontController {
     const OLD: Record<string, string> = {
       '/': '/', '/home': '/', '/index': '/', '/about': '/about.html', '/jobs': '/about.html', '/comments': '/about.html',
       '/contacts': '/contacts.html', '/credit_sale': '/credit.html', '/assembly': '/assembly.html', '/products/cart': '/cart',
-      '/products/compare': '/compare', '/users/registration': '/registration.html', '/users/login': '/login.html',
-      '/users/forgot': '/forgot-password.html', '/users/profile': '/account.html', '/help_up_menu/change': '/exchange.html',
+      '/products/compare': '/compare', '/users/registration': '/registration', '/users/login': '/login',
+      '/users/forgot': '/forgot-password', '/users/profile': '/account', '/help_up_menu/change': '/exchange.html',
       '/help_up_menu/delivery': '/delivery.html', '/help_up_menu/how_order': '/how-to-buy.html',
       '/help_up_menu/how_order_2': '/how-to-order.html', '/help_up_menu/how_pay': '/how-to-pay.html', '/help_up_menu/warranty': '/warranty.html',
     };

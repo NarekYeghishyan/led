@@ -1002,8 +1002,8 @@ const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 /* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
-const NX=p=>({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+p;
-const NX_PAGES=/^\/(cart|favorites|compare|search)(\?|#|$)/;
+const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
+const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
 const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
@@ -1064,7 +1064,9 @@ const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 /* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
 const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
 const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
-const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
+/* moved .html pages → their Next.js path (the account pages; info pages follow) */
+const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account'};
+const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{let h=a.dataset.nx||a.getAttribute('href');const m=/^(\/[\w-]+\.html)(.*)$/.exec(h);if(m&&NX_HTML[m[1]])h=NX_HTML[m[1]]+m[2];if(!NX_PAGES.test(h)&&!(m&&NX_HTML[m[1]]))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={get cart(){return NX('/cart')},get fav(){return NX('/favorites')},get cmp(){return NX('/compare')}};
@@ -1817,7 +1819,8 @@ html[lang=hy] .ipl[data-l=hy],html[lang=en] .ipl[data-l=en],html:not([lang=hy]):
   const me=force=>{if(!meP||force)meP=api('/me').then(u=>{cache(u);return u;},e=>{meP=null;throw e;});return meP;};
   const logout=()=>api('/logout',{method:'POST'}).catch(()=>{}).finally(()=>cache(null));
   function hdr(){const on=!!localStorage.getItem('led-user');
-    document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=on?'/account.html':'/login.html';});}
+    const pre={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||''; /* account pages live in Next.js now */
+    document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]')){a.href=pre+(on?'/account':'/login');a.dataset.nx='';}});}
 
   const showErr=(f,e)=>{const x=f&&f.querySelector('.au-err');if(!x)return;x.hidden=!e;x.innerHTML=e?msg(e.code||'server'):'';};
   /* runs fn(data) after LEDInfoForm validation passed ('ok' event); shows the API error inside the form */

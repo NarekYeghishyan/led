@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CatNode, ProductCard } from '@/lib/api';
-import { href, money, pick, STATIC, t, type Lang } from '@/lib/i18n';
+import { href, money, pick, t, type Lang } from '@/lib/i18n';
 import { SearchBox } from './SearchBox';
 import { Icon } from './Icon';
 
@@ -174,14 +174,15 @@ function Acts({ lang }: { lang: Lang }) {
     read();
     addEventListener('storage', read);
     addEventListener('led:store', read);
-    return () => { removeEventListener('storage', read); removeEventListener('led:store', read); };
+    addEventListener('led:user', read);
+    return () => { removeEventListener('storage', read); removeEventListener('led:store', read); removeEventListener('led:user', read); };
   }, []);
   const A = ({ to, icon, label, count }: { to: string; icon: string; label: string; count?: number }) => (
     <a className="act" href={to} data-lk="1"><Icon name={icon} /><span>{label}</span>{count ? <em>{count}</em> : null}</a>
   );
   return (
     <div className="acts">
-      <A to={n.user ? STATIC.account : STATIC.login} icon="user" label={t(lang, 'account')} />
+      <A to={href(lang, n.user ? '/account' : '/login')} icon="user" label={t(lang, 'account')} />
       <A to={href(lang, '/compare')} icon="cmp" label={t(lang, 'compare')} count={n.cmp} />
       <A to={href(lang, '/favorites')} icon="heart" label={t(lang, 'favorites')} count={n.fav} />
       <A to={href(lang, '/cart')} icon="cart" label={t(lang, 'cart')} count={n.cart} />

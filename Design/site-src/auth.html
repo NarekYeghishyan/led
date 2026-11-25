@@ -59,7 +59,8 @@
   const me=force=>{if(!meP||force)meP=api('/me').then(u=>{cache(u);return u;},e=>{meP=null;throw e;});return meP;};
   const logout=()=>api('/logout',{method:'POST'}).catch(()=>{}).finally(()=>cache(null));
   function hdr(){const on=!!localStorage.getItem('led-user');
-    document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]'))a.href=on?'/account.html':'/login.html';});}
+    const pre={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||''; /* account pages live in Next.js now */
+    document.querySelectorAll('header a.act').forEach(a=>{if(a.querySelector('use[href="#user"]')){a.href=pre+(on?'/account':'/login');a.dataset.nx='';}});}
 
   const showErr=(f,e)=>{const x=f&&f.querySelector('.au-err');if(!x)return;x.hidden=!e;x.innerHTML=e?msg(e.code||'server'):'';};
   /* runs fn(data) after LEDInfoForm validation passed ('ok' event); shows the API error inside the form */
