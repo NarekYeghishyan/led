@@ -554,3 +554,13 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   link fixer adds /ru|/en from `led-lang`); template demo cart seed removed. nginx: `/cart.html`, `/favorites.html`,
   `/compare.html`, `/search.html` → 301 to the new page (`?lang=ru|en` → prefix); old led.am `/products/cart|compare` → new pages.
   Backups: nginx `/root/led.creativeweb.am.conf.bak-20261125-*`, static `led-static-backup-20261125c.tgz`. Deployed + published.
+- 2026-11-25 — **Step 7: home page live in Next.js** (`web/src/app/[lang]/page.tsx`, `/`, `/ru`, `/en`). Template layout and look;
+  CSS `web/src/styles/home.css` = only the index.html rules that site.css lacks (rule-by-rule diff in `import_design.py`);
+  decorations (gaming art, configurator chain, quick-link icons) + 12 brand logos generated into `web/src/components/home/art.ts`.
+  Real data only: slider = one in-stock product with a photo per section (6 s autoplay, pause, arrows, swipe, tilt); quick links =
+  gaming PCs (`/computers/gaming`), network equipment (top 3 brands), New; stats = in-stock products / brands / categories;
+  "Best offers" tabs = New + each section; brands = most products in stock (logo or text tile) → `/search?q=<brand>`.
+  Removed demo parts: discounts, old prices, monthly payments, "top builds", instalment calculator, "10 000+ products".
+  Configurator links still go to static `/assembly.html`. Old `/?lang=ru|en` → 301 `/ru|/en` (proxy.ts); nginx `/` → Next.js,
+  `/index.html` → `/`. Static templates link home with the language prefix (`NX()` in shop_shared.html). Backups: nginx
+  `/root/led.creativeweb.am.conf.bak-20261125-*`, static `led-static-backup-20261125d.tgz`. Deployed + published.
