@@ -15,11 +15,15 @@ export type StockState = 'in' | 'low' | 'order';
 export interface ProductCard {
   code: number; slug: string; name: string; brand: string | null; price: number; unit: string | null;
   stock: { qty: number; state: StockState }; image: string | null; section: string | null;
+  specs?: { k: string; v: string; names: string[] }[];
 }
 export interface Crumb { slug: string; path: string; name: string[] }
+/** Spec filter from the API: key, label [ru, hy, en], values with counts (counts ignore the key's own selection). */
+export interface SpecFacet { k: string; names: string[]; values: { v: string; n: number }[] }
+export interface Spec { k: string; v: string; names: string[]; group: string }
 export interface ProductList {
   items: ProductCard[]; total: number; page: number; pages: number; limit: number; sort: string;
-  facets: { brands: { v: string; n: number }[]; price: { min: number; max: number } };
+  facets: { brands: { v: string; n: number }[]; price: { min: number; max: number }; specs: SpecFacet[] };
   category: { path: Crumb[]; children: { slug: string; path: string; name: string[] }[] } | null;
 }
 
@@ -44,7 +48,7 @@ export interface ProductDetail {
   code: number; slug: string; name: string; brand: string | null; price: number; currency: string; unit: string | null;
   stock: { qty: number; state: StockState }; images: string[]; barcode: string | null; description: string | null;
   seoTitle: string | null; seoDescription: string | null; weight: number | string | null; section: string | null;
-  breadcrumb: Crumb[]; similar: ProductCard[];
+  breadcrumb: Crumb[]; similar: ProductCard[]; specs: Spec[];
 }
 /** GET /api/shop/products/<slug>-<code>; NotFound when unknown or out of stock. */
 export const getProduct = (slug: string) => get<ProductDetail>(`/shop/products/${encodeURIComponent(slug)}`, ['products'], 60);

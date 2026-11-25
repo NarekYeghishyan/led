@@ -50,3 +50,8 @@ body{font-family:var(--font-inter),var(--font-arm),Inter,"Noto Sans Armenian",sy
 @media (max-width:860px){.pdp,.cols{grid-template-columns:minmax(0,1fr)}.gal{grid-template-columns:minmax(0,1fr)}}
 .pinfo h1,.sbar .t b{overflow-wrap:anywhere}
 .specs dd{overflow-wrap:anywhere}
+
+/* spec filters */
+.ck.off{opacity:.45;cursor:default}
+.ck-more{all:unset;cursor:pointer;font-size:13px;font-weight:600;color:var(--blue-600);padding:4px 0}
+.ck-more:hover{text-decoration:underline}

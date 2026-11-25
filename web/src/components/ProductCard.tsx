@@ -1,5 +1,5 @@
 import type { ProductCard as P } from '@/lib/api';
-import { href, money, t, type Lang, type TKey } from '@/lib/i18n';
+import { href, money, pick, specValue, t, type Lang, type TKey } from '@/lib/i18n';
 import { Icon } from './Icon';
 import { CardButtons } from './CardButtons';
 
@@ -48,7 +48,9 @@ export function ProductCard({ p, lang }: { p: P; lang: Lang }) {
       <div className="more-info">
         <dl>
           {p.brand ? <div><dt>{t(lang, 'spBrand')}</dt><dd>{p.brand}</dd></div> : null}
-          {specRows(spec).slice(0, 5).map((r, i) => <div key={i}><dt>{t(lang, r.k)}</dt><dd>{r.v}</dd></div>)}
+          {p.specs?.length
+            ? p.specs.map((r) => <div key={r.k}><dt>{pick(r.names, lang)}</dt><dd>{specValue(lang, r.k, r.v)}</dd></div>)
+            : specRows(spec).slice(0, 5).map((r, i) => <div key={i}><dt>{t(lang, r.k)}</dt><dd>{r.v}</dd></div>)}
           <div><dt>{t(lang, 'spCode')}</dt><dd>{p.code}</dd></div>
         </dl>
         <div className="mi-act">

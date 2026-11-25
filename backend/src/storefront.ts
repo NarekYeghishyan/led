@@ -15,6 +15,7 @@ import { BadRequestException, Controller, Get, Header, NotFoundException, Param,
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { identify } from './photos';
+import { SPECS, SPEC_KEYS, specNum, specsOf } from './specs';
 
 const LOW_STOCK = 3; // "last N" on the site
 const MAX_LIMIT = 60;
@@ -56,6 +57,12 @@ const brandOf = (name: string) => {
   }
   return b;
 };
+
+/** Up to 5 specs for the card's hover panel, in SPECS order (labels included so the site needs no copy of them). */
+const cardSpecs = (name: string) => Object.entries(specsOf(name))
+  .filter(([k]) => k !== 'cpu' || !specsOf(name).cpu_model)
+  .sort(([a], [b]) => SPEC_KEYS.indexOf(a) - SPEC_KEYS.indexOf(b)).slice(0, 5)
+  .map(([k, v]) => ({ k, v, names: SPECS[k].names }));
 
 export type StockState = 'in' | 'low' | 'order';
 const stockOf = (qty: number): { qty: number; state: StockState } => {
@@ -225,7 +232,27 @@ export class StorefrontController {
       if (inPrice(r)) { const b = brandOf(r.name); if (b) brandCount.set(b, (brandCount.get(b) || 0) + 1); }
       if (inBrand(r)) { lo = Math.min(lo, r.price); hi = Math.max(hi, r.price); }
     }
-    const hit = rows.filter((r) => inPrice(r) && inBrand(r));
+    // spec filters (?ram=16 GB,32 GB&cpu=Core i5): OR inside a key, AND between keys; values from the name (specs.ts)
+    const specWant = new Map<string, Set<string>>();
+    for (const k of SPEC_KEYS) {
+      const v = String(qs[k] ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+      if (v.length) specWant.set(k, new Set(v));
+    }
+    const inSpecs = (r: Row, skip?: string) => {
+      for (const [k, want] of specWant) if (k !== skip && !want.has(specsOf(r.name)[k] ?? '')) return false;
+      return true;
+    };
+    const hit = rows.filter((r) => inPrice(r) && inBrand(r) && inSpecs(r));
+    if (specWant.size) {
+      // brand counts and the price range follow the spec filters too
+      brandCount.clear(); lo = Infinity; hi = 0;
+      for (const r of rows) {
+        if (!inSpecs(r)) continue;
+        if (inPrice(r)) { const b = brandOf(r.name); if (b) brandCount.set(b, (brandCount.get(b) || 0) + 1); }
+        if (inBrand(r)) { lo = Math.min(lo, r.price); hi = Math.max(hi, r.price); }
+      }
+    }
+    const specFacets = (qs.cat || words.length) ? this.specFacets(rows.filter((r) => inPrice(r) && inBrand(r)), specWant, inSpecs) : [];
 
     const cmp: Record<Sort, (a: Row, b: Row) => number> = {
       default: (a, b) => Number(b.hasImg) - Number(a.hasImg) || b.code - a.code,
@@ -244,9 +271,39 @@ export class StorefrontController {
       facets: {
         brands: [...brandCount].map(([v, n]) => ({ v, n })).sort((a, b) => b.n - a.n || a.v.localeCompare(b.v)),
         price: { min: Number.isFinite(lo) ? lo : 0, max: hi },
+        specs: specFacets,
       },
       category,
     };
+  }
+
+  /**
+   * Spec filters worth showing for a product set: a key is offered when ≥ 30 % of the products have it and it has ≥ 2
+   * values (or is already selected). Counts ignore the key's own selection (so other values stay clickable).
+   */
+  private specFacets(rows: Row[], want: Map<string, Set<string>>, inSpecs: (r: Row, skip?: string) => boolean) {
+    const out: { k: string; names: string[]; values: { v: string; n: number }[] }[] = [];
+    if (!rows.length) return out;
+    for (const k of SPEC_KEYS) {
+      if (SPECS[k].noFilter) continue;
+      const counts = new Map<string, number>();
+      let have = 0;
+      for (const r of rows) {
+        const v = specsOf(r.name)[k];
+        if (v) have++;
+        if (v && inSpecs(r, k)) counts.set(v, (counts.get(v) || 0) + 1);
+      }
+      const sel = want.get(k);
+      for (const v of sel || []) if (!counts.has(v)) counts.set(v, 0);
+      if (!sel && (have / rows.length < 0.3 || counts.size < 2)) continue;
+      const def = SPECS[k];
+      const values = [...counts].map(([v, n]) => ({ v, n }));
+      values.sort(def.num
+        ? (a, b) => specNum(k, a.v) - specNum(k, b.v) || a.v.localeCompare(b.v)
+        : (a, b) => (a.v === 'yes' ? -1 : b.v === 'yes' ? 1 : 0) || b.n - a.n || a.v.localeCompare(b.v));
+      out.push({ k, names: def.names, values: values.slice(0, 40) });
+    }
+    return out;
   }
 
   /**
@@ -269,6 +326,7 @@ export class StorefrontController {
     return ids.map((id) => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r).map((r) => ({
       code: r.code, slug: slugOf(r), name: r.name, brand: brandOf(r.name), price: Number(r.price), unit: r.unit,
       stock: stockOf(r.quantity), image: r.images?.[0] ?? null, section: sectionOf(r.id),
+      specs: cardSpecs(r.name),
     }));
   }
 
@@ -384,7 +442,8 @@ export class StorefrontController {
       code: p.code, slug: slugOf(p), name: p.name, brand: brandOf(p.name), price: Number(p.price), currency: 'AMD', unit: p.unit,
       stock: stockOf(p.quantity), images: p.images || [], barcode: p.barcode || null,
       description: p.description || null, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null,
-      weight: p.weight || null, section: best?.[0]?.slug ?? null, breadcrumb: best ? this.crumbs(best) : [], similar,
+      weight: p.weight || null, section: best?.[0]?.slug ?? null,
+      specs: Object.entries(specsOf(p.name)).sort(([a], [b]) => SPEC_KEYS.indexOf(a) - SPEC_KEYS.indexOf(b)).map(([k, v]) => ({ k, v, names: SPECS[k].names, group: SPECS[k].group })), breadcrumb: best ? this.crumbs(best) : [], similar,
     };
   }
 }

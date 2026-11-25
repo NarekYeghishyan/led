@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { t, type Lang } from '@/lib/i18n';
-import { toSearch, type CatQuery } from './query';
+import { pick, specValue, t, type Lang } from '@/lib/i18n';
+import type { SpecFacet } from '@/lib/api';
+import { toSearch, withSpec, type CatQuery } from './query';
 
 const fmt = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const closeDrawer = () => document.body.classList.remove('flt-open');
@@ -12,8 +13,8 @@ const closeDrawer = () => document.body.classList.remove('flt-open');
  * renders the result. On phones the panel is a full-screen drawer (body.flt-open, CSS from responsive.html) opened by
  * the toolbar's "Filters" button.
  */
-export function Filters({ lang, base, q, brands, price, total, children }: {
-  lang: Lang; base: string; q: CatQuery; brands: { v: string; n: number }[]; price: { min: number; max: number }; total: number;
+export function Filters({ lang, base, q, brands, price, specs = [], total, children }: {
+  lang: Lang; base: string; q: CatQuery; brands: { v: string; n: number }[]; price: { min: number; max: number }; specs?: SpecFacet[]; total: number;
   children?: React.ReactNode;
 }) {
   const router = useRouter();
@@ -63,11 +64,34 @@ export function Filters({ lang, base, q, brands, price, total, children }: {
           })}
         </details>
       )}
+      {specs.map((f, i) => <SpecGroup key={f.k} lang={lang} f={f} q={q} open={i < 5 || !!q.specs[f.k]} go={go} />)}
       <button type="button" className="flt-go"
         onClick={() => { closeDrawer(); document.querySelector('.results')?.scrollIntoView({ behavior: 'smooth' }); }}>
         {t(lang, 'show')} ({total})
       </button>
     </aside>
+  );
+}
+
+const SHOW = 8;
+/** One spec filter (checkboxes, OR inside the group); long lists show the first values + "More". Zero-count values are disabled. */
+function SpecGroup({ lang, f, q, open, go }: { lang: Lang; f: SpecFacet; q: CatQuery; open: boolean; go: (c: Partial<CatQuery>) => void }) {
+  const [all, setAll] = useState(false);
+  const sel = new Set(q.specs[f.k] || []);
+  const vals = all ? f.values : f.values.filter((v, i) => i < SHOW || sel.has(v.v));
+  return (
+    <details open={open}>
+      <summary>{pick(f.names, lang)}</summary>
+      {vals.map((v) => (
+        <label key={v.v} className={`ck${!v.n && !sel.has(v.v) ? ' off' : ''}`}>
+          <input type="checkbox" checked={sel.has(v.v)} disabled={!v.n && !sel.has(v.v)} onChange={() => go(withSpec(q, f.k, v.v))} />
+          <span>{specValue(lang, f.k, v.v)}</span><em>{v.n}</em>
+        </label>
+      ))}
+      {f.values.length > SHOW ? (
+        <button type="button" className="ck-more" onClick={() => setAll(!all)}>{t(lang, all ? 'less' : 'more')} {all ? '' : `(${f.values.length - SHOW})`}</button>
+      ) : null}
+    </details>
   );
 }
 

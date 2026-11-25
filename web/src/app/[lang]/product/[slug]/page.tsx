@@ -8,8 +8,8 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { getProduct, NotFound, resolvePath } from '@/lib/api';
-import { href, money, pick, t, type Lang } from '@/lib/i18n';
-import { ProductCard, specRows, splitName } from '@/components/ProductCard';
+import { href, money, pick, specValue, t, type Lang, type TKey } from '@/lib/i18n';
+import { ProductCard, splitName } from '@/components/ProductCard';
 import { Gallery } from '@/components/product/Gallery';
 import { BuyActions } from '@/components/product/BuyBox';
 import { Icon } from '@/components/Icon';
@@ -19,7 +19,18 @@ type P = { params: Promise<{ lang: string; slug: string }> };
 const SITE = process.env.SITE_URL ?? 'https://led.creativeweb.am';
 const INDEXABLE = process.env.SITE_INDEX === '1';
 const PHONE = '+37410502802';
-const KEY_ICON: Record<string, string> = { spCpu: 'cpu', spScreen: 'monitor', spRam: 'spark', spDisk: 'doc', spGpu: 'tool', spOs: 'laptop', spSocket: 'cpu', spOther: 'check' };
+/** Spec groups of the table (order, title, icon) — group names come from backend/src/specs.ts. */
+const GROUPS: [string, TKey, string][] = [['main', 'gMain', 'doc'], ['cpu', 'gCpu', 'cpu'], ['display', 'gDisplay', 'monitor'],
+  ['memory', 'gMemory', 'spark'], ['graphics', 'gGraphics', 'monitor'], ['ports', 'gPorts', 'wifi'], ['power', 'gPower', 'ups'], ['body', 'gBody', 'tool']];
+/** Key tiles under the title: first 4 specs in this order. */
+const KEY_ORDER = ['cpu_model', 'cpu', 'screen', 'ram', 'storage', 'gpu', 'capacity', 'mem_type', 'socket', 'power_w', 'hz', 'resolution', 'ports', 'wifi', 'wireless', 'form', 'length'];
+const KEY_ICON: Record<string, string> = { main: 'doc', cpu: 'cpu', display: 'monitor', memory: 'spark', graphics: 'monitor', ports: 'wifi', power: 'ups', body: 'tool' };
+/** Bracket parts of the name the parser didn't turn into a spec ("Height, Pivot") → one "Features" row. */
+function leftovers(spec: string, values: string[]) {
+  const norm = (x: string) => x.toLowerCase().replace(/["″]/g, '').replace(/\s+/g, '');
+  const vals = values.map(norm);
+  return spec.split(' · ').filter((p) => p && !vals.some((v) => v && (norm(p).includes(v) || v.includes(norm(p)))));
+}
 
 const load = cache(async (lang: Lang, raw: string) => {
   const slug = decodeURIComponent(raw);
@@ -60,8 +71,9 @@ export default async function ProductPage({ params }: P) {
   const { title, spec } = splitName(p.name);
   const url = href(lang, `/product/${p.slug}`);
   const placeholder = `/img/placeholder/${p.section || 'default'}.svg`;
-  const rows = specRows(spec);
-  const keys = rows.filter((r) => r.k !== 'spOther').slice(0, 4);
+  const keys = KEY_ORDER.map((k) => p.specs.find((x) => x.k === k)).filter((x): x is NonNullable<typeof x> => !!x)
+    .filter((x, _, a) => !(x.k === 'cpu' && a.some((y) => y.k === 'cpu_model'))).slice(0, 4);
+  const other = leftovers(spec, p.specs.map((x) => x.v));
   const abs = (u: string) => (u.startsWith('http') ? u : SITE + u);
   const leaf = p.breadcrumb[p.breadcrumb.length - 1];
 
@@ -94,7 +106,7 @@ export default async function ProductPage({ params }: P) {
           <div className="meta"><span className="sku"><span>{t(lang, 'spCode')}:</span> <b>{p.code}</b></span></div>
           {keys.length ? (
             <div className="keys">
-              {keys.map((r) => <div key={r.k}><span className="ki"><Icon name={KEY_ICON[r.k]} /></span><span><small>{t(lang, r.k)}</small><b>{r.v}</b></span></div>)}
+              {keys.map((r) => <div key={r.k}><span className="ki"><Icon name={KEY_ICON[r.group] || 'doc'} /></span><span><small>{pick(r.names, lang)}</small><b>{specValue(lang, r.k, r.v)}</b></span></div>)}
             </div>
           ) : null}
           <a href="#specs" className="allspec"><span>{t(lang, 'specsH')}</span><Icon name="arrow" /></a>
@@ -122,13 +134,25 @@ export default async function ProductPage({ params }: P) {
             <h2>{t(lang, 'specsH')}</h2>
             <div className="card">
               <div className="specs">
-                <div className="sg"><h3><Icon name="doc" /><span>{t(lang, 'specsH')}</span></h3><dl>
-                  {p.brand ? <div><dt>{t(lang, 'spBrand')}</dt><dd>{p.brand}</dd></div> : null}
-                  {rows.map((r, i) => <div key={i}><dt>{t(lang, r.k)}</dt><dd>{r.v}</dd></div>)}
-                  {p.weight ? <div><dt>{t(lang, 'spWeight')}</dt><dd>{String(p.weight)}</dd></div> : null}
-                  {p.barcode ? <div><dt>{t(lang, 'spBarcode')}</dt><dd>{p.barcode}</dd></div> : null}
-                  <div><dt>{t(lang, 'spCode')}</dt><dd>{p.code}</dd></div>
-                </dl></div>
+                {GROUPS.map(([g, title, icon]) => {
+                  const list = p.specs.filter((x) => x.group === g && !(x.k === 'cpu' && p.specs.some((y) => y.k === 'cpu_model')));
+                  const extra = g === 'main' ? [
+                    ...(p.brand ? [[t(lang, 'spBrand'), p.brand]] : []),
+                    ...(other.length ? [[t(lang, 'spOther'), other.join(', ')]] : []),
+                  ] : g === 'body' ? [
+                    ...(p.weight ? [[t(lang, 'spWeight'), String(p.weight)]] : []),
+                    ...(p.barcode ? [[t(lang, 'spBarcode'), p.barcode]] : []),
+                    [t(lang, 'spCode'), String(p.code)],
+                  ] : [];
+                  if (!list.length && !extra.length) return null;
+                  return (
+                    <div className="sg" key={g}><h3><Icon name={icon} /><span>{t(lang, title)}</span></h3><dl>
+                      {g === 'main' ? extra.map(([a, b]) => <div key={a}><dt>{a}</dt><dd>{b}</dd></div>) : null}
+                      {list.map((x) => <div key={x.k}><dt>{pick(x.names, lang)}</dt><dd>{specValue(lang, x.k, x.v)}</dd></div>)}
+                      {g !== 'main' ? extra.map(([a, b]) => <div key={a}><dt>{a}</dt><dd>{b}</dd></div>) : null}
+                    </dl></div>
+                  );
+                })}
               </div>
             </div>
           </section>

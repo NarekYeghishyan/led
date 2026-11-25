@@ -9,13 +9,13 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { getCategories, getProducts, NotFound, resolvePath, type ProductList } from '@/lib/api';
-import { href, money, pick, t, type Lang } from '@/lib/i18n';
+import { href, money, pick, specValue, t, type Lang } from '@/lib/i18n';
 import { ProductCard } from '@/components/ProductCard';
 import { Tree } from '@/components/catalog/Tree';
 import { Filters, FiltersButton } from '@/components/catalog/Filters';
 import { Grid, Toolbar } from '@/components/catalog/Toolbar';
 import { Pager } from '@/components/catalog/Pager';
-import { isFiltered, parseQuery, type CatQuery } from '@/components/catalog/query';
+import { isFiltered, parseQuery, withSpec, type CatQuery } from '@/components/catalog/query';
 
 type SP = Record<string, string | string[] | undefined>;
 type P = { params: Promise<{ lang: string; slug: string[] }>; searchParams: Promise<SP> };
@@ -37,7 +37,8 @@ const load = cache(async (lang: Lang, slug: string[], sp: SP) => {
   if (path.length > 3 || path.some((s) => !/^[a-z0-9-]{1,80}$/.test(s))) return unknown();
   let data: ProductList;
   try {
-    data = await getProducts({ cat: path.join('/'), brand: q.brand.join(','), min: q.min, max: q.max, sort: q.sort, page: q.page, limit: PER_PAGE });
+    data = await getProducts({ ...Object.fromEntries(Object.entries(q.specs).map(([k, v]) => [k, v.join(',')])),
+      cat: path.join('/'), brand: q.brand.join(','), min: q.min, max: q.max, sort: q.sort, page: q.page, limit: PER_PAGE });
   } catch (e) {
     if (e instanceof NotFound) return unknown();
     throw e;
@@ -76,6 +77,10 @@ export default async function CategoryPage({ params, searchParams }: P) {
 
   const chips: { label: string; change: Partial<CatQuery> }[] = [
     ...q.brand.map((b) => ({ label: b, change: { brand: q.brand.filter((x) => x !== b) } })),
+    ...Object.entries(q.specs).flatMap(([k, vs]) => {
+      const f = data.facets.specs?.find((x) => x.k === k);
+      return vs.map((v) => ({ label: `${f ? `${pick(f.names, lang)}: ` : ''}${specValue(lang, k, v)}`, change: withSpec(q, k, v) }));
+    }),
     ...(q.min || q.max ? [{ label: `${q.min ? money(q.min) : '0'} — ${q.max ? money(q.max) : '∞'}`, change: { min: undefined, max: undefined } }] : []),
   ];
 
@@ -99,7 +104,7 @@ export default async function CategoryPage({ params, searchParams }: P) {
         <div><h1 id="catTitle">{name}</h1><p><b id="catCount">{data.total}</b> <span>{t(lang, 'products')}</span></p></div>
       </div>
       <div className="cat-body">
-        <Filters lang={lang} base={base} q={q} brands={data.facets.brands} price={data.facets.price} total={data.total}>
+        <Filters lang={lang} base={base} q={q} brands={data.facets.brands} price={data.facets.price} specs={data.facets.specs} total={data.total}>
           <Tree lang={lang} cats={cats} path={path} />
         </Filters>
         <div className="results">

@@ -130,12 +130,34 @@ const T = {
   prodDesc: ['{name}՝ {price}, առկա է LED Computers-ում։ Պաշտոնական երաշխիք, առաքում Հայաստանում, ապառիկ։',
     '{name} — {price}, в наличии в LED Computers. Официальная гарантия, доставка по Армении, рассрочка.',
     '{name} — {price}, in stock at LED Computers. Official warranty, delivery across Armenia, instalments.'],
+  yes: ['Այո', 'Да', 'Yes'],
+  no: ['Ոչ', 'Нет', 'No'],
+  noOs: ['Առանց ՕՀ', 'Без ОС', 'No OS'],
+  integrated: ['Ներկառուցված', 'Встроенная', 'Integrated'],
+  more: ['Ավելին', 'Ещё', 'More'],
+  less: ['Թաքցնել', 'Свернуть', 'Less'],
+  gMain: ['Հիմնական', 'Основные', 'General'],
+  gCpu: ['Պրոցեսոր', 'Процессор', 'Processor'],
+  gDisplay: ['Էկրան', 'Экран', 'Display'],
+  gMemory: ['Հիշողություն և կուտակիչ', 'Память и накопитель', 'Memory and storage'],
+  gGraphics: ['Գրաֆիկա', 'Графика', 'Graphics'],
+  gPorts: ['Կապ և միակցիչներ', 'Связь и разъёмы', 'Connectivity'],
+  gPower: ['Սնուցում', 'Питание', 'Power'],
+  gBody: ['Իրան և այլն', 'Корпус и прочее', 'Body and other'],
 } satisfies Record<string, [string, string, string]>;
 
 export type TKey = keyof typeof T;
 const IDX: Record<Lang, number> = { hy: 0, ru: 1, en: 2 };
 export const t = (lang: Lang, key: TKey, vars?: Record<string, string | number>) =>
   vars ? T[key][IDX[lang]].replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? '')) : T[key][IDX[lang]];
+
+/** Spec value as shown: the API sends yes/no/integrated tokens and language-neutral values (backend/src/specs.ts). */
+export function specValue(lang: Lang, k: string, v: string) {
+  if (v === 'yes') return t(lang, 'yes');
+  if (v === 'no') return t(lang, k === 'os' ? 'noOs' : 'no');
+  if (v === 'integrated') return t(lang, 'integrated');
+  return v;
+}
 
 /** Pages that are still static templates (Design/site) — they read the language from localStorage `led-lang`. */
 export const STATIC = {
