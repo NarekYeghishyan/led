@@ -2,28 +2,35 @@
  * Admin "Заказы" (/admin/orders, plan step 10; backend orders.ts): orders placed on the storefront (checkout and 1-click).
  * List with status tabs and search (number, name, phone, e-mail, company); card with contact, delivery, payment, items
  * (link to the product card, current stock), history; status change with a note for the history, internal staff note.
- * Old led.am orders stay on the customer cards (Покупатели).
+ * Tab "Старые заказы led.am" (?src=legacy): orders imported from the old site, read-only (no status change).
  */
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { api } from './api';
 import { useI18n } from './i18n';
 
-type St = 'new' | 'confirmed' | 'shipped' | 'done' | 'cancelled';
-interface Row { id: number; number: string; status: St; kind: string; orderedAt: string; name: string | null; phone: string; company: string | null;
-  total: number; delivery: string | null; pay: string | null; customerId: number | null; qty: number }
+type St = 'new' | 'confirmed' | 'shipped' | 'done' | 'cancelled' | 'received' | 'process' | 'resolved';
+interface Row { id: number; number: string; source: 'site' | 'legacy'; status: St; kind: string; orderedAt: string; name: string | null; phone: string; company: string | null;
+  total: number; shipping?: boolean; delivery: string | null; pay: string | null; customerId: number | null; qty: number }
 interface Order extends Row {
   lang: string; updatedAt: string | null; customerName: string | null; email: string | null; customerType: string | null; tax: string | null;
   region: string | null; city: string | null; address: string | null; day: string | null; slot: string | null; comment: string | null; callMe: boolean;
-  staffNote: string | null;
-  items: { code: number; name: string; price: number; qty: number; total: number; productId: number | null; stock: number | null }[];
+  staffNote: string | null; shop: string | null; paid: boolean;
+  items: { code: number; article: string | null; name: string; price: number; qty: number; total: number; productId: number | null; stock: number | null }[];
   history: { status: St; at: string; note: string | null; by: string | null }[];
 }
 
 const TX = {
   title: ['Заказы', 'Orders'],
-  note: ['Заказы с сайта: оформление и «купить в 1 клик». Цены — на момент заказа. Старые заказы led.am — в карточках покупателей.',
-    'Orders from the website: checkout and "buy in 1 click". Prices as at the time of the order. Old led.am orders are on the customer cards.'],
+  note: ['Заказы с сайта: оформление и «купить в 1 клик». Цены — на момент заказа.',
+    'Orders from the website: checkout and "buy in 1 click". Prices as at the time of the order.'],
+  noteOld: ['Заказы со старого сайта led.am (перенесены из его базы). Только просмотр — статусы не меняются.',
+    'Orders from the old led.am site (imported from its database). View only — statuses cannot be changed.'],
+  src_site: ['С нового сайта', 'New site'], src_legacy: ['Старые заказы led.am', 'Old led.am orders'],
+  s_received: ['Получен', 'Received'], s_process: ['В обработке', 'Processing'], s_resolved: ['Выполнен', 'Resolved'],
+  p_arca_master: ['Карта ArCa / Master', 'Card ArCa / Master'], p_arca_virtual: ['Карта ArCa (онлайн)', 'Card ArCa (online)'], p_tt: ['TelCell', 'TelCell'],
+  p_edram: ['Idram', 'Idram'], p_credit: ['Кредит / рассрочка', 'Credit'], paid: ['Оплачен', 'Paid'], shop: ['Магазин', 'Shop'],
+  old_ship: ['Доставка', 'Delivery'], old_pick: ['Без доставки', 'No delivery'], readonly: ['Старый заказ led.am — только просмотр.', 'Old led.am order — view only.'],
   all: ['Все', 'All'], search: ['Номер, имя, телефон, e-mail, компания', 'Number, name, phone, e-mail, company'],
   num: ['Номер', 'Number'], date: ['Дата', 'Date'], client: ['Покупатель', 'Customer'], items: ['Шт.', 'Qty'], sum: ['Сумма', 'Total'],
   dl: ['Получение', 'Delivery'], pay: ['Оплата', 'Payment'], status: ['Статус', 'Status'], none: ['Заказов нет', 'No orders'],
@@ -40,7 +47,8 @@ const TX = {
   shipNote: ['Стоимость доставки не рассчитана — сообщите покупателю по телефону.', 'Delivery cost is not calculated — tell the customer by phone.'],
 } as const;
 const STS: St[] = ['new', 'confirmed', 'shipped', 'done', 'cancelled'];
-const tone = (s: St) => (s === 'done' ? 'ok' : s === 'cancelled' ? 'bad' : s === 'new' ? 'warn' : '');
+const OLD_STS: St[] = ['received', 'process', 'resolved'];
+const tone = (s: St) => (s === 'done' || s === 'resolved' ? 'ok' : s === 'cancelled' ? 'bad' : s === 'new' ? 'warn' : '');
 const money = (n: number | null | undefined) => (n == null ? '—' : `${Math.round(n).toLocaleString('ru-RU')} ֏`);
 
 function useTx() {
@@ -51,26 +59,30 @@ function useTx() {
 export function OrdersPage() {
   const tx = useTx();
   const [sp, setSp] = useSearchParams();
-  const status = sp.get('status') || '', q = sp.get('q') || '', page = Number(sp.get('page')) || 1;
-  const [data, setData] = useState<{ items: Row[]; total: number; per: number; counts: Record<string, number> } | null>(null);
+  const status = sp.get('status') || '', q = sp.get('q') || '', page = Number(sp.get('page')) || 1, src = sp.get('src') === 'legacy' ? 'legacy' : '';
+  const [data, setData] = useState<{ items: Row[]; total: number; per: number; counts: Record<string, number>; legacyN: number } | null>(null);
   const [err, setErr] = useState('');
   const [qq, setQq] = useState(q);
   useEffect(() => {
-    const load = () => api<typeof data>(`/admin/orders?status=${status}&q=${encodeURIComponent(q)}&page=${page}`).then(setData).catch((e) => setErr(e.message));
+    const load = () => api<typeof data>(`/admin/orders?src=${src}&status=${status}&q=${encodeURIComponent(q)}&page=${page}`).then(setData).catch((e) => setErr(e.message));
     load();
     const id = setInterval(load, 60_000); // new orders show up without reloading
     return () => clearInterval(id);
-  }, [status, q, page]);
-  const go = (p: Record<string, string>) => setSp(Object.fromEntries(Object.entries({ status, q, ...p }).filter(([, v]) => v)));
+  }, [src, status, q, page]);
+  const go = (p: Record<string, string>) => setSp(Object.fromEntries(Object.entries({ src, status, q, ...p }).filter(([, v]) => v)));
   const all = data ? Object.values(data.counts).reduce((a, b) => a + b, 0) : 0;
   return (
     <>
       <header className="page-head"><h1>{tx('title')}</h1></header>
-      <p className="muted small">{tx('note')}</p>
+      <div className="seg" style={{ marginBottom: 8 }}>
+        <button type="button" className={!src ? 'on' : ''} onClick={() => go({ src: '', status: '', page: '' })}>{tx('src_site')}</button>
+        <button type="button" className={src ? 'on' : ''} onClick={() => go({ src: 'legacy', status: '', page: '' })}>{tx('src_legacy')} {data?.legacyN ? `(${data.legacyN})` : ''}</button>
+      </div>
+      <p className="muted small">{tx(src ? 'noteOld' : 'note')}</p>
       <div className="filters">
         <div className="seg">
           <button type="button" className={!status ? 'on' : ''} onClick={() => go({ status: '', page: '' })}>{tx('all')} {all ? `(${all})` : ''}</button>
-          {STS.map((s) => <button type="button" key={s} className={status === s ? 'on' : ''} onClick={() => go({ status: s, page: '' })}>
+          {(src ? OLD_STS : STS).map((s) => <button type="button" key={s} className={status === s ? 'on' : ''} onClick={() => go({ status: s, page: '' })}>
             {tx(`s_${s}`)} {data?.counts[s] ? `(${data.counts[s]})` : ''}</button>)}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); go({ q: qq.trim(), page: '' }); }}>
@@ -85,12 +97,12 @@ export function OrdersPage() {
           <tbody>
             {data?.items.map((o) => (
               <tr key={o.id}>
-                <td data-label={tx('num')} className="title"><Link to={`/orders/${o.id}`}>{o.number}</Link><div className="muted small">{tx(`kind_${o.kind}`)}</div></td>
+                <td data-label={tx('num')} className="title"><Link to={`/orders/${o.id}`}>{o.number}</Link>{o.kind ? <div className="muted small">{tx(`kind_${o.kind}`)}</div> : null}</td>
                 <td data-label={tx('date')} className="muted">{new Date(o.orderedAt).toLocaleString()}</td>
                 <td data-label={tx('client')}>{o.name || '—'}<div className="muted small">{[o.phone, o.company].filter(Boolean).join(' · ')}</div></td>
                 <td data-label={tx('items')} className="num">{o.qty}</td>
                 <td data-label={tx('sum')} className="num">{money(o.total)}</td>
-                <td data-label={tx('dl')}>{o.delivery ? tx(`d_${o.delivery}`) : '—'}</td>
+                <td data-label={tx('dl')}>{o.delivery ? tx(`d_${o.delivery}`) : o.source === 'legacy' ? tx(o.shipping ? 'old_ship' : 'old_pick') : '—'}</td>
                 <td data-label={tx('pay')}>{o.pay ? tx(`p_${o.pay}`) : '—'}</td>
                 <td data-label={tx('status')}><span className={`tag ${tone(o.status)}`}>{tx(`s_${o.status}`)}</span></td>
               </tr>
@@ -131,10 +143,10 @@ export function OrderPage() {
   const dl = { display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '6px 16px', margin: 0 } as const;
   return (
     <>
-      <p><Link to="/orders">{tx('back')}</Link></p>
+      <p><Link to={o.source === 'legacy' ? '/orders?src=legacy' : '/orders'}>{tx('back')}</Link></p>
       <header className="page-head">
         <h1>{o.number} <span className={`tag ${tone(o.status)}`}>{tx(`s_${o.status}`)}</span></h1>
-        <span className="muted small">{tx(`kind_${o.kind}`)} · {new Date(o.orderedAt).toLocaleString()} · {money(o.total)}</span>
+        <span className="muted small">{o.kind ? `${tx(`kind_${o.kind}`)} · ` : ''}{new Date(o.orderedAt).toLocaleString()} · {money(o.total)}</span>
       </header>
       {err && <div className="error">{err}</div>}
       <div className="grid2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 16 }}>
@@ -152,7 +164,8 @@ export function OrderPage() {
         <section className="card" style={{ padding: 16 }}>
           <h3 style={{ marginTop: 0 }}>{tx('dl')}</h3>
           <dl style={dl}>
-            {row('dl', o.delivery ? tx(`d_${o.delivery}`) : '—')}
+            {row('dl', o.delivery ? tx(`d_${o.delivery}`) : o.source === 'legacy' ? tx(o.shipping ? 'old_ship' : 'old_pick') : '—')}
+            {row('shop', o.shop)}{row('paid', o.source === 'legacy' && o.paid ? '✓' : '')}
             {row('address', [o.region, o.city, o.address].filter(Boolean).join(', '))}
             {row('when', o.day ? `${new Date(o.day).toLocaleDateString()}${o.slot ? `, ${o.slot}` : ''}` : '')}
             {row('pay', o.pay ? tx(`p_${o.pay}`) : '')}
@@ -168,7 +181,7 @@ export function OrderPage() {
           <tbody>
             {o.items.map((i, k) => (
               <tr key={k}>
-                <td className="mono">{i.code}</td>
+                <td className="mono">{i.code ?? i.article ?? '—'}</td>
                 <td>{i.productId ? <Link to={`/products/${i.productId}`}>{i.name}</Link> : i.name}</td>
                 <td className="num">{money(i.price)}</td><td className="num">{i.qty}</td><td className="num">{money(i.total)}</td>
                 <td className="num">{i.stock == null ? '—' : <span className={i.stock < i.qty ? 'tag bad' : ''}>{i.stock}</span>}</td>
@@ -179,6 +192,7 @@ export function OrderPage() {
         </table>
       </div>
 
+      {o.source === 'legacy' ? <p className="muted" style={{ marginTop: 16 }}>{tx('readonly')}</p> :
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))', gap: 16, marginTop: 16 }}>
         <section className="card" style={{ padding: 16 }}>
           <h3 style={{ marginTop: 0 }}>{tx('change')}</h3>
@@ -201,7 +215,7 @@ export function OrderPage() {
             ))}
           </ul>
         </section>
-      </div>
+      </div>}
     </>
   );
 }

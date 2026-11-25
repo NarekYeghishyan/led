@@ -21,6 +21,7 @@ import { StorefrontController } from './storefront';
 import { sendMail } from './mailer';
 
 export const ORDER_STATUSES = ['new', 'confirmed', 'shipped', 'done', 'cancelled'] as const;
+const LEGACY_STATUSES = ['received', 'process', 'resolved'] as const;
 type Status = (typeof ORDER_STATUSES)[number];
 const SHIP = ['pick', 'cour', 'reg'] as const;
 const PAY = ['cash', 'card', 'idram', 'inst', 'bank'] as const;
@@ -158,41 +159,45 @@ export class OrdersAdminController {
   constructor(@InjectDataSource() private ds: DataSource) {}
 
   @Get()
-  async list(@Query() q: { status?: string; q?: string; page?: string }) {
-    const where = [`o.source = 'site'`], args: unknown[] = [];
-    if ((ORDER_STATUSES as readonly string[]).includes(String(q.status))) { args.push(q.status); where.push(`o.status = $${args.length}`); }
+  async list(@Query() q: { status?: string; q?: string; page?: string; src?: string }) {
+    // src=legacy → orders imported from the old led.am (read-only, statuses received / process / resolved)
+    const legacy = q.src === 'legacy';
+    const where = [legacy ? `o.source = 'legacy'` : `o.source = 'site'`], args: unknown[] = [];
+    const sts: readonly string[] = legacy ? LEGACY_STATUSES : ORDER_STATUSES;
+    if (sts.includes(String(q.status))) { args.push(q.status); where.push(`o.status = $${args.length}`); }
     const s = String(q.q || '').trim();
     if (s) {
       args.push(`%${s.toLowerCase()}%`);
       const d = s.replace(/\D/g, '');
-      where.push(`(lower(o.number) LIKE $${args.length} OR lower(coalesce(o.contact_person,'')) LIKE $${args.length} OR lower(coalesce(o.contact_email,'')) LIKE $${args.length}
+      where.push(`(lower(coalesce(o.number, o.legacy_id::text)) LIKE $${args.length} OR lower(coalesce(o.contact_person,'')) LIKE $${args.length} OR lower(coalesce(o.contact_email,'')) LIKE $${args.length}
         OR lower(coalesce(o.company,'')) LIKE $${args.length}${d.length >= 4 ? ` OR regexp_replace(coalesce(o.contact_phone,''), '\\D', '', 'g') LIKE '%${d}%'` : ''})`);
     }
     const page = Math.max(1, parseInt(String(q.page), 10) || 1), per = 50;
     const W = where.join(' AND ');
     const items = await this.ds.query(`
-      SELECT o.id, o.number, o.status, o.kind, o.ordered_at AS "orderedAt", o.contact_person AS name, o.contact_phone AS phone, o.company,
+      SELECT o.id, COALESCE(o.number, 'led.am #' || o.legacy_id) AS number, o.source, o.shipping, o.status, o.kind, o.ordered_at AS "orderedAt", o.contact_person AS name, o.contact_phone AS phone, o.company,
              o.total::float AS total, o.delivery, o.payment_type AS pay, o.customer_id AS "customerId",
              (SELECT COALESCE(SUM(qty), 0)::int FROM customer_order_items i WHERE i.order_id = o.id) AS qty
       FROM customer_orders o WHERE ${W} ORDER BY o.ordered_at DESC, o.id DESC LIMIT ${per} OFFSET ${(page - 1) * per}`, args);
     const [{ total }] = await this.ds.query(`SELECT COUNT(*)::int AS total FROM customer_orders o WHERE ${W}`, args);
-    const counts = await this.ds.query(`SELECT status, COUNT(*)::int AS n FROM customer_orders WHERE source = 'site' GROUP BY status`);
-    return { items, total, page, per, counts: Object.fromEntries(counts.map((c: { status: string; n: number }) => [c.status, c.n])), statuses: ORDER_STATUSES };
+    const counts = await this.ds.query(`SELECT status, COUNT(*)::int AS n FROM customer_orders WHERE source = $1 GROUP BY status`, [legacy ? 'legacy' : 'site']);
+    const [{ legacyN }] = await this.ds.query(`SELECT COUNT(*)::int AS "legacyN" FROM customer_orders WHERE source = 'legacy'`);
+    return { items, total, page, per, counts: Object.fromEntries(counts.map((c: { status: string; n: number }) => [c.status, c.n])), statuses: sts, legacyN };
   }
 
   @Get(':id')
   async one(@Param('id') id: string) {
     const [o] = await this.ds.query(`
-      SELECT o.id, o.number, o.status, o.kind, o.lang, o.ordered_at AS "orderedAt", o.updated_at AS "updatedAt", o.customer_id AS "customerId",
+      SELECT o.id, COALESCE(o.number, 'led.am #' || o.legacy_id) AS number, o.source, o.shipping, o.status, o.kind, o.lang, o.shop_address AS shop, o.paid, o.ordered_at AS "orderedAt", o.updated_at AS "updatedAt", o.customer_id AS "customerId",
              c.name AS "customerName", o.contact_person AS name, o.contact_phone AS phone, o.contact_email AS email, o.customer_type AS "customerType",
              o.company, o.tax_code AS tax, o.delivery, o.region, o.city, o.address, o.delivery_day AS "day", o.delivery_slot AS slot,
              o.payment_type AS pay, o.comment, o.call_me AS "callMe", o.staff_note AS "staffNote", o.total::float AS total,
              COALESCE((SELECT json_agg(json_build_object('code', i.product_external_id, 'name', i.name, 'price', i.price::float, 'qty', i.qty,
-               'total', i.total::float, 'productId', p.id, 'stock', p.quantity::float) ORDER BY i.id)
+               'total', i.total::float, 'article', i.article, 'productId', p.id, 'stock', p.quantity::float) ORDER BY i.id)
                FROM customer_order_items i LEFT JOIN products p ON p.external_id = i.product_external_id WHERE i.order_id = o.id), '[]') AS items,
              COALESCE((SELECT json_agg(json_build_object('status', e.status, 'at', e.at, 'note', e.note, 'by', e.by) ORDER BY e.at)
                FROM customer_order_events e WHERE e.order_id = o.id), '[]') AS history
-      FROM customer_orders o LEFT JOIN customers c ON c.id = o.customer_id WHERE o.id = $1 AND o.source = 'site'`, [parseInt(id, 10) || 0]);
+      FROM customer_orders o LEFT JOIN customers c ON c.id = o.customer_id WHERE o.id = $1 AND o.source IN ('site', 'legacy')`, [parseInt(id, 10) || 0]);
     if (!o) throw new NotFoundException();
     return o;
   }
@@ -201,6 +206,7 @@ export class OrdersAdminController {
   @Patch(':id')
   async update(@Param('id') id: string, @Body() b: { status?: string; note?: string; staffNote?: string }, @Req() req: { user?: { email?: string } }) {
     const o = await this.one(id);
+    if (o.source !== 'site') throw new BadRequestException('Old led.am orders are read-only');
     const who = req.user?.email ?? 'admin';
     const changes: Record<string, [unknown, unknown]> = {};
     if (b?.status !== undefined && b.status !== o.status) {
