@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from './api';
 import { useI18n } from './i18n';
+import { PageBuilder } from './page-builder';
 
 type L3 = 'hy' | 'ru' | 'en';
 type F = { title: string; h1: string; lead: string; html: string };
@@ -21,7 +22,9 @@ const FIELDS: (keyof F)[] = ['title', 'h1', 'lead', 'html'];
 const TX = {
   title: ['Страницы сайта', 'Site pages'],
   note: ['Тексты информационных страниц на трёх языках. Сначала показан текущий текст шаблона; сохраняются только изменённые поля. «Как в шаблоне» возвращает исходный текст. Скрипты и формы вырезаются; [[form]] на странице контактов — место формы обратной связи.', 'Texts of the info pages in three languages. The current template text is shown first; only changed fields are saved. "As template" restores the original. Scripts and forms are removed; [[form]] on the contacts page marks the contact form.'],
-  f_title: ['Заголовок вкладки браузера', 'Browser tab title'], f_h1: ['Заголовок страницы', 'Page heading'], f_lead: ['Подзаголовок', 'Lead line'], f_html: ['Текст страницы (HTML)', 'Page text (HTML)'],
+  f_title: ['Заголовок вкладки браузера', 'Browser tab title'], f_h1: ['Заголовок страницы', 'Page heading'], f_lead: ['Подзаголовок', 'Lead line'], f_html: ['Содержимое страницы', 'Page content'],
+  blocks: ['Конструктор', 'Constructor'], htmlMode: ['HTML (для специалиста)', 'HTML (expert)'],
+  copyFrom: ['Взять блоки из', 'Copy blocks from'], copySure: ['Заменить содержимое этого языка копией? Тексты потом нужно перевести.', 'Replace this language with a copy? Translate the texts afterwards.'],
   reset: ['как в шаблоне', 'as template'], edited: ['изменено', 'edited'], preview: ['Предпросмотр', 'Preview'], open: ['Открыть на сайте ↗', 'Open on the site ↗'],
   save: ['Сохранить', 'Save'], saving: ['Сохранение…', 'Saving…'], saved: ['Сохранено — сайт обновится через несколько секунд', 'Saved — the website updates in a few seconds'],
   unsaved: ['есть несохранённые изменения', 'unsaved changes'],
@@ -36,6 +39,17 @@ export function InfoPagesPage() {
   const [page, setPage] = useState('about');
   const [l, setL] = useState<L3>('hy');
   const [busy, setBusy] = useState(false), [msg, setMsg] = useState(''), [err, setErr] = useState('');
+  const [mode, setMode] = useState<'blocks' | 'html'>('blocks');
+  // the storefront's own stylesheets + icon sprite, so the constructor and the preview look like the site
+  const [site, setSite] = useState<{ css: string[]; sprite: string; icons: string[] }>({ css: [], sprite: '', icons: [] });
+  useEffect(() => {
+    fetch('/about').then((r) => r.text()).then((h) => {
+      const css = [...h.matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]);
+      const sprite = (/<svg id="ledIcons"[\s\S]*?<\/svg>(?=\s*<)/.exec(h) || [''])[0];
+      const icons = [...sprite.matchAll(/<symbol id="([\w-]+)"/g)].map((m) => m[1]).filter((i) => !/^(br-|logo|ci-|sp-|g-)/.test(i));
+      setSite({ css, sprite, icons });
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch('/info-defaults.json').then((r) => r.json()).then(setDefs).catch((e) => setErr(String(e)));
@@ -57,15 +71,17 @@ export function InfoPagesPage() {
       setEd(r.data); setSaved(JSON.stringify(r.data)); setMsg(tx('saved'));
     } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
   };
-  const doc = useMemo(() => `<!doctype html><meta charset="utf-8"><base target="_blank"><style>body{font:15px/1.6 system-ui,sans-serif;color:#16243B;padding:16px;margin:0}
-    h1{font-size:24px;margin:0 0 6px}.lead{color:#5B6B82;margin:0 0 16px}svg{display:none}img,iframe{max-width:100%}table{border-collapse:collapse}td,th{border:1px solid #E3E9F1;padding:6px}</style>
-    <h1>${esc(cur('h1'))}</h1><p class="lead">${esc(cur('lead'))}</p>${cur('html')}`, [ed, page, l, defs]); // eslint-disable-line react-hooks/exhaustive-deps
+  const doc = useMemo(() => `<!doctype html><html lang="${l}"><meta charset="utf-8"><base target="_blank">${site.css.map((c) => `<link rel="stylesheet" href="${c}">`).join('')}
+    <style>body{margin:0;padding:12px 16px;font-family:Inter,'Noto Sans Armenian',system-ui,sans-serif}.ip{display:block}.ip-main{max-width:none}</style>
+    <body>${site.sprite}<main class="info"><div class="ip"><div class="ip-main"><div class="ip-hero"><div><h1>${esc(cur('h1'))}</h1><p>${esc(cur('lead'))}</p></div></div>
+    ${cur('html').replace('[[form]]', '')}</div></div></main></body></html>`, [ed, page, l, defs, site]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!defs) return err ? <div className="error">{err}</div> : <p className="muted">…</p>;
   const pg = PAGES.find((x) => x[0] === page)!;
 
   return (
     <>
       <header className="page-head"><h1>{tx('title')}</h1></header>
+      {site.sprite ? <div style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: site.sprite }} /> : null}
       <p className="muted small">{tx('note')}</p>
       {err && <div className="error">{err}</div>}
       {msg && <div className="success">{msg}</div>}
@@ -84,15 +100,32 @@ export function InfoPagesPage() {
             <a href={`${l === 'hy' ? '' : '/' + l}${pg[3]}`} target="_blank" rel="noopener">{tx('open')}</a>
           </div>
           {FIELDS.map((f) => (
-            <label key={f}>
+            <div key={f} className="pb-field">
               <span>{tx(`f_${f}` as keyof typeof TX)}
                 {isEd(f) ? <> · <b>{tx('edited')}</b> · <button type="button" className="ghost" style={{ padding: '0 6px' }} onClick={() => set(f, undefined)}>{tx('reset')}</button></> : null}
               </span>
-              {f === 'html'
-                ? <textarea rows={22} className="mono" style={{ fontSize: 12.5 }} value={cur(f)} onChange={(e) => set(f, e.target.value)} />
+              {f === 'html' ? (
+                <>
+                  <span style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', margin: '4px 0 8px' }}>
+                    <button type="button" className={mode === 'blocks' ? '' : 'ghost'} onClick={() => setMode('blocks')}>{tx('blocks')}</button>
+                    <button type="button" className={mode === 'html' ? '' : 'ghost'} onClick={() => setMode('html')}>{tx('htmlMode')}</button>
+                    <span style={{ flex: 1 }} />
+                    <span className="muted small">{tx('copyFrom')}</span>
+                    {(['hy', 'ru', 'en'] as L3[]).filter((x) => x !== l).map((x) => (
+                      <button key={x} type="button" className="ghost" onClick={() => {
+                        if (!confirm(tx('copySure'))) return;
+                        set('html', ed[page]?.[x]?.html ?? (defs?.[page]?.[x] as F | undefined)?.html ?? '');
+                      }}>{x.toUpperCase()}</button>
+                    ))}
+                  </span>
+                  {mode === 'html'
+                    ? <textarea rows={22} className="mono" style={{ fontSize: 12.5 }} value={cur(f)} onChange={(e) => set(f, e.target.value)} />
+                    : <PageBuilder key={`${page}-${l}`} html={cur(f)} onChange={(v) => set(f, v)} icons={site.icons} lang={lang} />}
+                </>
+              )
                 : f === 'lead' ? <textarea rows={2} value={cur(f)} onChange={(e) => set(f, e.target.value)} />
                   : <input value={cur(f)} onChange={(e) => set(f, e.target.value)} />}
-            </label>
+            </div>
           ))}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <button type="button" disabled={busy || !dirty} onClick={save}>{busy ? tx('saving') : tx('save')}</button>
