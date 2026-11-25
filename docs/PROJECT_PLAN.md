@@ -275,7 +275,7 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 | 6 ✅ | (done 2026-11-25: in-memory search `backend/src/search.ts`, no trigram/DB extension needed at this size) Shared shop state: cart/favourites/compare with real ids, price/stock re-check, favourites saved to the account, real search (full-text + trigram, RU/HY/EN synonyms) | Cart and search on real data |
 | 7 | Port the remaining pages: home (real New/Sale/Best sellers), search, brand, cart, checkout, account, login/registration/forgot, info pages, assembly. Then retire the static site | Whole site in Next.js |
 | 8 ✅ | Admin web fields: descriptions HY/RU/EN, SEO, specs, hide on site, sale/old price (part 1 done 2026-11-25: product card "Данные сайта"), home banners and blocks (part 2 done 2026-11-25: admin "Главная страница"), per-category filters (part 3), info page texts (part 4; step done 2026-11-25) | Content editable without code |
-| 9 | SEO and the move from led.am: sitemap, canonical, hreflang, 404, **301 from every old led.am URL**, caching | seo-check passes |
+| 9 ✅ | SEO and the move from led.am: sitemap, canonical, hreflang, 404, **301 from every old led.am URL**, caching (done 2026-11-25; site stays noindex until step 11, switch = SITE_INDEX=1) | seo-check passes |
 | 10 | Orders: checkout and 1-click write `customer_orders` (`source='site'`), admin Orders page, staff alerts, real order tracking | Order reaches the staff |
 | 11 | Go-live: re-import old customers, SMTP/SMS, remove `MAIL_DEV_LOG`, analytics, remove `noindex`, Search Console, domain switch | led.am on the new site |
 
