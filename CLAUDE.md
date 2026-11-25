@@ -530,3 +530,16 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   Site: spec filter groups (first 8 values + "More", zero counts disabled), chips, URL keys sorted, filtered = noindex; product page spec
   table grouped (General / Processor / Display / Memory / Graphics / Connectivity / Power / Body), key tiles from specs, unparsed name parts
   in one "Feature" row. Rollback: `/root/led-api-image-before-specs-*.txt`. Deployed.
+- 2026-11-25 — **Storefront step 6 done: search, store re-check, account favourites.**
+  Search (`backend/src/search.ts`, in memory, no DB extension): every word must match the name, brand or the product's category
+  names in RU/HY/EN (so "նոութբուք"/"laptop" work), synonyms (`SYN`: мышка/mouse/մկնիկ…), typo correction to the nearest index or
+  synonym word (lenvo → lenovo, monitr → monitor; returned as `fix`), Access code search, relevance sort. `/api/shop/products?q=` uses it
+  (+ `facets.cats`), `/api/shop/suggest?q=` feeds the header dropdown. Site: `/search?q=` page (Next.js, category chips, filters, sort,
+  pages, noindex; old led.am `/search?term=` → here), header `SearchBox` (live dropdown, recent searches `led-recent`, ↑/↓/Enter/Esc).
+  Static templates' header search now also uses `/api/shop/suggest` + `/search` (static `/search.html` no longer linked).
+  `StoreSync` (every Next.js page, once): cart / favourites / compare re-checked via `/api/shop/products/by-ids` — price, name, photo,
+  URL updated; sold-out/hidden removed with a message; template demo items dropped. Favourites of logged-in customers sync both ways
+  with `/api/shop/me/wishlist` (GET, POST {add, remove}; table `customer_wishlist`, migration `Wishlist1764800000000`, 386 old led.am
+  favourites of 127 customers copied in; admin "view as customer" can't change it). Static cart/favourites pages don't re-check by
+  themselves yet (step 7 moves them to Next.js). DB backup `/root/led-db-backup-20261125-1413-pre-wishlist.dump`, static
+  `led-static-backup-20261125b.tgz`, API rollback id `/root/led-api-image-before-search-*.txt`. Deployed + published.
