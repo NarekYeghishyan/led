@@ -32,15 +32,7 @@ export async function GET() {
   const iso = (d: string | number) => new Date(d).toISOString().slice(0, 19) + '+00:00';
   const newest = data.products.reduce((m, p) => Math.max(m, +new Date(p.at) || 0), 0) || Date.now();
   const urls = entries.flatMap(({ path, at }) => LANGS.map(([, pre]) =>
-    `<url>
-<loc>${esc(loc(pre, path))}</loc>
-<lastmod>${iso(at || newest)}</lastmod>
-</url>`));
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.join('
-')}
-</urlset>
-`;
+    `<url>\n<loc>${esc(loc(pre, path))}</loc>\n<lastmod>${iso(at || newest)}</lastmod>\n</url>`));
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
   return new Response(xml, { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=600' } });
 }
