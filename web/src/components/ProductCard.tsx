@@ -11,13 +11,13 @@ export function splitName(name: string) {
 
 /** Label for one spec part of the name ("15.6\" FHD IPS" → screen, "Core i5 13420H" → CPU…); order = first match. */
 const KIND: [TKey, RegExp][] = [
-  ['spGpu', /b(rtx|gtx|radeon|geforce|arc|graphics|\d+gb\s*(rtx|gtx|gddr))/i],
-  ['spCpu', /b(core|ryzen|celeron|pentium|athlon|xeon|snapdragon|apple m\d|i[3579][-\s]?\d{3,5})/i],
-  ['spScreen', /(\d{2}(\.\d)?\s*("|″|inch|')|b(fhd|uhd|qhd|wuxga|oled|ips|\d+k|\d{2,3}\s?hz|touch|retina)b)/i],
-  ['spDisk', /b(ssd|hdd|nvme|emmc|\d+\s?tb)b/i],
-  ['spRam', /b\d{1,3}\s?gbb(?!.*ssd)|bddr\d/i],
-  ['spOs', /b(win(dows)?\s?\d*|dos|linux|chrome\s?os|macos|no os|free dos)b/i],
-  ['spSocket', /b(s-?am\d|s-?\d{3,4}|lga\s?\d{3,4}|socket)b/i],
+  ['spGpu', /\b(rtx|gtx|radeon|geforce|arc|graphics|\d+gb\s*(rtx|gtx|gddr))/i],
+  ['spCpu', /\b(core|ryzen|celeron|pentium|athlon|xeon|snapdragon|apple m\d|i[3579][-\s]?\d{3,5})/i],
+  ['spScreen', /(\d{2}(\.\d)?\s*("|″|inch|')|\b(fhd|uhd|qhd|wuxga|oled|ips|\d+k|\d{2,3}\s?hz|touch|retina)\b)/i],
+  ['spDisk', /\b(ssd|hdd|nvme|emmc|\d+\s?tb)\b/i],
+  ['spRam', /\b\d{1,3}\s?gb\b|\bddr\d/i],
+  ['spOs', /\b(win(dows)?\s?\d*|dos|linux|chrome\s?os|macos|no os|free dos)\b/i],
+  ['spSocket', /\b(s-?am\d|s-?\d{3,4}|lga\s?\d{3,4}|socket)\b/i],
 ];
 export function specRows(spec: string) {
   const used = new Set<TKey>();
