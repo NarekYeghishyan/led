@@ -914,9 +914,7 @@ document.addEventListener('auxclick',e=>{if(e.button===1&&e.target.closest('.pro
 <script>/* LED shop store: cart / favourites / compare in localStorage (demo until the API exists) */
 (function(){
 const K={cart:'led-cart',fav:'led-fav',cmp:'led-cmp'};
-const SEED={cart:[{id:'lenovo-ideapad-slim-3-15',q:1},{id:'hp-pavilion-15',q:1}],
- fav:[{id:'asus-zenbook-14-oled'},{id:'msi-thin-gf63'},{id:'lenovo-yoga-7-2-in-1-14'},{id:'dell-inspiron-14'}],
- cmp:[{id:'lenovo-ideapad-slim-3-15'},{id:'hp-pavilion-15'},{id:'asus-vivobook-16'}]};
+const SEED={cart:[],fav:[],cmp:[]}; /* real products only (no demo seed) */
 const slug=t=>(t||'').toLowerCase().replace(/[″"]/g,'').replace(/[^a-z0-9а-яё]+/gi,'-').replace(/^-|-$/g,'');
 const get=k=>{let v=null;try{v=JSON.parse(localStorage.getItem(K[k]))}catch(e){}return Array.isArray(v)?v:SEED[k].map(x=>({...x}))};
 const subs=[];
@@ -928,7 +926,13 @@ function add(k,item){const v=get(k),i=v.findIndex(x=>x.id===item.id);
 const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
-const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={cart:'/cart',fav:'/favorites',cmp:'/compare'};
+/* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
+const NX=p=>({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+p;
+const NX_PAGES=/^\/(cart|favorites|compare|search)(\?|#|$)/;
+const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
+document.addEventListener('DOMContentLoaded',fixLinks);
+new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+const ICON={cart:'#cart',fav:'#heart',cmp:'#cmp'},URL={get cart(){return NX('/cart')},get fav(){return NX('/favorites')},get cmp(){return NX('/compare')}};
 function act(k){return document.querySelector(`.acts .act use[href="${ICON[k]}"]`)?.closest('.act')}
 function paint(k,bump=true){const a=act(k);if(!a)return;let em=a.querySelector('em');const n=count(k);
  if(!n){em&&em.remove();return}if(!em){em=document.createElement('em');a.appendChild(em)}
@@ -995,8 +999,8 @@ const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 /* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
-const NX=p=>({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+p;
-const NX_PAGES=/^\/(cart|favorites|compare|search)(\?|#|$)/;
+const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
+const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
 const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

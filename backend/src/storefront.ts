@@ -458,7 +458,7 @@ export class StorefrontController {
       '/help_up_menu/how_order_2': '/how-to-order.html', '/help_up_menu/how_pay': '/how-to-pay.html', '/help_up_menu/warranty': '/warranty.html',
     };
     // targets with ".html" are static templates (language in ?lang=); the others are Next.js pages (language prefix)
-    if (OLD[rest]) return /\.html$|^\/$/.test(OLD[rest]) ? page(OLD[rest]) : app(OLD[rest]); // home: /?lang=ru until it moves (step 7)
+    if (OLD[rest]) return /\.html$/.test(OLD[rest]) ? page(OLD[rest]) : app(OLD[rest]);
     throw new NotFoundException('No redirect');
   }
 

@@ -1371,8 +1371,8 @@ const remove=(k,id)=>set(k,get(k).filter(x=>x.id!==id));
 const toggle=(k,item)=>has(k,item.id)?(remove(k,item.id),false):(add(k,item),true);
 const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 /* pages that live in Next.js now (docs/PROJECT_PLAN.md step 7): language prefix from the saved language */
-const NX=p=>({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+p;
-const NX_PAGES=/^\/(cart|favorites|compare|search)(\?|#|$)/;
+const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
+const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
 const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{const h=a.dataset.nx||a.getAttribute('href');if(!NX_PAGES.test(h))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});

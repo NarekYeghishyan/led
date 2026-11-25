@@ -31,6 +31,12 @@ export async function proxy(req: NextRequest) {
     }
   }
 
+  // old static home with ?lang=ru|en (template links, old redirects) → /ru, /en
+  const ql = req.nextUrl.searchParams.get('lang');
+  if (pathname === '/' && (ql === 'ru' || ql === 'en') && req.headers.get(MARK) !== '1') {
+    return NextResponse.redirect(new URL(`/${ql}`, req.url), 301);
+  }
+
   if (pathname === '/hy' || pathname.startsWith('/hy/')) {
     if (req.headers.get(MARK) === '1') return NextResponse.next();
     const url = req.nextUrl.clone();
