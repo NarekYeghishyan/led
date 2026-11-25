@@ -64,3 +64,6 @@ body{font-family:var(--font-inter),var(--font-arm),Inter,"Noto Sans Armenian",sy
 .sr-cats a.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
 .sr-cats a.on em{background:rgba(255,255,255,.2);color:#fff}
 .sx .chips a small{color:var(--muted);font-size:11.5px}
+
+/* product page: call button stays above the sticky buy bar */
+body:has(.sbar.show) .fab{bottom:92px}
