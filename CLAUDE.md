@@ -601,3 +601,9 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   → 301. Tested live (checkout + 1-click created, sold-out / bad phone / missing address refused, tracking with wrong phone 404, admin status
   change shows in tracking, no token 401), test orders deleted (numbers 105001–2 used). DB backup `/root/led-db-backup-20261125-1929-pre-orders.dump`,
   nginx `.bak-20261125-1929-orders`, static `led-static-backup-20261125i.tgz`. Deployed + published.
+- 2026-11-25 — **Full test of the test site before go-live** (step 11 itself postponed by the owner): all 3 984 sitemap URLs 200 with title,
+  one H1, own canonical, no error pages (median 0.36 s, max 1.07 s); 163 other internal links/images OK (only Cloudflare's
+  `/cdn-cgi/l/email-protection`, handled by Cloudflare). Real Chrome: 29 page types × HY/RU/EN × desktop 1366 / phone 390 — no JS errors,
+  no failed requests, no broken images, no sideways overflow. Flows: add to cart → cart → checkout (errors, terms) → order → tracking
+  (wrong phone = not found) → 1-click from the product page → search dropdown. Fix: phone mask no longer blocks the order forms' own
+  check (`data-own-check`), so an empty checkout marks every missing field. Test orders LED-105003…105005 deleted. Deployed.
