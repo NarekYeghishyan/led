@@ -86,7 +86,7 @@
   /* brand tiles / chips → brand page */
   document.addEventListener('click',e=>{const a=e.target.closest('.brands a,#megaBr a,.pdp .brand,.mega-br a');if(!a)return;
     const n=(a.querySelector('svg[aria-label]')?.getAttribute('aria-label')||a.getAttribute('title')||a.textContent).trim().replace(/‑/g,'-');if(!n)return;
-    e.preventDefault();location.href='/brand.html?b='+n.toLowerCase().replace(/[^a-z0-9]+/g,'-');},true);
+    e.preventDefault();location.href=({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+'/brand/'+n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');},true);
   window.LEDSearch={I,CATS,POP,search,suggest,hl,norm,remember,recent,esc};
 
   /* header search: Enter / button → /search.html?q=…, live suggestions */

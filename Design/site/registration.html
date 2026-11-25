@@ -930,7 +930,7 @@ const count=k=>get(k).reduce((s,x)=>s+(k==='cart'?(x.q||1):1),0);
 const NX=p=>{const x={ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'';return x?x+(p==='/'?'':p):p};
 const NX_PAGES=/^\/((cart|favorites|compare|search)(\?|#|$)|$)/;
 /* moved .html pages → their Next.js path (the account pages; info pages follow) */
-const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account'};
+const NX_HTML={'/login.html':'/login','/registration.html':'/registration','/forgot-password.html':'/forgot-password','/account.html':'/account','/about.html':'/about','/contacts.html':'/contacts','/credit.html':'/credit','/exchange.html':'/exchange','/delivery.html':'/delivery','/how-to-buy.html':'/how-to-buy','/how-to-order.html':'/how-to-order','/how-to-pay.html':'/how-to-pay','/warranty.html':'/warranty'};
 const fixLinks=()=>document.querySelectorAll('a[href]').forEach(a=>{let h=a.dataset.nx||a.getAttribute('href');const m=/^(\/[\w-]+\.html)(.*)$/.exec(h);if(m&&NX_HTML[m[1]])h=NX_HTML[m[1]]+m[2];if(!NX_PAGES.test(h)&&!(m&&NX_HTML[m[1]]))return;a.dataset.nx=h;a.setAttribute('href',NX(h))});
 document.addEventListener('DOMContentLoaded',fixLinks);
 new MutationObserver(fixLinks).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
@@ -1982,7 +1982,7 @@ body.oc-lock{overflow:hidden}
   /* brand tiles / chips → brand page */
   document.addEventListener('click',e=>{const a=e.target.closest('.brands a,#megaBr a,.pdp .brand,.mega-br a');if(!a)return;
     const n=(a.querySelector('svg[aria-label]')?.getAttribute('aria-label')||a.getAttribute('title')||a.textContent).trim().replace(/‑/g,'-');if(!n)return;
-    e.preventDefault();location.href='/brand.html?b='+n.toLowerCase().replace(/[^a-z0-9]+/g,'-');},true);
+    e.preventDefault();location.href=({ru:'/ru',en:'/en'}[localStorage.getItem('led-lang')]||'')+'/brand/'+n.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');},true);
   window.LEDSearch={I,CATS,POP,search,suggest,hl,norm,remember,recent,esc};
 
   /* header search: Enter / button → /search.html?q=…, live suggestions */

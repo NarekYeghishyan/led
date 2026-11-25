@@ -279,7 +279,7 @@ export class StorefrontController {
         brands: [...brandCount].map(([v, n]) => ({ v, n })).sort((a, b) => b.n - a.n || a.v.localeCompare(b.v)),
         price: { min: Number.isFinite(lo) ? lo : 0, max: hi },
         specs: specFacets,
-        cats: score ? await this.catFacet(hit.map((r) => r.id)) : [],
+        cats: score || want.size ? await this.catFacet(hit.map((r) => r.id)) : [],
       },
       category, fix,
     };

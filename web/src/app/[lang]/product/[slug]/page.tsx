@@ -5,6 +5,7 @@
  * - No fake data: no reviews, ratings, options or bundles until the store has them (docs/PROJECT_PLAN.md section 11).
  */
 import type { Metadata } from 'next';
+import { brandSlug } from '@/lib/brands';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { getProduct, NotFound, resolvePath } from '@/lib/api';
@@ -101,7 +102,7 @@ export default async function ProductPage({ params }: P) {
         <Gallery images={p.images} alt={title} placeholder={placeholder} />
 
         <div className="pinfo">
-          {p.brand ? <span className="brand">{p.brand}</span> : null}
+          {p.brand ? <a className="brand" href={href(lang, `/brand/${brandSlug(p.brand)}`)}>{p.brand}</a> : null}
           <h1>{p.name}</h1>
           <div className="meta"><span className="sku"><span>{t(lang, 'spCode')}:</span> <b>{p.code}</b></span></div>
           {keys.length ? (

@@ -15,6 +15,7 @@ import { pageUrl } from '@/lib/pages';
 import { BestTabs, CreditCalc, TopBuilds, GamingCard, HeroSlider, type Slide } from '@/components/home/HomeClient';
 import { BRAND_LOGOS, CHAIN, QK_NEW, QK_SALE } from '@/components/home/art';
 import { getBuilds } from '@/lib/builds';
+import { brandSlug } from '@/lib/brands';
 import '@/styles/home.css';
 
 type P = { params: Promise<{ lang: string }> };
@@ -171,12 +172,12 @@ export default async function Home({ params }: P) {
 
       {brands.length ? (
         <section>
-          <div className="sh"><h2>{t(lang, 'brands')}</h2></div>
+          <div className="sh"><h2>{t(lang, 'brands')}</h2><a href={href(lang, '/brands')}>{t(lang, 'allL')} →</a></div>
           <div className="brands">
             {brands.map((b) => {
               const logo = BRAND_LOGOS[b.v.toLowerCase()];
               return (
-                <a key={b.v} href={`${href(lang, '/search')}?q=${encodeURIComponent(b.v)}`} style={{ ['--bc' as string]: logo?.[0] ?? '#16243B' }} title={`${b.v} · ${b.n}`}>
+                <a key={b.v} href={href(lang, `/brand/${brandSlug(b.v)}`)} style={{ ['--bc' as string]: logo?.[0] ?? '#16243B' }} title={`${b.v} · ${b.n}`}>
                   {logo ? <span style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: logo[1] }} /> : <b className="br-txt">{b.v}</b>}
                   <span>{b.v}</span>
                 </a>

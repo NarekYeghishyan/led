@@ -87,3 +87,6 @@ body:has(.sbar.show) .fab{bottom:92px}
 /* info / account frame: the templates spaced the blocks through .ipl (one per language); one language per page here */
 .info .ip-main{display:flex;flex-direction:column;gap:18px}
 .info .ip-main>.ac-app{display:flex;flex-direction:column;gap:18px}
+/* brands: word-mark logos stay on one line inside the tile */
+.br-t .br-wm{width:auto!important;max-width:100%;white-space:nowrap;font-size:18px;overflow:hidden;text-overflow:ellipsis}
+.ptitle a.brand,a.brand{text-decoration:none}
