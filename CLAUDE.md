@@ -615,3 +615,4 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   another language, preview with the site's real CSS and icons. Unknown parts (contacts cards, map, contact form) stay fixed blocks;
   "HTML (для специалиста)" mode kept. Admin orders status tabs: text colour fixed. Deployed.
 - 2026-11-25 — `/sitemap.xml` in the plain format: each URL = `<url><loc>…</loc><lastmod>2026-11-25T15:21:03+00:00</lastmod></url>` on its own lines (products: their update time; other pages: newest product update). hreflang alternates removed from the sitemap (they stay in every page head). 3 984 URLs. Deployed.
+- 2026-11-25 — Contacts page: WhatsApp / Viber pills now have their icons and brand colours (green / purple, lift on hover). Deployed.
