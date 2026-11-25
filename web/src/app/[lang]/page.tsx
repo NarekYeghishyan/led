@@ -12,7 +12,7 @@ import { href, pick, STATIC, t, type Lang } from '@/lib/i18n';
 import { ProductCard, splitName } from '@/components/ProductCard';
 import { Icon } from '@/components/Icon';
 import { pageUrl } from '@/lib/pages';
-import { BestTabs, GamingCard, HeroSlider, type Slide } from '@/components/home/HomeClient';
+import { BestTabs, CreditCalc, GamingCard, HeroSlider, type Slide } from '@/components/home/HomeClient';
 import { BRAND_LOGOS, CHAIN, QK_NEW, QK_SALE } from '@/components/home/art';
 import '@/styles/home.css';
 
@@ -149,11 +149,7 @@ export default async function Home({ params }: P) {
           <h3>{t(lang, 'crH')}</h3>
           <ul>{(['cr1', 'cr2', 'cr3'] as const).map((k) => <li key={k}><Icon name="check" />{t(lang, k)}</li>)}</ul>
           <a className="btn p" href={pageUrl(lang, 'credit')}>{t(lang, 'crGo')}</a>
-          <div className="calc">
-            {([['crF1', 'crV1'], ['crF2', 'crV2'], ['crF3', 'crV3']] as const).map(([f, v], i) => (
-              <div key={f}><small>{t(lang, f)}</small><b style={i === 2 ? { color: 'var(--blue-600)' } : undefined}>{t(lang, v)}</b></div>
-            ))}
-          </div>
+          {slides.length ? <CreditCalc lang={lang} price={(slides.find((x) => x.price >= 200000) ?? slides[0]).price} /> : null}
         </div>
       </section>
 

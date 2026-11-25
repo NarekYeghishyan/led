@@ -128,3 +128,23 @@ export function BestTabs({ title, tabs, all, children }: { title: string; tabs: 
     </section>
   );
 }
+
+/** Instalment calculator of the template (index.html #termR): price of a real in-stock product, term 3–36 months,
+ *  monthly payment = price × (1 + 1.2 % × months) / months, rounded to 100 ֏ (the template's formula). */
+export function CreditCalc({ lang, price }: { lang: Lang; price: number }) {
+  const [n, setN] = useState(24);
+  const pay = Math.round((price * (1 + 0.012 * n)) / n / 100) * 100;
+  return (
+    <>
+      <div className="calc">
+        <div><small>{t(lang, 'crCost')}</small><b>{money(price)}</b></div>
+        <div><small>{t(lang, 'crF3')}</small><b>{n} <span>{t(lang, 'crMo')}</span></b></div>
+        <div><small>{t(lang, 'crPay')}</small><b style={{ color: 'var(--blue-600)' }}>{money(pay)}</b></div>
+      </div>
+      <div className="range">
+        <input type="range" min={3} max={36} step={3} value={n} onChange={(e) => setN(Number(e.target.value))} aria-label={t(lang, 'crF3')} />
+        <div><span>3</span><span>36</span></div>
+      </div>
+    </>
+  );
+}
