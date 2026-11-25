@@ -2,7 +2,7 @@
 /**
  * +374 XX XXX XXX mask for every phone field on the page (input[type=tel] / [inputmode=tel], also ones added later) —
  * port of site-src/phone_mask.html. Accepts pasted 0XX… / 374… / +374…; a form with an incomplete number does not submit
- * (field marked .tel-bad).
+ * (field marked .tel-bad), except forms with data-own-check, which validate the phone themselves.
  */
 import { useEffect } from 'react';
 
@@ -39,6 +39,7 @@ export function PhoneMask() {
       const el = e.target; if (isTel(el) && e.key === 'Backspace' && (el.selectionStart ?? 0) <= 5 && (el.selectionEnd ?? 0) <= 5) e.preventDefault();
     };
     const submit = (e: Event) => {
+      if ((e.target as HTMLElement).hasAttribute('data-own-check')) return; // the form validates the phone itself (order forms) and shows all errors
       const bad = [...(e.target as HTMLElement).querySelectorAll<HTMLInputElement>(SEL)].filter((el) => !el.disabled && !full(el));
       if (bad.length) { e.preventDefault(); e.stopImmediatePropagation(); bad.forEach((el) => el.classList.add('tel-bad')); bad[0].focus(); }
     };

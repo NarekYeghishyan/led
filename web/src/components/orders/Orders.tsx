@@ -260,7 +260,7 @@ export function CheckoutPage({ lang }: { lang: Lang }) {
           <span className="on"><i>2</i>{L('step2')}</span><b /><span><i>3</i>{L('step3')}</span>
         </div></div>
       </div>
-      <form className="sp-cart co" noValidate onSubmit={submit}>
+      <form className="sp-cart co" noValidate data-own-check onSubmit={submit}>
         <div>
           <div className="sp-card co-s"><h3><i>1</i>{L('c1')}</h3>
             {u ? <p className="co-hint"><Icon name="user" />{L('hello')} <b>{u.fname || u.login}</b></p>
@@ -420,7 +420,7 @@ export function OneClick({ lang }: { lang: Lang }) {
               ))}
             </div>
             <div className="oc-tot"><span>{L('total')}</span><b>{money(tot)}</b></div>
-            <form className="oc-f" noValidate onSubmit={go}>
+            <form className="oc-f" noValidate data-own-check onSubmit={go}>
               <label>{L('ocName')}<input value={f.name} autoComplete="name" maxLength={120} onChange={(e) => setF({ ...f, name: e.target.value })} /></label>
               <label>{L('phone')} *<input type="tel" inputMode="tel" autoComplete="tel" className={bad ? 'bad' : undefined} value={f.phone}
                 onChange={(e) => { setF({ ...f, phone: e.target.value }); setBad(false); }} required /></label>
@@ -482,7 +482,7 @@ export function TrackOrder({ lang }: { lang: Lang }) {
   return (
     <div className="tr-app">
       <div className="ip-card tr-qc">
-        <form className="tr-q" noValidate onSubmit={(e) => { e.preventDefault(); find(n, ph); }}>
+        <form className="tr-q" noValidate data-own-check onSubmit={(e) => { e.preventDefault(); find(n, ph); }}>
           <label>{L('tn')}<input value={n} placeholder="LED-105001" className={bad.has('n') ? 'bad' : undefined} onChange={(e) => setN(e.target.value)} /></label>
           <label>{L('phone')}<input type="tel" inputMode="tel" value={ph} className={bad.has('ph') ? 'bad' : undefined} onChange={(e) => setPh(e.target.value)} /></label>
           <button className="btn p" type="submit" disabled={state === 'load'}>{L('tgo')}</button>
