@@ -511,3 +511,6 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   (secret `REVALIDATE_SECRET` in .env) after product syncs, Курсы, catalog edits; `/internal/` 404 from outside. `/ru`, `/en` home = temporary
   307 to static home until step 7. No build-time prerender (build must not need the API). Product pages (`/product/…`) = step 5 (404 now).
   DB backup `/root/led-db-backup-20261125-0246-pre-url-redirects.dump`, compose/env/nginx backups `*-20261125-0246`. Deployed.
+- 2026-11-25 — Category cards: the hover panel (`.more-info`) was empty — now lists brand, up to 5 specs read from the name's brackets with
+  labels (screen / processor / memory / storage / graphics / OS / socket, `specRows()` in `web/src/components/ProductCard.tsx`, HY/RU/EN) and
+  the code, like the template. Real per-product specs come with plan step 2. Deployed.
