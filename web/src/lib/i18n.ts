@@ -98,6 +98,16 @@ const T = {
   catDesc: ['{name} LED Computers-ում՝ {n} ապրանք առկա է։ Պաշտոնական երաշխիք, առաքում ամբողջ Հայաստանում, ապառիկ։',
     '{name} в LED Computers: {n} товаров в наличии. Официальная гарантия, доставка по Армении, рассрочка.',
     '{name} at LED Computers: {n} products in stock. Official warranty, delivery across Armenia, instalments.'],
+  spScreen: ['Էկրան', 'Экран', 'Screen'],
+  spCpu: ['Պրոցեսոր', 'Процессор', 'Processor'],
+  spRam: ['Հիշողություն', 'Память', 'Memory'],
+  spDisk: ['Կուտակիչ', 'Накопитель', 'Storage'],
+  spGpu: ['Վիդեոքարտ', 'Видеокарта', 'Graphics'],
+  spOs: ['ՕՀ', 'ОС', 'OS'],
+  spSocket: ['Սոկետ', 'Сокет', 'Socket'],
+  spOther: ['Բնութագիր', 'Характеристика', 'Feature'],
+  spBrand: ['Բրենդ', 'Бренд', 'Brand'],
+  spCode: ['Կոդ', 'Код', 'Code'],
 } satisfies Record<string, [string, string, string]>;
 
 export type TKey = keyof typeof T;
