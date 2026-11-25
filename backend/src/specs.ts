@@ -160,7 +160,7 @@ export function parseSpecs(name: string): Specs {
     if (gpu) s.gpu = gpu[1].replace(/GeForce\s+/i, '').replace(/\s+/g, ' ').toUpperCase().replace('RADEON', 'Radeon').replace('ARC', 'Arc');
     else if (kind === 'laptop') {
       s.gpu = 'integrated';
-      const name = parts.find((p) => /(Graphics|Radeon|Arc|Iris|UHD|Adreno)/i.test(p));
+      const name = parts.find((p) => /\b(Graphics|Radeon|Arc|Iris|UHD|Adreno)\b/i.test(p));
       if (name) s.gpu_model = name;
     }
     const os = /\b(Win(?:dows)?\s?1[01](?:\s?(?:Pro|Home))?|Free\s?DOS|DOS|No\s?OS|Linux|Chrome\s?OS|macOS)\b/i.exec(all);
