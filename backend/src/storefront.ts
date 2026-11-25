@@ -46,7 +46,7 @@ const slugOf = (p: { code: number; name: string; customSlug?: string | null }) =
 
 // ---------------------------------------------------------------- caches (one API instance)
 
-type Cat = { id: number; parentId: number | null; slug: string; names: [string, string, string]; visible: boolean; sort: number };
+type Cat = { id: number; parentId: number | null; slug: string; names: [string, string, string]; visible: boolean; sort: number; filterKeys: string[] | null };
 type Tree = { byId: Map<number, Cat>; kids: Map<number | null, Cat[]>; at: number };
 type Rates = { map: Map<number, number>; at: number };
 
@@ -122,13 +122,13 @@ export class StorefrontController {
     await loadSpecEdits(this.ds); // admin spec corrections (spec-edits.ts), cached 60 s
     if (this.tree && Date.now() - this.tree.at < 60_000) return this.tree;
     const rows: { id: number; parent_id: number | null; slug: string; name_ru: string; name_hy: string; name_en: string;
-      is_visible: boolean; sort: number }[] = await this.ds.query(
-      `SELECT id, parent_id, slug, name_ru, name_hy, name_en, is_visible, sort FROM site_categories ORDER BY sort, id`);
+      is_visible: boolean; sort: number; filter_keys: string[] | null }[] = await this.ds.query(
+      `SELECT id, parent_id, slug, name_ru, name_hy, name_en, is_visible, sort, filter_keys FROM site_categories ORDER BY sort, id`);
     const byId = new Map<number, Cat>();
     const kids = new Map<number | null, Cat[]>();
     const or = (...v: (string | null)[]) => v.find((x) => x) || '';
     for (const r of rows) {
-      const c: Cat = { id: r.id, parentId: r.parent_id, slug: r.slug, visible: r.is_visible, sort: r.sort,
+      const c: Cat = { id: r.id, parentId: r.parent_id, slug: r.slug, visible: r.is_visible, sort: r.sort, filterKeys: r.filter_keys,
         names: [or(r.name_ru, r.name_en, r.name_hy), or(r.name_hy, r.name_ru), or(r.name_en, r.name_ru)] };
       byId.set(c.id, c);
       kids.set(c.parentId, [...(kids.get(c.parentId) || []), c]);
@@ -190,6 +190,7 @@ export class StorefrontController {
 
     let category: { path: ReturnType<StorefrontController['crumbs']>; children: { slug: string; path: string; name: string[] }[] } | null = null;
     let catIds: number[] | null = null;
+    let filterKeys: string[] | null = null; // admin's filter list of this category or its nearest parent (null = automatic)
     if (qs.cat) {
       const slugs = String(qs.cat).split('/').map((s) => s.trim()).filter(Boolean).slice(0, 3);
       let parent: number | null = null;
@@ -206,6 +207,9 @@ export class StorefrontController {
         children: (t.kids.get(node!.id) || []).filter((c) => c.visible).map((c) => ({ slug: c.slug, path: `${base}/${c.slug}`, name: c.names })),
       };
       catIds = this.subtree(t, node!.id);
+      for (let c: Cat | undefined = node; c; c = c.parentId === null ? undefined : t.byId.get(c.parentId)) {
+        if (c.filterKeys) { filterKeys = c.filterKeys; break; }
+      }
     }
 
     const q = String(qs.q || '').slice(0, 200);
@@ -266,7 +270,7 @@ export class StorefrontController {
         if (inBrand(r)) { lo = Math.min(lo, r.price); hi = Math.max(hi, r.price); }
       }
     }
-    const specFacets = (qs.cat || words.length) ? this.specFacets(rows.filter((r) => inPrice(r) && inBrand(r)), specWant, inSpecs) : [];
+    const specFacets = (qs.cat || words.length) ? this.specFacets(rows.filter((r) => inPrice(r) && inBrand(r)), specWant, inSpecs, filterKeys) : [];
 
     const cmp: Record<Sort, (a: Row, b: Row) => number> = {
       default: (a, b) => (score ? (score.get(b.id) || 0) - (score.get(a.id) || 0) : 0) || Number(b.hasImg) - Number(a.hasImg) || b.code - a.code,
@@ -343,13 +347,15 @@ export class StorefrontController {
 
   /**
    * Spec filters worth showing for a product set: a key is offered when ≥ 30 % of the products have it and it has ≥ 2
-   * values (or is already selected). Counts ignore the key's own selection (so other values stay clickable).
+   * values (or is already selected). A category with its own filter list in the admin (site_categories.filter_keys,
+   * inherited from the nearest parent) shows exactly those keys, in that order, whenever they have a value. Counts ignore the key's own selection (so other values stay clickable).
    */
-  private specFacets(rows: Row[], want: Map<string, Set<string>>, inSpecs: (r: Row, skip?: string) => boolean) {
+  private specFacets(rows: Row[], want: Map<string, Set<string>>, inSpecs: (r: Row, skip?: string) => boolean, keys: string[] | null = null) {
     const out: { k: string; names: string[]; values: { v: string; n: number }[] }[] = [];
     if (!rows.length) return out;
-    for (const k of SPEC_KEYS) {
-      if (SPECS[k].noFilter) continue;
+    // keys = the admin's list for this category (in that order, no coverage rule); null = automatic choice
+    for (const k of keys ? keys.filter((x) => SPECS[x]) : SPEC_KEYS) {
+      if (!keys && SPECS[k].noFilter) continue;
       const counts = new Map<string, number>();
       let have = 0;
       for (const r of rows) {
@@ -359,7 +365,7 @@ export class StorefrontController {
       }
       const sel = want.get(k);
       for (const v of sel || []) if (!counts.has(v)) counts.set(v, 0);
-      if (!sel && (have / rows.length < 0.3 || counts.size < 2)) continue;
+      if (!sel && (keys ? counts.size < 1 : have / rows.length < 0.3 || counts.size < 2)) continue;
       const def = SPECS[k];
       const values = [...counts].map(([v, n]) => ({ v, n }));
       values.sort(def.num

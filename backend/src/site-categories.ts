@@ -13,16 +13,18 @@ import { cleanRules } from './category-rules';
 import { ProductCategoriesService } from './product-categories';
 import { categoryPaths, recordPathChanges, RESERVED_ROOT } from './url-redirects';
 import { revalidateSite } from './revalidate';
+import { SPECS, SPEC_KEYS, specsOf } from './specs';
 
 const MAX_DEPTH = 3; // section → group → item (the site's catalog popup shows exactly these levels)
 const TEXT = ['name_ru', 'name_hy', 'name_en', 'icon', 'promo_ru', 'promo_hy', 'promo_en', 'slug'] as const;
 const COLS = `c.id, c.parent_id AS "parentId", c.sort, c.slug, c.name_ru AS "nameRu", c.name_hy AS "nameHy", c.name_en AS "nameEn",
   c.icon, c.promo_ru AS "promoRu", c.promo_hy AS "promoHy", c.promo_en AS "promoEn", c.is_visible AS "isVisible",
-  c.access_category_ids AS "accessCategoryIds", c.match_rules AS "matchRules", c.updated_at AS "updatedAt"`;
+  c.access_category_ids AS "accessCategoryIds", c.match_rules AS "matchRules", c.filter_keys AS "filterKeys", c.updated_at AS "updatedAt"`;
 /** camelCase body field → column */
 const FIELD: Record<string, string> = {
   nameRu: 'name_ru', nameHy: 'name_hy', nameEn: 'name_en', icon: 'icon', promoRu: 'promo_ru', promoHy: 'promo_hy', promoEn: 'promo_en',
   slug: 'slug', isVisible: 'is_visible', accessCategoryIds: 'access_category_ids', parentId: 'parent_id', matchRules: 'match_rules',
+  filterKeys: 'filter_keys',
 };
 /** Distinct products in each category or below it (root = the category). */
 const SUBTREE_COUNTS = `sub AS (SELECT id AS root, id FROM site_categories
@@ -48,6 +50,25 @@ export class SiteCategoriesController {
           JOIN products p ON p.id = x.product_id AND p.deleted_at IS NULL GROUP BY sub.root)
       SELECT ${COLS}, COALESCE(cnt.n, 0) AS "productCount", COALESCE(cnt.s, 0) AS "inStockCount"
       FROM site_categories c LEFT JOIN cnt ON cnt.root = c.id ORDER BY c.parent_id NULLS FIRST, c.sort, c.id`);
+  }
+
+  /**
+   * Spec keys of the in-stock products in this category (and below), for the "Filters" setting: how many products have
+   * the key, how many values, whether the automatic rule would show it (≥ 30 % of products, ≥ 2 values).
+   */
+  @Get(':id/filter-keys')
+  async filterKeys(@Param('id', ParseIntPipe) id: number) {
+    const rows: { name: string }[] = await this.ds.query(`
+      WITH RECURSIVE sub AS (SELECT id FROM site_categories WHERE id = $1 UNION ALL SELECT c.id FROM site_categories c JOIN sub ON c.parent_id = sub.id)
+      SELECT DISTINCT p.name FROM products p JOIN product_site_categories x ON x.product_id = p.id JOIN sub ON sub.id = x.site_category_id
+      WHERE p.deleted_at IS NULL AND p.is_visible AND NOT p.discontinued AND p.price > 0 AND p.quantity > 0`, [id]);
+    const keys = SPEC_KEYS.map((k) => {
+      const vals = new Set<string>();
+      let n = 0;
+      for (const r of rows) { const v = specsOf(r.name)[k]; if (v) { n++; vals.add(v); } }
+      return { k, names: SPECS[k].names, n, values: vals.size, auto: !SPECS[k].noFilter && rows.length > 0 && n / rows.length >= 0.3 && vals.size >= 2 };
+    }).filter((x) => x.n > 0);
+    return { products: rows.length, keys };
   }
 
   @Post()
@@ -164,6 +185,10 @@ export class SiteCategoriesController {
       } else if (col === 'access_category_ids') {
         if (!Array.isArray(val)) throw new BadRequestException('accessCategoryIds must be an array');
         out[col] = [...new Set(val.map(Number).filter((x) => Number.isInteger(x)))];
+      } else if (col === 'filter_keys') { // null = automatic filters; array = exactly these spec keys, in this order
+        if (val === null) { out[col] = null; continue; }
+        if (!Array.isArray(val)) throw new BadRequestException('filterKeys must be an array or null');
+        out[col] = [...new Set(val.map(String).filter((x) => SPECS[x]))].slice(0, 30);
       } else if (col === 'parent_id') out[col] = val === null || val === '' ? null : Number(val);
       else if ((TEXT as readonly string[]).includes(col)) {
         const s = val === null || val === undefined ? '' : String(val).trim().slice(0, 300);

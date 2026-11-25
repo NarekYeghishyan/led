@@ -6,11 +6,14 @@ import { useData, useT } from './pages';
 import { IconPicker, IconSvg, type SiteIcon } from './site-icons';
 import { RulesEditor } from './rules';
 
+import { CategoryFilters } from './category-filters';
+
 /** Storefront catalog tree (backend/src/site-categories.ts). Section → group → item. */
+
 export interface SiteCat {
   id: number; parentId: number | null; sort: number; slug: string; nameRu: string; nameHy: string; nameEn: string;
   icon: string | null; promoRu: string | null; promoHy: string | null; promoEn: string | null; isVisible: boolean;
-  accessCategoryIds: number[]; matchRules: MatchRule[]; productCount: number; inStockCount: number; updatedAt: string;
+  accessCategoryIds: number[]; matchRules: MatchRule[]; filterKeys: string[] | null; productCount: number; inStockCount: number; updatedAt: string;
 }
 type Draft = Omit<SiteCat, 'id' | 'sort' | 'productCount' | 'inStockCount' | 'updatedAt'> & { id?: number };
 
@@ -18,7 +21,7 @@ const MAX_DEPTH = 3;
 
 const empty = (parentId: number | null): Draft => ({
   parentId, slug: '', nameRu: '', nameHy: '', nameEn: '', icon: parentId === null ? 'pc' : null,
-  promoRu: '', promoHy: '', promoEn: '', isVisible: true, accessCategoryIds: [], matchRules: [],
+  promoRu: '', promoHy: '', promoEn: '', isVisible: true, accessCategoryIds: [], matchRules: [], filterKeys: null,
 });
 
 export function SiteCategoriesPage() {
@@ -250,6 +253,9 @@ function Editor({ draft, setDraft, busy, msg, err, onSubmit, onDelete, cats, byI
       )}
 
       <RulesEditor rules={draft.matchRules || []} accessIds={draft.accessCategoryIds} onChange={(matchRules) => set({ matchRules })} />
+
+      <CategoryFilters id={draft.id} value={draft.filterKeys ?? null} onChange={(filterKeys) => set({ filterKeys })}
+        inherited={(() => { for (let c = draft.parentId === null ? undefined : byId.get(draft.parentId); c; c = c.parentId === null ? undefined : byId.get(c.parentId)) if (c.filterKeys) return { name: label(c) }; return null; })()} />
 
       {err && <div className="error">{err}</div>}
       {msg && <div className="success">{msg}</div>}
