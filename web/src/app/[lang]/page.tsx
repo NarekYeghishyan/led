@@ -7,7 +7,7 @@
  * Old /?lang=ru links → 301 /ru (web/src/proxy.ts).
  */
 import type { Metadata } from 'next';
-import { getCategories, getProducts, type CatNode, type ProductCard as Card, type ProductList } from '@/lib/api';
+import { getByCodes, getCategories, getHomeBlocks, getProducts, type HomeBlocks, type CatNode, type ProductCard as Card, type ProductList } from '@/lib/api';
 import { href, pick, t, type Lang } from '@/lib/i18n';
 import { ProductCard, splitName } from '@/components/ProductCard';
 import { Icon } from '@/components/Icon';
@@ -32,7 +32,10 @@ async function load() {
     safe(getProducts({ sort: 'new', limit: 10 }), EMPTY),
     ...cats.map((c) => safe(getProducts({ cat: c.s, limit: 10 }), EMPTY)),
   ]);
-  return { cats, all, fresh, bySection };
+  const blocks = await safe(getHomeBlocks(), null as HomeBlocks | null);
+  const manual = blocks?.slides.mode === 'manual' && blocks.slides.items.length
+    ? (await safe(getByCodes(blocks.slides.items.map((x) => x.code)), { items: [] as Card[] })).items : [];
+  return { cats, all, fresh, bySection, blocks, manual };
 }
 
 export async function generateMetadata({ params }: P): Promise<Metadata> {
@@ -51,17 +54,23 @@ const countLeaves = (n: CatNode[]): number => n.reduce((s, c) => s + (c.c?.lengt
 
 export default async function Home({ params }: P) {
   const lang = (await params).lang as Lang;
-  const [{ cats, all, fresh, bySection }, builds] = await Promise.all([load(), getBuilds().catch(() => [])]);
+  const [{ cats, all, fresh, bySection, blocks, manual }, builds] = await Promise.all([load(), getBuilds().catch(() => [])]);
   const url = (p: Card) => href(lang, `/product/${p.slug}`);
   const img = (p: Card) => p.image || `/img/placeholder/${p.section || 'default'}.svg`;
 
-  // slider: first product with a photo in each section (max 5)
-  const slides: Slide[] = cats.flatMap((c, i) => {
-    const p = bySection[i].items.find((x) => x.image);
-    if (!p) return [];
+  const show = (id: string) => !blocks?.hide.includes(id);
+  const tx = (v: { hy?: string; ru?: string; en?: string } | undefined) => v?.[lang] || v?.hy || v?.ru || v?.en || '';
+  const slideOf = (p: Card, tag: string): Slide => {
     const { title, spec } = splitName(p.name);
-    return [{ tag: pick(c.n, lang), title, spec, price: p.price, img: img(p), url: url(p),
-      item: { id: `p${p.code}`, code: p.code, t: p.name, img: img(p), spec, p: p.price, url: url(p) } }];
+    return { tag, title, spec, price: p.price, img: img(p), url: url(p), item: { id: `p${p.code}`, code: p.code, t: p.name, img: img(p), spec, p: p.price, url: url(p) } };
+  };
+  // slider: the admin's hand-picked in-stock products, else the first product with a photo in each section (max 5)
+  const sectionName = (p: Card) => { const c = cats.find((x) => x.s === p.section); return c ? pick(c.n, lang) : ''; };
+  const picked: Slide[] = blocks?.slides.mode === 'manual'
+    ? blocks.slides.items.flatMap((x) => { const p = manual.find((m) => m.code === x.code); return p ? [slideOf(p, tx(x.tag) || sectionName(p))] : []; }) : [];
+  const slides: Slide[] = picked.length ? picked : cats.flatMap((c, i) => {
+    const p = bySection[i].items.find((x) => x.image);
+    return p ? [slideOf(p, pick(c.n, lang))] : [];
   }).slice(0, 5);
 
   const find = (path: string[]) => {
@@ -75,10 +84,11 @@ export default async function Home({ params }: P) {
   const netBrands = netI >= 0 ? bySection[netI].facets.brands.slice(0, 3).map((b) => b.v).join(' · ') : '';
   const brands = all.facets.brands.slice(0, 12);
 
-  const tabs = [t(lang, 'qkNew'), ...cats.map((c) => pick(c.n, lang))];
-  const lists = [fresh, ...bySection];
-  const allLinks = [{ href: href(lang, '/catalog'), label: `${t(lang, 'catalog')} →` },
-    ...cats.map((c) => ({ href: href(lang, `/${c.s}`), label: t(lang, 'allIn') }))];
+  // "Best offers" tabs: the admin's order ('new' + section slugs), else New + every section
+  const tabKeys = (blocks?.tabs.length ? blocks.tabs : ['new', ...cats.map((c) => c.s)]).filter((k) => k === 'new' || cats.some((c) => c.s === k));
+  const tabs = tabKeys.map((k) => (k === 'new' ? t(lang, 'qkNew') : pick(cats.find((c) => c.s === k)!.n, lang)));
+  const lists = tabKeys.map((k) => (k === 'new' ? fresh : bySection[cats.findIndex((c) => c.s === k)]));
+  const allLinks = tabKeys.map((k) => (k === 'new' ? { href: href(lang, '/catalog'), label: `${t(lang, 'catalog')} →` } : { href: href(lang, `/${k}`), label: t(lang, 'allIn') }));
   const orgLd = { '@context': 'https://schema.org', '@type': 'ComputerStore', name: 'LED Computers', url: SITE + href(lang, '/'),
     logo: `${SITE}/img/logo.png`, telephone: '+37410502802', priceRange: '֏֏',
     address: { '@type': 'PostalAddress', streetAddress: 'Kievyan 11-34', addressLocality: 'Yerevan', addressCountry: 'AM' } };
@@ -89,17 +99,27 @@ export default async function Home({ params }: P) {
       <div className="hero">
         <HeroSlider lang={lang} slides={slides} />
         <div className="hside">
+      {show('cfgPromo') ? (<>
           <div className="promo b">
             <div className="ic"><Icon name="cpu" /></div>
             <span style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: CHAIN }} />
             <small>{t(lang, 'cfgSmall')}</small><h3>{t(lang, 'cfgH')}</h3>
             <a href={href(lang, '/assembly')}>{t(lang, 'cfgA')} <Icon name="arrow" style={{ width: 16 }} /></a>
           </div>
-          <GamingCard lang={lang} url={href(lang, gaming ? '/computers/gaming' : '/computers')} />
+      </>) : null}
+          {show('gaming') ? <GamingCard lang={lang} url={href(lang, gaming ? '/computers/gaming' : '/computers')} /> : null}
         </div>
       </div>
 
+      {show('quick') || show('stats') ? (
       <div className="qk">
+        {!show('quick') ? null : blocks?.quick.mode === 'manual' && blocks.quick.items.length ? blocks.quick.items.map((q, n) => (
+          <a key={n} className={`qk-c ${q.style}`} href={q.url.startsWith('/') ? href(lang, q.url) : q.url || '#'}>
+            {q.style === 'srv' ? <i className="qi"><Icon name="server" /></i> : <i className="qi" dangerouslySetInnerHTML={{ __html: q.style === 'sale' ? QK_SALE : QK_NEW }} />}
+            <div className="qx"><b>{tx(q.title)}</b><span>{tx(q.sub)}</span></div>
+            <i className="qa"><Icon name="arrow" /></i>
+          </a>
+        )) : <>
         {gaming ? (
           <a className="qk-c sale" href={href(lang, '/computers/gaming')}>
             <i className="qi" dangerouslySetInnerHTML={{ __html: QK_SALE }} />
@@ -119,24 +139,34 @@ export default async function Home({ params }: P) {
           <div className="qx"><b>{t(lang, 'qkNew')}</b><span>{t(lang, 'qkNewS')}</span></div>
           <i className="qa"><Icon name="arrow" /></i>
         </a>
+        </>}
+        {show('stats') ? (
         <div className="qk-st">
           <div><b>{all.total.toLocaleString('ru-RU').replace(/ /g, ' ')}</b><span>{t(lang, 'stInStock')}</span></div>
           <div><b>{all.facets.brands.length}</b><span>{t(lang, 'stBrands')}</span></div>
           <div><b>{countLeaves(cats)}</b><span>{t(lang, 'stCats')}</span></div>
         </div>
+        ) : null}
       </div>
+      ) : null}
 
+      {show('trust') ? (<>
       <div className="trust">
         {([['truck', 'tDelivery', 'tDeliveryS'], ['card', 'tCredit', 'tCreditS'], ['shield', 'tWarranty', 'tWarrantyS'], ['store', 'tShow', 'tShowS']] as const).map(([ic, b, s]) => (
           <div className="t" key={b}><div className="ic"><Icon name={ic} /></div><div><b>{t(lang, b)}</b><span>{t(lang, s)}</span></div></div>
         ))}
       </div>
+      </>) : null}
 
+      {show('best') ? (<>
       <BestTabs title={t(lang, 'bestH')} tabs={tabs} all={allLinks}>
         {lists.map((l, i) => l.items.slice(0, 10).map((p) => <ProductCard key={`${i}-${p.code}`} p={p} lang={lang} />))}
       </BestTabs>
+      </>) : null}
 
+      {show('build') || show('credit') ? (
       <section className="band">
+        {show('build') ? (
         <div className="build">
           <div className="bl">
             <span className="eyebrow">{t(lang, 'bEyebrow')}</span>
@@ -147,6 +177,8 @@ export default async function Home({ params }: P) {
           </div>
           <TopBuilds lang={lang} builds={builds} cfgUrl={href(lang, '/assembly')} />
         </div>
+        ) : null}
+        {show('credit') ? (
         <div className="credit">
           <span className="eyebrow">{t(lang, 'crEyebrow')}</span>
           <h3>{t(lang, 'crH')}</h3>
@@ -154,8 +186,11 @@ export default async function Home({ params }: P) {
           <a className="btn p" href={pageUrl(lang, 'credit')}>{t(lang, 'crGo')}</a>
           {slides.length ? <CreditCalc lang={lang} price={(slides.find((x) => x.price >= 200000) ?? slides[0]).price} /> : null}
         </div>
+        ) : null}
       </section>
+      ) : null}
 
+      {show('b2b') ? (<>
       <section className="b2b">
         <div>
           <span className="eyebrow">{t(lang, 'bzEyebrow')}</span>
@@ -169,8 +204,9 @@ export default async function Home({ params }: P) {
           ))}
         </div>
       </section>
+      </>) : null}
 
-      {brands.length ? (
+      {brands.length && show('brands') ? (
         <section>
           <div className="sh"><h2>{t(lang, 'brands')}</h2><a href={href(lang, '/brands')}>{t(lang, 'allL')} →</a></div>
           <div className="brands">

@@ -5,7 +5,7 @@ import { revalidateTag } from 'next/cache';
  * (backend/src/revalidate.ts) after a sync batch or a catalog change, over the compose network. nginx answers 404 for
  * /internal/ from outside; the secret is the second lock.
  */
-const ALLOWED = new Set(['products', 'categories']);
+const ALLOWED = new Set(['products', 'categories', 'blocks']);
 
 export async function POST(req: Request) {
   const secret = process.env.REVALIDATE_SECRET;

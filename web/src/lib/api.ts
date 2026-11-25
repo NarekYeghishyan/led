@@ -86,3 +86,14 @@ export async function resolvePath(path: string): Promise<string | null> {
   const j = (await res.json()) as { to?: string };
   return j.to && j.to.startsWith('/') && !j.to.startsWith('//') ? j.to : null;
 }
+
+/** Home page settings from the admin "Главная страница" (backend site-blocks.ts); empty = automatic defaults. */
+export type L3 = Partial<Record<'hy' | 'ru' | 'en', string>>;
+export interface HomeBlocks {
+  slides: { mode: 'auto' | 'manual'; items: { code: number; tag?: L3 }[] };
+  quick: { mode: 'auto' | 'manual'; items: { style: 'sale' | 'srv' | 'new'; title: L3; sub: L3; url: string }[] };
+  tabs: string[]; hide: string[];
+}
+export const getHomeBlocks = () => get<HomeBlocks>('/shop/blocks/home', ['blocks'], 60);
+export const getByCodes = (codes: number[]) =>
+  get<{ items: ProductCard[] }>(`/shop/products/by-ids?codes=${codes.join(',')}`, ['products'], 60);

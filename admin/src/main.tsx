@@ -7,6 +7,7 @@ import { ThemeSwitch } from './theme';
 import { CategoriesPage, DashboardPage, ImportPage, LogsPage, TablePage, TablesPage, ProductPage, ProductsPage, SyncPage } from './pages';
 import { CustomerPage, CustomersPage } from './customers';
 import { SiteCategoriesPage } from './site-categories';
+import { HomeBlocksPage } from './home-blocks';
 import { ProductCategoriesPage } from './product-categories';
 import { PhotoBatchPage } from './photo-batch';
 import './styles.css';
@@ -84,6 +85,7 @@ function Layout() {
           <NavLink to="/" end><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/></svg>{t('nav.dashboard')}</NavLink>
           <NavLink to="/products?stock=in"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></svg>{t('nav.products')}</NavLink>
           <NavLink to="/customers"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M16 4a4 4 0 0 1 0 8M22 21c0-3-2-5-4-6"/></svg>{t('nav.customers')}</NavLink>
+          <NavLink to="/home"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/></svg>{t('nav.home')}</NavLink>
           <NavLink to="/site-categories"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v4H4zM14 5h6v4h-6zM14 15h6v4h-6zM7 9v8h7M7 13h7"/></svg>{t('nav.siteCategories')}</NavLink>
           <NavLink to="/product-categories"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>{t('nav.productCategories')}</NavLink>
           <NavLink to="/photo-batch"><svg className="ni" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg>{t('nav.photoBatch')}</NavLink>
@@ -115,6 +117,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="customers/:id" element={<CustomerPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="site-categories" element={<SiteCategoriesPage />} />
+            <Route path="home" element={<HomeBlocksPage />} />
             <Route path="product-categories" element={<ProductCategoriesPage />} />
             <Route path="photo-batch" element={<PhotoBatchPage />} />
             <Route path="sync" element={<SyncPage />} />
