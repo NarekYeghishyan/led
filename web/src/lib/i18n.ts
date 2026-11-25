@@ -291,6 +291,5 @@ export function specValue(lang: Lang, k: string, v: string) {
 export const STATIC = {
   credit: '/credit.html', about: '/about.html', buy: '/how-to-buy.html', order: '/how-to-order.html', track: '/track-order.html',
   pay: '/how-to-pay.html', delivery: '/delivery.html', warranty: '/warranty.html', exchange: '/exchange.html',
-  assembly: '/assembly.html',
   contacts: '/contacts.html', login: '/login.html', account: '/account.html', checkout: '/checkout.html',
 } as const;

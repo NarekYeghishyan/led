@@ -213,7 +213,7 @@ export function TopBuilds({ lang, builds, cfgUrl }: { lang: Lang; builds: Build[
             <div className="tb-pr"><b>{money(b.price)}</b><small>{tx('sum')}</small></div>
             <div className="tb-act">
               <a className="btn g tb-cart" href="#" title={tx('cart')} aria-label={tx('cart')} onClick={toCart}><Icon name="cart" /></a>
-              <a className="btn p tb-cfg" href={cfgUrl}>{tx('cfg')} <Icon name="arrow" /></a>
+              <a className="btn p tb-cfg" href={cfgUrl} onClick={() => { try { localStorage.setItem('led-asm', JSON.stringify(Object.fromEntries(b.parts.map((p) => [p.role === 'cs' ? 'case' : p.role, { code: p.code, q: 1 }])))); } catch { /* full */ } }}>{tx('cfg')} <Icon name="arrow" /></a>
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ import { SPECS, SPEC_KEYS, specNum, specsOf } from './specs';
 import { norm, search } from './search';
 
 const LOW_STOCK = 3; // "last N" on the site
-const MAX_LIMIT = 60;
+const MAX_LIMIT = 100; // configurator rows load a whole category
 const VISIBLE = `p.deleted_at IS NULL AND p.is_visible AND NOT p.discontinued AND p.price > 0 AND p.quantity > 0`;
 const PUBLIC_COLS = `p.id, p.external_id AS "code", p.name, p.slug AS "customSlug", p.unit, p.quantity, p.images, p.barcode,
   p.web_description AS "description", p.seo_title AS "seoTitle", p.seo_description AS "seoDescription", p.weight`;
@@ -451,7 +451,7 @@ export class StorefrontController {
     if (rest === '/search') return app(term ? `/search?q=${term}` : '/search');
     const OLD: Record<string, string> = {
       '/': '/', '/home': '/', '/index': '/', '/about': '/about', '/jobs': '/about', '/comments': '/about',
-      '/contacts': '/contacts', '/credit_sale': '/credit', '/assembly': '/assembly.html', '/products/cart': '/cart',
+      '/contacts': '/contacts', '/credit_sale': '/credit', '/assembly': '/assembly', '/products/cart': '/cart',
       '/products/compare': '/compare', '/users/registration': '/registration', '/users/login': '/login',
       '/users/forgot': '/forgot-password', '/users/profile': '/account', '/help_up_menu/change': '/exchange',
       '/help_up_menu/delivery': '/delivery', '/help_up_menu/how_order': '/how-to-buy',

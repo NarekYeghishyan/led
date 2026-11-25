@@ -8,7 +8,7 @@
  */
 import type { Metadata } from 'next';
 import { getCategories, getProducts, type CatNode, type ProductCard as Card, type ProductList } from '@/lib/api';
-import { href, pick, STATIC, t, type Lang } from '@/lib/i18n';
+import { href, pick, t, type Lang } from '@/lib/i18n';
 import { ProductCard, splitName } from '@/components/ProductCard';
 import { Icon } from '@/components/Icon';
 import { pageUrl } from '@/lib/pages';
@@ -93,7 +93,7 @@ export default async function Home({ params }: P) {
             <div className="ic"><Icon name="cpu" /></div>
             <span style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: CHAIN }} />
             <small>{t(lang, 'cfgSmall')}</small><h3>{t(lang, 'cfgH')}</h3>
-            <a href={STATIC.assembly}>{t(lang, 'cfgA')} <Icon name="arrow" style={{ width: 16 }} /></a>
+            <a href={href(lang, '/assembly')}>{t(lang, 'cfgA')} <Icon name="arrow" style={{ width: 16 }} /></a>
           </div>
           <GamingCard lang={lang} url={href(lang, gaming ? '/computers/gaming' : '/computers')} />
         </div>
@@ -143,9 +143,9 @@ export default async function Home({ params }: P) {
             <h3>{t(lang, 'bH')}</h3>
             <p>{t(lang, 'bP')}</p>
             <ul className="perks">{(['b1', 'b2', 'b3'] as const).map((k) => <li key={k}><Icon name="check" /><span>{t(lang, k)}</span></li>)}</ul>
-            <div className="btns"><a className="btn p" href={STATIC.assembly}>{t(lang, 'bGo')} <Icon name="arrow" /></a></div>
+            <div className="btns"><a className="btn p" href={href(lang, '/assembly')}>{t(lang, 'bGo')} <Icon name="arrow" /></a></div>
           </div>
-          <TopBuilds lang={lang} builds={builds} cfgUrl={STATIC.assembly} />
+          <TopBuilds lang={lang} builds={builds} cfgUrl={href(lang, '/assembly')} />
         </div>
         <div className="credit">
           <span className="eyebrow">{t(lang, 'crEyebrow')}</span>

@@ -167,3 +167,8 @@ for f in (SITE / "img" / "placeholder").glob("*.svg"):
     shutil.copy2(f, img / "placeholder" / f.name)
 
 print(f"site.css {len(css) // 1024} KB from {len(blocks)} blocks, {symbols.count('<symbol')} icons, images copied")
+
+# 1g. configurator page CSS (Next.js /assembly, components/assembly/Assembly.tsx): the <style> of site-src/assembly_page.html
+asm = (ROOT / "Design" / "site-src" / "assembly_page.html").read_text(encoding="utf-8")
+(WEB / "src" / "styles" / "assembly.css").write_text(header.replace("category.html", "site-src/assembly_page.html")
+    + "\n".join(b.strip() for b in re.findall(r"<style[^>]*>(.*?)</style>", asm, re.S)) + "\n", encoding="utf-8")
