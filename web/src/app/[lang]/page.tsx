@@ -148,6 +148,11 @@ export default async function Home({ params }: P) {
           <h3>{t(lang, 'crH')}</h3>
           <ul>{(['cr1', 'cr2', 'cr3'] as const).map((k) => <li key={k}><Icon name="check" />{t(lang, k)}</li>)}</ul>
           <a className="btn p" href={STATIC.credit}>{t(lang, 'crGo')}</a>
+          <div className="calc">
+            {([['crF1', 'crV1'], ['crF2', 'crV2'], ['crF3', 'crV3']] as const).map(([f, v], i) => (
+              <div key={f}><small>{t(lang, f)}</small><b style={i === 2 ? { color: 'var(--blue-600)' } : undefined}>{t(lang, v)}</b></div>
+            ))}
+          </div>
         </div>
       </section>
 
