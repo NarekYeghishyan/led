@@ -618,3 +618,4 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
 - 2026-11-25 — Contacts page: WhatsApp / Viber pills now have their icons and brand colours (green / purple, lift on hover). Deployed.
 - 2026-11-25 — Admin "Заказы": tab "Старые заказы led.am" (`?src=legacy`) lists the 2 457 imported old orders (number `led.am #<id>`, statuses Получен / В обработке / Выполнен, search, card with items); read-only — PATCH refuses them. Deployed.
 - 2026-11-26 — Home slider: the front product photo opens the product reliably (click handled on `.sl-stage`: the 3D tilt moved the card between press and release, so clicks after moving the mouse were lost). Deployed.
+- 2026-11-26 — Home slider: side photos also open their product (before: brought it to the front). Deployed.
