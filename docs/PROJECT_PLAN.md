@@ -268,10 +268,10 @@ ones), cart/favourites/compare keep the same localStorage keys (`led-cart`, `led
 | # | Step | Done when |
 |---|---|---|
 | 1 ✅ | Product API (NestJS): `GET /api/shop/products` (site category, search, brand, price, stock, sort, pages, facet counts), `/api/shop/products/:slug`, `/api/shop/products/by-ids` (cart re-check). Fixed field allow-list — never cost/margin/`raw`. Prices in ֏, slugs, visibility rules | curl returns real products for a site category |
-| 2 | Specs and filters: `product_specs` (name parser → Icecat specs → AI from names only), brands normalised, filter set per site category (edited in "Категории сайта"), facet counts | Laptops filter by CPU/RAM/SSD/screen on real data |
+| 2 ✅ | Specs and filters (done 2026-11-25): name parser `backend/src/specs.ts` (no AI, no table yet: cached in memory), filters chosen automatically per category (key on ≥ 30 % of its products, ≥ 2 values), facet counts, grouped spec table on the product page. Later: admin spec overrides + per-category filter choice (step 8), Icecat specs when photos/AI come back | Laptops filter by CPU/RAM/SSD/screen on real data |
 | 3 ✅ | Next.js base (done 2026-11-25, live at /catalog): `web/`, CSS/tokens from the templates, layout (top bar, header, catalog popup, top menu, footer), HY/RU/EN routing, API client, page cache + refresh trigger from NestJS after a sync, Docker image + GitHub Actions, nginx route | Empty layout live on the test domain |
 | 4 ✅ | Category page `/<section>/<group>/<item>` (done 2026-11-25): tree, filters in the URL, sort, pages, server-rendered cards, breadcrumb, meta | Category pages show live products |
-| 5 | Product page `/product/...`: gallery, specs, description, stock, JSON-LD, similar, bought together, cart/♡/compare/1-click | Product pages live |
+| 5 ✅ | Product page `/product/...` (done 2026-11-25; bought together/1-click wait for real data/orders): gallery, specs, description, stock, JSON-LD, similar, bought together, cart/♡/compare/1-click | Product pages live |
 | 6 | Shared shop state: cart/favourites/compare with real ids, price/stock re-check, favourites saved to the account, real search (full-text + trigram, RU/HY/EN synonyms) | Cart and search on real data |
 | 7 | Port the remaining pages: home (real New/Sale/Best sellers), search, brand, cart, checkout, account, login/registration/forgot, info pages, assembly. Then retire the static site | Whole site in Next.js |
 | 8 | Admin web fields: descriptions HY/RU/EN, SEO, specs, hide on site, sale/old price, home banners and blocks | Content editable without code |

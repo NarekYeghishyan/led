@@ -521,3 +521,12 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
   `/api/shop/resolve` (category) or 404; old led.am `…/products/category/<name>_<code>.html` → 301 here. Product + BreadcrumbList JSON-LD,
   canonical, hreflang, OG image. No reviews/options/bundles/fake data. 1-click form waits for orders (step 10). Styles: `web/src/styles/product.css`
   (generated from product.html by `import_design.py`). Deployed.
+- 2026-11-25 — **Storefront step 2 done: specs and filters.** `backend/src/specs.ts` reads specs from the Access name (CPU, model, socket,
+  chipset, screen, resolution, panel, Hz, touch, RAM, storage, capacity, DDR, MHz, form factor, interface, rpm, graphics, OS, PSU W / 80+,
+  UPS VA, switch ports / speed / PoE, Wi-Fi, wireless, DPI, cable length, case PSU / window, colour). No AI, no outside service, cached
+  in memory. **Add new name patterns / keys there** (labels HY/RU/EN live in `SPECS`, the site has no copy). `/api/shop/products`:
+  `?<key>=v1,v2` filters (OR inside a key, AND between), `facets.specs` = keys on ≥ 30 % of the category's products with ≥ 2 values
+  (`noFilter` keys like cpu_model only on the product page); cards carry 5 specs (hover panel); product detail carries all specs + group.
+  Site: spec filter groups (first 8 values + "More", zero counts disabled), chips, URL keys sorted, filtered = noindex; product page spec
+  table grouped (General / Processor / Display / Memory / Graphics / Connectivity / Power / Body), key tiles from specs, unparsed name parts
+  in one "Feature" row. Rollback: `/root/led-api-image-before-specs-*.txt`. Deployed.
