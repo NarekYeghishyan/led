@@ -514,3 +514,10 @@ into `Design/site` / `build_shop.py`** — the static templates are then only re
 - 2026-11-25 — Category cards: the hover panel (`.more-info`) was empty — now lists brand, up to 5 specs read from the name's brackets with
   labels (screen / processor / memory / storage / graphics / OS / socket, `specRows()` in `web/src/components/ProductCard.tsx`, HY/RU/EN) and
   the code, like the template. Real per-product specs come with plan step 2. Deployed.
+- 2026-11-25 — **Storefront step 5 done: product page live** (`web/src/app/[lang]/product/[slug]`, `/product/<slug>-<code>`, `/ru`, `/en`).
+  Gallery (thumbs, ‹ ›, swipe, lightbox), brand, name, code, 4 key specs, buy box (֏ price, stock, qty, cart, "order by phone",
+  wishlist/compare, phone sticky bar), perks, spec table (from the name + part number + code), description (`web_description`), delivery
+  card, up to 10 similar products. Wrong slug with a valid code → permanent redirect to the canonical slug; sold out/unknown →
+  `/api/shop/resolve` (category) or 404; old led.am `…/products/category/<name>_<code>.html` → 301 here. Product + BreadcrumbList JSON-LD,
+  canonical, hreflang, OG image. No reviews/options/bundles/fake data. 1-click form waits for orders (step 10). Styles: `web/src/styles/product.css`
+  (generated from product.html by `import_design.py`). Deployed.
